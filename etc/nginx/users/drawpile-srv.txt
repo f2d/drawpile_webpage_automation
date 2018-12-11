@@ -1,0 +1,6 @@
+# name:password:comment
+
+# 1) echo -n '<put name here>:' >> /etc/nginx/users/drawpile-srv.txt
+# 2) openssl passwd -apr1 >> /etc/nginx/users/drawpile-srv.txt
+# 3) <enter the password if prompted>
+

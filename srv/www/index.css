@@ -1,0 +1,118 @@
+body {
+	background-color: #eee;
+}
+table {
+	border: none;
+	border-spacing: 2px;
+}
+.outside>table {
+	width: 100%;
+	height: 100%;
+}
+.outside td {
+	text-align: center;
+}
+.inside, div.media-row-images {
+	display: inline-block;
+}
+.inside>table {
+	width: 100%;
+}
+.inside th, td {
+	padding: 4px 8px;
+}
+.inside th,
+.inside thead td,
+.inside tfoot td {
+	background-color: #ccc;
+}
+.inside td {
+	background-color: #fff;
+}
+.inside .user td {
+	background-color: #f3f4f5;
+}
+.inside .user:hover td {
+	background-color: #fffaec;
+}
+.inside td, h3 {
+	text-align: left;
+}
+.inside .links-chain {
+	display: inline-block;
+	background-color: #ddd;
+}
+.inside .links-chain:not(:first-child) {
+	margin: 0 1em;
+}
+.inside a {
+	display: inline-block;
+	padding: 4px 8px;
+	color: #4988ba;
+}
+.inside a:visited {
+	color: #576ca3;
+}
+.inside th a {
+	padding: 4px;
+}
+.inside th a,
+.inside td a {
+	margin: -4px 0;
+}
+.inside .media-row[id] th a,
+.inside .simple-rows-table td a {
+	display: block;
+	margin: -4px -8px;
+}
+.inside a.media-row-img {
+	padding: 4px;
+	margin: -4px;
+	border: 2px solid transparent;
+}
+.inside a.media-row-img:hover {
+	position: relative;
+	z-index: 1;
+}
+.inside a:hover {
+	background-color: #fffeaa;
+	border-color: #f4b7a1;
+	color: #d59980;
+}
+.inside h3 button {
+	margin-left: 1em;
+}
+.media-rows-table .media-row,
+.media-rows-table .media-row-info {
+	background-color: #fafafa;
+}
+.media-rows-table tr,
+.media-rows-table th,
+.media-rows-table td,
+.media-rows-table img,
+.media-row {
+	text-align: left;
+	vertical-align: top;
+}
+.media-row-info tr>*:nth-child(2n) {
+	text-align: right;
+}
+.simple-rows-table th,
+.simple-rows-table td:not(:first-child),
+.media-row-info tr>*,
+.media-row-header-inside {
+	white-space: nowrap;
+}
+.media-row-info,
+.media-row-header-inside {
+	float: left;
+}
+.media-row-value-inside {
+	float: right;
+}
+.inside.media-rows-separated .simple-row,
+.inside:not(.media-rows-separated) .media-rows-table,
+.inside:not(.media-row-img-newlines) .media-row-images br,
+.loading body>* {
+	display: none;
+}

@@ -1,0 +1,141 @@
+body,
+u u>*>a,
+u u>*>b,
+u u>*>i,
+.o {
+	background-color: #eee;
+	vertical-align: top;
+	margin: 0 auto;
+}
+u u {	width: 100%;}
+u * {					text-align: center;}
+u u>*>*:first-child:not(:last-child) {	text-align: right;}
+u u>*>*:last-child:not(:first-child) {	text-align: left;}
+u, s, i {
+	text-decoration: none;
+	font-style: normal;
+}
+u {
+	display: table;
+	border-collapse: separate;
+	border-spacing: 4px;
+}
+s, form {
+	display: table-row;
+}
+a, b, del, button {
+	display: table-cell;
+	width: 100%;
+}
+a, b, i, del, button {
+	background-color: #ccc;
+/*	border: 8px solid #aaa;
+	border-radius: 8px;*/
+	border: none;
+	padding: 8px;
+	white-space: nowrap;
+}
+a, i, del, button {
+	background-color: #eee;
+	border-color: #888;
+}
+a, button {
+	cursor: pointer;
+	color: #4988ba;
+}
+a:visited {
+	color: #576ca3;
+}
+a:hover, button:hover {
+	background-color: #fffeaa;
+	border-color: #d9cf8f;
+	color: #d59980;
+}
+.explain {
+	display: inline;
+	padding: 0;
+	background-color: inherit;
+}
+.toggle, i {
+	position: relative;
+	display: block;
+	width: auto;
+}
+.toggle::before {
+	position: absolute;
+	display: inline-block;
+	top: 8px;
+	left: 8px;
+	border: 1px solid currentColor;
+	padding: 0;
+	margin-right: 8px;
+	width: 18px;
+	height: 18px;
+	line-height: 18px;
+	font-size: 18px;
+	font-family: monospace;
+	vertical-align: middle;
+	content: "+";
+}
+.toggle::after {
+	content: ".";
+}
+.toggle.open::after {
+	content: ":";
+}
+.toggle.open::before {
+	content: "-";
+}
+.toggle:not(.open)+* {
+	display: none;
+}
+i+i {
+	margin-top: 4px;
+}
+.e {
+	background-color: #fb5b00;
+	border-color: #ff9898;
+	color: #ffdf3d;
+}
+.purple {
+	background-color: #dfd6ff;
+	border-color: #a19dde;
+	color: #747386;
+}
+.red {
+	background-color: #f4e1ea;
+	border-color: #e8b9ce;
+	color: #b54879;
+}
+.green {
+	background-color: #e2f7e1;
+	border-color: #aeedaa;
+	color: #50a16b;
+}
+.blue {
+	background-color: #e0eef8;
+	border-color: #ace;
+	color: #4988ba;
+}
+.col-width u>*>*:not(form):not(small):first-child {
+	min-width: 93px;
+}
+.col-width u>*>*:not(form):not(small):last-child {
+	min-width: 245px;
+}
+.col-width.drawpile u>*>*:not(form):not(small):last-child {
+	min-width: 174px;
+}
+.o:not(.toggle) {
+	display: block;
+	vertical-align: middle;
+	width: 200px;
+	height: 200px;
+	line-height: 200px;
+	border-radius: 200px;
+	background-position: center;
+	background-repeat: no-repeat;
+}
+.o:not(.box):not(.toggle) {
+	background-size: cover;
+}

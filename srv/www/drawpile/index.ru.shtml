@@ -1,0 +1,58 @@
+<html lang="ru">
+<head>
+	<meta charset="utf-8">
+	<link rel="stylesheet" type="text/css" href="index.css">
+	<link rel="shortcut icon" type="image/png" href="index.png">
+	<script src="index.js"></script>
+	<title>Drawpile - выделенный сервер - информация</title>
+</head>
+<body>
+	<table width="100%" height="100%"><tr><td align="center">
+	<u><b class="col-width drawpile">
+		<u><i class="purple">Сервер для рисования на общем полотне:</i></u>
+		<u>
+			<s><b>Программа для участия:	</b><a href="https://drawpile.net/download/">drawpile.net/download/</a></s>
+			<s><b>Адрес сервера:		</b><i>
+				<!--#include file="hostname.txt" stub="www.example.com"-->:9002
+			</i></s>
+			<s><b>Архив записей:		</b><a href="/drawpile/record/">
+				<!--#include file="hostname.txt" stub="www.example.com"-->/drawpile/record/
+			</a></s>
+		</u>
+		<u><!--# block name="none"-->
+			<i class="blue">Активные сессии: 0</i>
+			<i class="blue">Участники: 0</i>
+			<i class="blue">Обновлено: 0000-00-00 <small>00:00:00</small></i><!--# endblock --><!--#include file="stats.ru.htm" stub="none"-->
+		</u>
+		<u>
+			<a class="green toggle" onclick="toggle(this)">Как присоединиться</a>
+			<i class="green"><img src="how_to_join.ru.png"></i>
+		</u>
+		<u>
+			<a class="green toggle" onclick="toggle(this)">Примеры настроек для инструментов</a>
+			<i class="green"><img src="example_tools.png"></i>
+		</u>
+		<u>
+			<a class="green toggle" onclick="toggle(this)">Если обнаружена смена сертификата</a>
+			<i class="green">
+				<img src="certificate_changed.png">
+				<br>
+				Это нормально, SSL-сертификат сервера обновляется
+				<a class="explain" href="https://letsencrypt.org/2015/11/09/why-90-days.html">каждые 2-3 месяца</a>.
+			</i>
+		</u>
+		<u>
+			<s><b>Вернуться на главную страницу:</b><a href="/">
+				<!--#include file="hostname.txt" stub="www.example.com"-->/
+			</a></s>
+		</u>
+		<u>
+			<s>
+				<a href="index.en.shtml">EN</a>
+				<a href="index.ru.shtml">RU</a>
+			</s>
+		</u>
+	</b></u>
+	</td></tr></table>
+</body>
+</html>
