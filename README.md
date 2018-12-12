@@ -1,6 +1,6 @@
 # drawpile_webpage_automation
 
-Included `/srv/nginx/nginx.conf` is just an incomplete example.
+Included `/etc/nginx/nginx.conf` is just an incomplete example.
 Everything else should probably run as is, although not advised and not tested in a bare install.
 
 ## Features:
@@ -36,16 +36,21 @@ Set all *.sh files to be executable:
 chmod +x /srv/drawpile/*.sh
 ```
 
-To start the Drawpile server, use this command or put it into Drawpile service config:
+To start the Drawpile server, use this command:
 ```
 /srv/drawpile/start-drawpile-srv.sh
 ```
 
-For maintenance safety, stop the service before editing any scripts in `/srv/drawpile/`, do not edit them while it's running.
-Restart Drawpile service for script changes to take effect.
+Or put it into drawpile-srv service config and use:
+```
+service drawpile-srv start
+```
+
+For maintenance safety, `stop` the service before editing any scripts in `/srv/drawpile/`, do not edit them while it's running.
+Service `restart` is required for script changes to take effect.
 
 It is possible to configure all paths to write changes directly to a public web folder.
-Otherwise, create links like this, as link -> real target (following are defaults, adjust as needed):
+Otherwise, create links as following, written as link -> real target (defaults, adjust as needed):
 ```
 /srv/www/drawpile/record/      -> /srv/drawpile/sessions/public_archive/
 /srv/www/drawpile/stats.en.htm -> /srv/drawpile/stats.en.htm
