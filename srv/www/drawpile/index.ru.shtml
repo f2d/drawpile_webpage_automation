@@ -3,6 +3,8 @@
 	<meta charset="utf-8">
 	<link rel="stylesheet" type="text/css" href="index.css">
 	<link rel="shortcut icon" type="image/png" href="index.png">
+	<link rel="alternate" hreflang="en" href="index.en.shtml">
+	<link rel="alternate" hreflang="ru" href="index.ru.shtml">
 	<script src="index.js"></script>
 	<title>Drawpile - выделенный сервер - информация</title>
 </head>
