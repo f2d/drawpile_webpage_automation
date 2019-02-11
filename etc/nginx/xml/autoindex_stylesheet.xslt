@@ -206,6 +206,10 @@
 			<xsl:value-of select="normalize-space(.)" />
 		</xsl:variable>
 
+		<xsl:variable name="name_length">
+			<xsl:value-of select="string-length($name)" />
+		</xsl:variable>
+
 		<xsl:variable name="size_bytes">
 			<xsl:value-of select="@size" />
 			<xsl:text> </xsl:text>
@@ -218,7 +222,15 @@
 			</xsl:call-template>
 		</xsl:variable>
 
-		<td><a href="{$url-escaped-name}" target="_blank"><xsl:value-of select="$name" /></a></td>
+		<xsl:choose>
+			<xsl:when test="$name_length > 5 and substring($name, $name_length - 5) = '.dprec'">
+				<td><a href="{$url-escaped-name}" target="_blank" rel="nofollow"><xsl:value-of select="$name" /></a></td>
+			</xsl:when>
+			<xsl:otherwise>
+				<td><a href="{$url-escaped-name}" target="_blank"><xsl:value-of select="$name" /></a></td>
+			</xsl:otherwise>
+		</xsl:choose>
+
 		<td title="{$size_bytes}"><xsl:value-of select="$size_formatted" /></td>
 		<td><time data-t="{@mtime}"><xsl:value-of select="@mtime" /></time></td>
 	</tr>

@@ -111,7 +111,6 @@ function compareCaseless(a, b) {return a.toLowerCase() > b.toLowerCase() ? 1 : -
 function gc(n,p) {try {return TOS.slice.call((p || document).getElementsByClassName(n) || []);} catch(e) {return [];}}
 function gt(n,p) {try {return TOS.slice.call((p || document).getElementsByTagName(n) || []);} catch(e) {return [];}}
 function gn(n,p) {try {return TOS.slice.call((p || document).getElementsByName(n) || []);} catch(e) {return [];}}
-function gi(n,p) {try {return TOS.slice.call((p || document).getElementsById(n) || []);} catch(e) {return [];}}
 function id(i) {return document.getElementById(i);}
 function orz(n) {return parseInt(n||0)||0;}
 function hasValue(v) {return !!v;}
@@ -753,7 +752,7 @@ window.addEventListener('load', function() {
 						,	downloadLink = (
 								'<a href="'
 							+		n
-							+	'" target="_blank">'
+							+	'" target="_blank" rel="nofollow">'
 							+		label
 							+	'</a> (' + j.short + ')'
 							)
