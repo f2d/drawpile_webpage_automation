@@ -173,9 +173,9 @@
 	<th>
 		<xsl:value-of select="$title" />
 		<xsl:text> </xsl:text>
-		<a href="?sort_by={$by}&amp;sort_order=ascending">▲</a>
+		<a href="?sort_by={$by}&amp;sort_order=ascending" rel="nofollow">▲</a>
 		<xsl:text> </xsl:text>
-		<a href="?sort_by={$by}&amp;sort_order=descending">▼</a>
+		<a href="?sort_by={$by}&amp;sort_order=descending" rel="nofollow">▼</a>
 	</th>
 </xsl:template>
 
