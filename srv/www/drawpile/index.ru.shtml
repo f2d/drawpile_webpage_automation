@@ -21,7 +21,8 @@
 				<!--#include file="hostname.txt" stub="www.example.com"-->/drawpile/record/
 			</a></s>
 		</u>
-		<u><!--# block name="none"-->
+		<u><!--# block name="not_found"-->не найдено<!--# endblock -->
+			<i class="blue">Версия сервера: <!--#include file="version.txt" stub="not_found"--></i><!--# block name="none"-->
 			<i class="blue">Активные сессии: 0</i>
 			<i class="blue">Участники: 0</i>
 			<i class="blue">Обновлено: 0000-00-00 <small>00:00:00</small></i><!--# endblock --><!--#include file="stats.ru.htm" stub="none"-->

@@ -822,7 +822,7 @@ if task == 'stats' or task == 'pipe':
 							,	[re.compile('^.*true.*$', re.I), '(18+)']
 							]
 						}
-					,	'title', 'founder', 'userCount', 'maxUserCount'
+					,	'protocol', 'title', 'founder', 'userCount', 'maxUserCount'
 					]
 				}
 			]
@@ -837,6 +837,7 @@ if task == 'stats' or task == 'pipe':
 						indent_inline + u'<span title="title">"$title"</span>'
 					+	indent_inline + u'<span title="minimal user age requirement">$nsfm</span>'
 					)
+				,	u'<span title="protocol version">$protocol</span>'
 				,	u'<span title="started by">$founder</span>'
 				,	u'<span title="users">$userCount/$maxUserCount</span>'
 				,	u'<span title="start time">$startTime</span>'
@@ -846,6 +847,7 @@ if task == 'stats' or task == 'pipe':
 						indent_inline + u'<span title="название">"$title"</span>'
 					+	indent_inline + u'<span title="минимальный возраст для участия">$nsfm</span>'
 					)
+				,	u'<span title="версия протокола">$protocol</span>'
 				,	u'<span title="кто начал">$founder</span>'
 				,	u'<span title="участники">$userCount/$maxUserCount</span>'
 				,	u'<span title="время начала">$startTime</span>'
