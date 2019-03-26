@@ -13,6 +13,8 @@ Everything else should probably run as is, although not advised and not tested i
 ## Required:
 
 * **drawpile-srv**
+* **drawpile-cmd**
+* **dprectool**
 * **bash**
 * **awk** (mawk is OK)
 * **python2** (for now)
@@ -72,3 +74,9 @@ To manually run updates in terminal as your Drawpile service user, use this comm
 ```
 sudo -u drawpile-user-name /srv/drawpile/update.sh --records --stats
 ```
+
+Public archive may be deleted and regenerated as follows:
+1. Delete the whole sessions public archive folder, or any files in it, which contain relevant session ID in their filename.
+2. Put all relevant files from the closed sessions, which you want to process, back into active session folder without renaming or subfolders.
+3. Run manual update command, mentioned above.
+4. After update is finished, all processed source files will be moved to closed session storage. Do not delete them.
