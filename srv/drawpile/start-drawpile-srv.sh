@@ -67,4 +67,4 @@ fi
 -f "${root_dir}event-listener.awk" \
 -v "sessions_logs_dir=${active_sessions_dir}" \
 -v "cmd_before=\"${root_dir}update.sh\" --silent --wait --"
--v "cmd_after= \"${start_date}\" &"
+-v "cmd_after= &"

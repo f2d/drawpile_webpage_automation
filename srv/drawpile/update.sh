@@ -5,6 +5,8 @@
 # https://superuser.com/a/186279
 # Idiomatic parameter and option handling in sh:
 
+log_date=$(date '+%F')
+
 while test $# -gt 0
 do
 	case "$1" in
@@ -13,7 +15,7 @@ do
 		-ro|--readonly)		cmd_readonly=true;;
 		-r|--records)		cmd_records=true;;
 		-s|--stats)		cmd_stats=true;;
-		[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]*)	start_date=$1;;
+		[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]*)	log_date=$1;;
 	esac
 	shift
 done
@@ -42,7 +44,7 @@ run_update_cmd () {
 		"${cmd_wait}"
 		"${cmd_readonly}"
 		"${update_lock_dir}update_${cmd_task}.lock"
-		"${update_log_dir}update_${cmd_task}_${start_date}.log"
+		"${update_log_dir}update_${cmd_task}_${log_date}.log"
 		"root = ${root_dir}"
 		"rec_src = ${active_sessions_dir}"
 		"api_url_prefix = http://127.0.0.1:${admin_port}/"
