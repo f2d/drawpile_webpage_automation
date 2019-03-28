@@ -488,33 +488,29 @@ window.addEventListener('load', function() {
 				.replace(regTrimSlash, '')
 				.split(regSlash)
 			)
-		,	k = a.length
+		,	currentPath = ''
+		,	i = 0
+		,	j = '/'
+		,	k = a.length + 1
 		,	p = e.parentNode
 		,	pathLinkContainer = p
 			;
 			del(e);
 			p.innerHTML = p.innerHTML.replace(/[\s:.,]*$/, ': ');
 
-			if (k > 1) {
-			var	currentPath = ''
-			,	i = 0
-			,	j = '/'
-				;
+			e = pathLinkContainer = cre('span', p);
+			e.className = classLinksChain;
 
-				e = pathLinkContainer = cre('span', p);
-				e.className = classLinksChain;
+			a.unshift('');
 
-				a.unshift('');
-
-				for (k++; i < k; i++) {
-				var	currentName = a[i] + j;
-					currentPath += currentName;
-					addPathLink(currentName, currentPath);
-					// cre('span', pathLinkContainer).textContent = '»';
-				}
-
-				pathLinkContainer = p;
+			for (; i < k; i++) {
+			var	currentName = a[i] + j;
+				currentPath += currentName;
+				addPathLink(currentName, currentPath);
+				// cre('span', pathLinkContainer).textContent = '»';
 			}
+
+			pathLinkContainer = p;
 
 			if (LS) {
 
