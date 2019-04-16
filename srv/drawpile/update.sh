@@ -11,10 +11,10 @@ while test $# -gt 0
 do
 	case "$1" in
 		-w|--wait)		cmd_wait="wait = 3";;
-		-q|--quiet|--silent)	cmd_silent=true;;
-		-ro|--readonly)		cmd_readonly=true;;
-		-r|--records)		cmd_records=true;;
-		-s|--stats)		cmd_stats=true;;
+		-q|--quiet|--silent)	cmd_silent="silent";;
+		-ro|--readonly)		cmd_readonly="readonly";;
+		-r|--records)		cmd_records="records";;
+		-s|--stats)		cmd_stats="stats";;
 		[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]*)	log_date=$1;;
 	esac
 	shift

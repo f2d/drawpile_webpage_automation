@@ -12,6 +12,8 @@ from PIL import Image, ImageChops
 
 # self_path = os.path.realpath(__file__)
 
+cmd_optimize_prefix = 'cmd_optimize_'
+
 # Order of preference: cmd arg > ini? > default:
 cfg_default = {
 	'root': u'./'
@@ -38,10 +40,11 @@ cfg_default = {
 ,	'sleep':          {'min': 0, 'default': 1}			# <- seconds, wait_after_pipe_task
 ,	'wait':           {'min': 0, 'default': 0}			# <- seconds, wait_before_single_task
 
+,	'cmd_rec_versions': '-2.0/-2.1'
 ,	'cmd_rec_stats':    'dprectool --acl --format text'		# not needed: -o /dev/stdout, -o CON, etc.
 ,	'cmd_rec_render':   'drawpile-cmd --acl --verbose --every-seq 1000 -platform offscreen'
-,	'cmd_optimize_jpg': 'jpegoptim --all-progressive'		# 'jpegtran -progressive -optimize -outfile %s.out %s'
-,	'cmd_optimize_png': 'optipng -i 0 -fix' 			# 'oxipng -i 0 --fix -t 1 %s'
+,	cmd_optimize_prefix + 'jpg': 'jpegoptim --all-progressive'	# 'jpegtran -progressive -optimize -outfile %s.out %s'
+,	cmd_optimize_prefix + 'png': 'optipng -i 0 -fix' 		# 'oxipng -i 0 --fix -t 1 %s'
 
 ,	'api_url_prefix': 'http://127.0.0.1:1234/'
 # ,	'run_after_stats': 'http://127.0.0.1/drawpile/add_time.php'
@@ -53,11 +56,15 @@ def print_help():
 	line_sep = '''
 -------------------------------------------------------------------------------
 '''
+
 	print line_sep
+
 	print ' - Usage:'
 	print
 	print '"%s" [<task>] [<option>] ["<option = value>"] [<option>] [...]' % __file__
+
 	print line_sep
+
 	print ' - <Task> is always first, required, may be any of:'
 	print
 	print 'r, records: Once, move archived sessions and their records into subdir by date.'
@@ -71,7 +78,9 @@ def print_help():
 	print '- Function as task, called once per every optional argument/file path:'
 	print
 	for i in tasks_as_function_name: print i
+
 	print line_sep
+
 	print ' - <Option> in any order, optional:'
 	print
 	print 'ro, readonly: Don\'t save or change anything, only show output, for testing.'
@@ -80,7 +89,9 @@ def print_help():
 	print '</path/to/file>.lock: Lock file to queue self runs.', get_cfg_for_help('lock')
 	print '</path/to/file>.txt:  Save only CSV of usernames.  ', get_cfg_for_help('txt')
 	print '</path/to/file>.html: Save HTML part for SSI.      ', get_cfg_for_help('html')
+
 	print line_sep
+
 	print ' - <Option = value> in any order, optional:'
 	print
 	print ', '.join(cfg_by_ext), '= </path/to/file>: Same as above options.'
@@ -104,13 +115,29 @@ def print_help():
 	print '	Txt file is intended to be used by a chat bot to announce new users.'
 	print '	', get_cfg_for_help('add_pwd_session_users')
 	print
+	print 'cmd_rec_versions = <version.number.1/v.2/v.3>:'
+	print '	Try to append each part as literal suffix to executed filename of'
+	print '	record processing tools, starting with empty.'
+	print '	Stop on the first that returns viable result.'
+	print '	', get_cfg_for_help('cmd_rec_versions')
+	print
 	print ' - Commands for processing (%s for subject filename, or it will be appended):'
 	print
 	print 'cmd_rec_stats      = <command line>.', get_cfg_for_help('cmd_rec_stats')
 	print 'cmd_rec_render     = <command line>.', get_cfg_for_help('cmd_rec_render')
-	print 'cmd_optimize_jpg   = <command line>.', get_cfg_for_help('cmd_optimize_jpg')
-	print 'cmd_optimize_png   = <command line>.', get_cfg_for_help('cmd_optimize_png')
-	print 'cmd_optimize_<ext> = <command line>.'
+	print
+	print cmd_optimize_prefix + '<ext> = <command line>. Custom formats may be added here.'
+
+	prefix_len = len(cmd_optimize_prefix)
+	pad_to_len = prefix_len + len('<ext>')
+
+	for arg in cfg_default:
+		if arg[:prefix_len] == cmd_optimize_prefix:
+			j = pad_to_len - len(arg)
+			pad = (' ' * j) if j > 0 else ''
+
+			print arg + pad + ' = <command line>.', get_cfg_for_help(arg)
+
 	print
 	print ' - Source to process:'
 	print
@@ -140,7 +167,9 @@ def print_help():
 	print 'file_enc  = <encoding name>. Default:', default_enc
 	print 'log_enc   = <encoding name>. Default:', default_enc
 	print 'web_enc   = <encoding name>. Default:', default_enc
+
 	print line_sep
+
 	print ' - Result (error) codes:'
 	print
 	print '0: All done, or cycle was interrupted by user.'
@@ -148,6 +177,7 @@ def print_help():
 	print '2: Wrong arguments.'
 	print '3: Cannot log.'
 	print '4: Cannot lock.'
+
 	print line_sep
 
 # - Do not change: ------------------------------------------------------------
@@ -257,11 +287,12 @@ pat_conseq_spaces    = re.compile(r'\s+')
 pat_conseq_spaces_un = re.compile(r'[_\s]+')
 pat_cmd_line_arg     = re.compile(r'(?P<Arg>"([^"]|\")*"|\S+)(?P<After>\s+|$)')
 
-session_closed_ext = '.archived'
-session_cfg_ext    = '.session'
-session_rec_ext    = '.dprec'
-session_log_ext    = '.log'
-session_meta_ext   = '.js'
+session_temp_copy_ext = '.temp_copy'
+session_closed_ext    = '.archived'
+session_cfg_ext       = '.session'
+session_rec_ext       = '.dprec'
+session_log_ext       = '.log'
+session_meta_ext      = '.js'
 
 session_meta_var_name = 'dprecMetaByID'
 
@@ -527,6 +558,22 @@ def sanitize_filename(input_text, safe_only=False):
 
 	return result_text
 
+def get_sanitized_filename_from_array(input_array):
+	parts = filter(None, input_array)
+
+	if len(parts) > 0:
+		if READ_ONLY:
+			print 'File name parts:', get_obj_pretty_print(parts)
+
+		j = ' - '.join(parts)
+
+		try:
+			return sanitize_filename(j)
+		except:
+			return sanitize_filename(j, safe_only=True)
+
+	return ''
+
 def expand_task(task):
 	if task in tasks_as_function_name:
 		return task
@@ -669,7 +716,7 @@ for v in options:
 			if is_type_int(v_min) and v < v_min: v = v_min
 
 		elif k == 'add_pwd_session_users':
-			v = map(lambda x: x.strip().lower(), v.split(','))
+			v = sorted(set(map(lambda x: x.strip().lower(), v.split(','))))
 
 		elif k != 'api_url_prefix':
 			v = fix_slashes(v)
@@ -692,6 +739,7 @@ log_enc   = cfg.get('log_enc',   '') or default_enc
 web_enc   = cfg.get('web_enc',   '') or default_enc
 
 thumb_size = cfg['thumb_w'], cfg['thumb_h']
+rec_versions = sorted(set(map(lambda x: x.strip(), cfg.get('cmd_rec_versions', '').split('/'))))
 
 # - Open log: -----------------------------------------------------------------
 
@@ -1132,7 +1180,7 @@ def check_and_move(src_path, dest_path):
 	# os.rename(src, dst):
 	# Rename the file or directory src to dst. If dst is a directory, OSError will be raised. On Unix, if dst exists and is a file, it will be replaced silently if the user has permission. The operation may fail on some Unix flavors if src and dst are on different filesystems. If successful, the renaming will be an atomic operation (this is a POSIX requirement). On Windows, if dst already exists, OSError will be raised even if it is a file; there may be no way to implement an atomic rename when dst names an existing file.
 
-def get_cmd_with_path(cmd_line, subject=''):
+def get_cmd_with_path(cmd_line, subject='', exe_suffix=''):
 	arr = []
 	placeholder = '%s'
 	found_subject = False
@@ -1153,12 +1201,46 @@ def get_cmd_with_path(cmd_line, subject=''):
 	if not found_subject:
 		arr.append(subject)
 
+	if exe_suffix:
+		arr[0] += str(exe_suffix)
+
 	exe_full_path = prepend_root_if_none(arr[0])
 
 	if os.path.isfile(exe_full_path):
 		arr[0] = exe_full_path
 
-	return map(fix_slashes, arr)
+	return list(map(fix_slashes, arr))
+
+def get_print_and_check_cmd_result(
+	cmd_line
+,	filename=''
+,	title=''
+,	pipe_line_handler_function=None
+,	final_check_function=None
+,	retry_exe_suffixes=None
+,	print_cmd_output=True
+,	return_cmd_output=True
+):
+	retry_exe_suffixes.append('')
+	retry_exe_suffixes = sorted(set(map(str, retry_exe_suffixes)))
+
+	for exe_suffix in retry_exe_suffixes:
+		cmd_result = get_and_print_cmd_result(
+			get_cmd_with_path(cmd_line, filename, exe_suffix)
+		,	title=title
+		,	pipe_line_handler_function=pipe_line_handler_function
+		,	print_cmd_output=print_cmd_output
+		,	return_cmd_output=return_cmd_output
+		)
+
+		if final_check_function:
+			if final_check_function():
+				break
+		else:
+			if cmd_result:
+				break
+
+	return cmd_result
 
 def get_and_print_cmd_result(
 	cmd_line
@@ -1173,7 +1255,11 @@ def get_and_print_cmd_result(
 	,	((' - ' + title) if title else '')
 	)
 
-	cmd = get_cmd_with_path(cmd_line, filename)
+	if is_type_str(cmd_line):
+		cmd = get_cmd_with_path(cmd_line, filename)
+	else:
+		cmd = cmd_line
+
 	print cmd
 
 	cmd_result = ''
@@ -1247,26 +1333,26 @@ def get_recording_stats_for_each_user(
 	source_rec_file_path
 ,	users_by_ID=None
 ):
-	global rec_stats_multiline
+	global rec_stats_multiline, rec_stats_users_by_ID, rec_stats_total_strokes
+
+	rec_stats_multiline = ''
+	rec_stats_users_by_ID = {}
+	rec_stats_total_strokes = 0
 
 	pat_username = re.compile(r'^(?P<ID>\d+)\s+(?:\S+\s+)*name=(?P<Name>[^\r\n]*)', re.I | re.DOTALL)
 	pat_stroke = re.compile(r'^(?P<ID>\d+)\s+penup', re.I | re.DOTALL)
 
 	if users_by_ID:
 		for i, v in users_by_ID.items():
-			if not 'name' in v:
-				v['name'] = '#' + i
-			if not 'strokes' in v:
-				v['strokes'] = 0
-	else:
-		users_by_ID = {}
-
-	rec_stats_multiline = ''
+			rec_stats_users_by_ID[i] = {
+				'name': v.get('name', '#' + i)
+			,	'strokes': v.get('strokes', 0)
+			}
 
 	# - Find usernames by ID and their stroke counts:
 
 	def run_for_each_line(line):
-		global rec_stats_multiline
+		global rec_stats_multiline, rec_stats_users_by_ID, rec_stats_total_strokes
 
 		try:
 			line = unicode(line.decode(file_enc))
@@ -1286,52 +1372,58 @@ def get_recording_stats_for_each_user(
 				return
 
 		r_u = re.search(pat_username, line)
-		r_s = re.search(pat_stroke, line) if not r_u else None
+		r_s = re.search(pat_stroke, line)
 		res = r_u or r_s
 
 		if res:
 			i = res.group('ID')
-			known = (i in users_by_ID)
-			v = users_by_ID[i] if known else {
+			known = (i in rec_stats_users_by_ID)
+			v = rec_stats_users_by_ID[i] if known else {
 				'name': '#' + i
 			,	'strokes': 0
 			}
 
 			if r_u:
-				name = res.group('Name').strip()
+				name = r_u.group('Name').strip()
 
 				if len(name) > 0:
 					v['name'] = name
 
-			elif r_s:
+			if r_s:
 				v['strokes'] += 1
+				rec_stats_total_strokes += 1
 
 			if not known:
-				users_by_ID[i] = v
+				rec_stats_users_by_ID[i] = v
 
-	get_and_print_cmd_result(
+	def run_for_final_check():
+		if rec_stats_multiline:
+			run_for_each_line('}')
+
+		return bool(rec_stats_users_by_ID) and rec_stats_total_strokes > 0
+
+	get_print_and_check_cmd_result(
 		cfg['cmd_rec_stats']
 	,	source_rec_file_path
 	,	'get recording stats'
 	,	run_for_each_line
+	,	run_for_final_check
+	,	retry_exe_suffixes=rec_versions
 	,	print_cmd_output=False	# <- to keep output/logs cleaner
 	,	return_cmd_output=False	# <- to use less memory uselessly
 	)
 
-	if rec_stats_multiline:
-		run_for_each_line('}')
-
-	return users_by_ID
+	return rec_stats_users_by_ID
 
 def get_recording_stats_for_each_username(users_by_ID):
 	users_by_name = {}
 
-	for k, v in users_by_ID.items():
+	for i, v in users_by_ID.items():
 		try:
-			user_name = v['name']
-			strokes_count = v['strokes']
+			strokes_count = v.get('strokes', 0)
 
 			if strokes_count > 0:
+				user_name = v.get('name', '#' + i)
 				user_name = re.sub(pat_conseq_spaces_un, '_', user_name.strip())
 
 				if user_name in users_by_name:
@@ -1355,10 +1447,12 @@ def get_recording_usernames_with_stats(users_by_name):
 	return users_by_name_with_stats
 
 def get_recording_screenshots_saved(source_rec_file_path):
-	img_paths = []
+	global rec_img_paths
+
+	rec_img_paths = []
 
 	if READ_ONLY:
-		return img_paths
+		return rec_img_paths
 
 	# - Get path markers to look for:
 
@@ -1391,25 +1485,32 @@ def get_recording_screenshots_saved(source_rec_file_path):
 	# - Save image files:
 
 	def run_for_each_line(line):
+		global rec_img_paths
+
 		for i in path_prefix:
 			prefix, offset = i if is_type_arr(i) else (i, 0)
 
 			pos = line.find(prefix)
 			if pos >= 0:
 				img_path = line[pos + offset : ].rstrip().rstrip('.')
-				img_paths.append(img_path)
+				rec_img_paths.append(img_path)
 
 				return
 
-	get_and_print_cmd_result(
+	def run_for_final_check():
+		return bool(rec_img_paths)
+
+	get_print_and_check_cmd_result(
 		cfg['cmd_rec_render']
 	,	source_rec_file_path
 	,	'save screenshots + thumbs'
 	,	run_for_each_line
+	,	run_for_final_check
+	,	retry_exe_suffixes=rec_versions
 	,	return_cmd_output=False
 	)
 
-	return get_recording_screenshots_with_thumbs(img_paths)
+	return get_recording_screenshots_with_thumbs(rec_img_paths)
 
 def get_recording_screenshots_with_thumbs(img_paths):
 	to_move = []
@@ -1458,7 +1559,7 @@ def get_recording_screenshots_with_thumbs(img_paths):
 			except: pass
 
 			ext = img_ext.strip('.').replace('jpeg', 'jpg')
-			cmd = cfg.get('cmd_optimize_' + ext, '')
+			cmd = cfg.get(cmd_optimize_prefix + ext, '')
 
 			if cmd:
 				for filename in [img_filename, res_filename]:
@@ -1478,6 +1579,7 @@ def process_archived_session(session_ID, src_files):
 	cfg_files_to_read     = []
 	log_files_to_read     = []
 	rec_files_to_copy_one = []
+	temp_files_to_remove  = []
 
 	time_started = time_closed = date_match = None
 	to_keep = False
@@ -1491,11 +1593,24 @@ def process_archived_session(session_ID, src_files):
 			if not date_match:
 				date_match = re.search(pat_get_date, filename)
 
-			if   filename.find(session_rec_ext) > 0: rec_files_to_copy_one.append(filename)
+			if filename.find(session_temp_copy_ext) > 0: temp_files_to_remove.append(filename)
+			elif filename.find(session_rec_ext) > 0: rec_files_to_copy_one.append(filename)
 			elif filename.find(session_cfg_ext) > 0: cfg_files_to_read.append(filename)
 			elif filename.find(session_log_ext) > 0: log_files_to_read.append(filename)
 
 			all_files_to_move.append(filename)
+
+	# - Remove leftovers of previously failed runs:
+
+	a = dir_active + '/'
+
+	for filename in temp_files_to_remove:
+		f = a + filename
+
+		try_print('Old temp copy, remove file:', f)
+
+		if not READ_ONLY:
+			os.remove(f)
 
 	# - Find best session recording to copy:
 
@@ -1600,7 +1715,7 @@ def process_archived_session(session_ID, src_files):
 		if sz > cfg['rec_del_max']:
 			to_keep = True
 
-		source_rec_filename = session_ID + session_rec_ext + '.temp_copy'
+		source_rec_filename = session_ID + session_rec_ext + session_temp_copy_ext
 		source_rec_file_path = fix_slashes(dir_active + '/' + source_rec_filename)
 
 		if READ_ONLY:
@@ -1640,6 +1755,9 @@ def process_archived_session(session_ID, src_files):
 		dir_len = len(dir_active)
 		shortened = False
 
+		public_rec_filename = ''
+		public_rec_ext = session_ID + session_rec_ext
+
 		parts = filter(None, [
 			time_started
 		,	time_closed
@@ -1651,21 +1769,11 @@ def process_archived_session(session_ID, src_files):
 		stats = ' - '.join(parts)
 
 		while usernames_count > 0 and len(usernames_list) > 0:
-			parts = filter(None, [
+			public_rec_filename = get_sanitized_filename_from_array([
 				stats
 			,	', '.join(sorted(set(usernames_list), key=string.lower)) # <- https://stackoverflow.com/a/10269708
-			,	session_ID + session_rec_ext
+			,	public_rec_ext
 			])
-
-			if READ_ONLY:
-				print 'File name parts:', get_obj_pretty_print(parts)
-
-			j = ' - '.join(parts)
-
-			try:
-				public_rec_filename = sanitize_filename(j)
-			except:
-				public_rec_filename = sanitize_filename(j, safe_only=True)
 
 			path_len = dir_len + len(public_rec_filename)
 
@@ -1677,6 +1785,12 @@ def process_archived_session(session_ID, src_files):
 				shortened = True
 			else:
 				break
+
+		if not public_rec_filename:
+			public_rec_filename = get_sanitized_filename_from_array([
+				stats
+			,	public_rec_ext
+			])
 
 		if shortened:
 			public_meta_filename = session_ID + session_meta_ext
