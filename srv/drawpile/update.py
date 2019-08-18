@@ -282,6 +282,9 @@ pat_time_to_html = (
 )
 # pat_time_to_html = r'\g<Date> <small>\g<Time></small>'
 
+pat_false = re.compile('^.*false.*$', re.I)
+pat_true  = re.compile('^.*true.*$', re.I)
+
 pat_conseq_slashes   = re.compile(r'[\\/]+')
 pat_conseq_spaces    = re.compile(r'\s+')
 pat_conseq_spaces_un = re.compile(r'[_\s]+')
@@ -506,12 +509,21 @@ def get_trimmed_image(im, border=None):
 	return im
 
 def replace_by_arr(text, arr):
-	for r in arr:
-		text = (
-			r(text) if is_type_fun(r) else
-			re.sub(r[0], r[1], text) if is_type_arr(r) else
-			re.sub(r, '', text)
-		)
+	if not is_type_arr(arr):
+		arr = [arr]
+
+# set to 1st if "true", 2nd if "false":
+	if (len(arr) == 1 or (len(arr) == 2 and is_type_str(arr[1]))) and is_type_str(arr[0]):
+		k = 0 if re.match(pat_true, text) != None else 1
+		text = arr[k] if len(arr) > k else ''
+
+# batch of replacements:
+	else:
+		for r in arr:
+			if   is_type_fun(r): text = r(text)
+			elif is_type_arr(r): text = re.sub(r[0], r[1], text)
+			elif is_type_str(r): text = re.sub(r, '', text)
+
 	return text
 
 # https://gist.github.com/carlsmith/b2e6ba538ca6f58689b4c18f46fef11c
@@ -857,18 +869,20 @@ if task == 'stats' or task == 'pipe':
 				,	'get_vars': [
 						{
 							'id': 'startTime'
-						,	'replace': [
-							#	[re.compile(r'[^\d:-]+'), ' ']
-								fix_html_time_stamp
-							]
+						,	'replace': [fix_html_time_stamp]
+						}
+					,	{
+							'id': 'persistent'
+						,	'replace': ['&#x231b;']	# <- other version: 23F3
+						}
+					,	{
+							'id': 'hasPassword'
+						,	'replace': ['&#x1F512;']
 						}
 					,	{
 							'get_by_id': 'nsfm'
 						,	'put_by_id': 'nsfm'
-						,	'replace': [
-								[re.compile('^.*false.*$', re.I), '(0+)']
-							,	[re.compile('^.*true.*$', re.I), '(18+)']
-							]
+						,	'replace': ['18+', '0+']
 						}
 					,	'protocol', 'title', 'founder', 'userCount', 'maxUserCount'
 					]
@@ -883,7 +897,9 @@ if task == 'stats' or task == 'pipe':
 				'en': indent_param.join([
 					(
 						indent_inline + u'<span title="title">"$title"</span>'
-					+	indent_inline + u'<span title="minimal user age requirement">$nsfm</span>'
+					+	indent_inline + u'(<span title="minimal user age requirement">$nsfm</span>'
+					+	indent_inline + u'<span title="persistent session, will not end without users">$persistent</span>'
+					+	indent_inline + u'<span title="need password to join">$hasPassword</span>)'
 					)
 				,	u'<span title="protocol version">$protocol</span>'
 				,	u'<span title="started by">$founder</span>'
@@ -893,7 +909,9 @@ if task == 'stats' or task == 'pipe':
 			,	'ru': indent_param.join([
 					(
 						indent_inline + u'<span title="название">"$title"</span>'
-					+	indent_inline + u'<span title="минимальный возраст для участия">$nsfm</span>'
+					+	indent_inline + u'(<span title="минимальный возраст для участия">$nsfm</span>'
+					+	indent_inline + u'<span title="постоянная сессия, не закроется пользователей">$persistent</span>'
+					+	indent_inline + u'<span title="нужен пароль, чтобы зайти">$hasPassword</span>)'
 					)
 				,	u'<span title="версия протокола">$protocol</span>'
 				,	u'<span title="кто начал">$founder</span>'
