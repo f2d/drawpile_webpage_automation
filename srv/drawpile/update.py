@@ -513,9 +513,10 @@ def replace_by_arr(text, arr):
 		arr = [arr]
 
 # set to 1st if "true", 2nd if "false":
-	if (len(arr) == 1 or (len(arr) == 2 and is_type_str(arr[1]))) and is_type_str(arr[0]):
-		k = 0 if re.match(pat_true, text) != None else 1
-		text = arr[k] if len(arr) > k else ''
+	n = len(arr)
+	if (n >= 1) and (n <= 2) and (n == len(filter(is_type_str, arr))):
+		k = 1 if (re.match(pat_true, text) == None) else 0
+		text = arr[k] if n > k else ''
 
 # batch of replacements:
 	else:
@@ -873,11 +874,11 @@ if task == 'stats' or task == 'pipe':
 						}
 					,	{
 							'id': 'persistent'
-						,	'replace': ['&#x231b;']	# <- other version: 23F3
+						,	'replace': ['&#x231b;', ' ']
 						}
 					,	{
 							'id': 'hasPassword'
-						,	'replace': ['&#x1F512;']
+						,	'replace': ['&#x1F512;', ' ']
 						}
 					,	{
 							'get_by_id': 'nsfm'
@@ -895,25 +896,27 @@ if task == 'stats' or task == 'pipe':
 			}
 		,	'output_entry_format': {
 				'en': indent_param.join([
-					(
-						indent_inline + u'<span title="title">"$title"</span>'
-					+	indent_inline + u'(<span title="minimal user age requirement">$nsfm</span>'
-					+	indent_inline + u'<span title="persistent session, will not end without users">$persistent</span>'
-					+	indent_inline + u'<span title="need password to join">$hasPassword</span>)'
-					)
-				,	u'<span title="protocol version">$protocol</span>'
+					indent_inline.join([
+						''
+					,	u'<span title="title">"$title"</span>'
+					,	u'<span title="minimal user age requirement">($nsfm</span>'
+					,	u'<span title="persistent session, will not end without users">$persistent</span>'
+					,	u'<span title="need password to join">$hasPassword</span>'
+					,	u'<span title="protocol version">$protocol)</span>'
+					])
 				,	u'<span title="started by">$founder</span>'
 				,	u'<span title="users">$userCount/$maxUserCount</span>'
 				,	u'<span title="start time">$startTime</span>'
 				])
 			,	'ru': indent_param.join([
-					(
-						indent_inline + u'<span title="название">"$title"</span>'
-					+	indent_inline + u'(<span title="минимальный возраст для участия">$nsfm</span>'
-					+	indent_inline + u'<span title="постоянная сессия, не закроется пользователей">$persistent</span>'
-					+	indent_inline + u'<span title="нужен пароль, чтобы зайти">$hasPassword</span>)'
-					)
-				,	u'<span title="версия протокола">$protocol</span>'
+					indent_inline.join([
+						''
+					,	u'<span title="название">"$title"</span>'
+					,	u'<span title="минимальный возраст для участия">($nsfm</span>'
+					,	u'<span title="постоянная сессия, не закроется пользователей">$persistent</span>'
+					,	u'<span title="нужен пароль, чтобы зайти">$hasPassword</span>'
+					,	u'<span title="версия протокола">$protocol)</span>'
+					])
 				,	u'<span title="кто начал">$founder</span>'
 				,	u'<span title="участники">$userCount/$maxUserCount</span>'
 				,	u'<span title="время начала">$startTime</span>'

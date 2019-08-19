@@ -49,10 +49,10 @@ service drawpile-srv start
 ```
 
 For maintenance safety, `stop` the service before editing any scripts in `/srv/drawpile/`, do not edit them while it's running.
-Service `restart` is required for script changes to take effect.
+Service `restart` is required for script changes to take effect (except `update.py`).
 
 It is possible to configure all paths to write changes directly to a public web folder.
-Otherwise, create links as following, written as link -> real target (defaults, adjust as needed):
+Otherwise, create symlinks as following for example (written as link -> real target, assuming `/srv/www/` is the web root):
 ```
 /srv/www/drawpile/record/      -> /srv/drawpile/sessions/public_archive/
 /srv/www/drawpile/stats.en.htm -> /srv/drawpile/stats.en.htm
