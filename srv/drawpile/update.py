@@ -32,7 +32,7 @@ cfg_default = {
 ,	'lock': None
 ,	'log':  None
 
-,	'new_dir_rights': {'min': 0, 'default': 0755, 'max': 0777}	# <- bit-mask
+,	'new_dir_rights': {'min': 0, 'default': 0o755, 'max': 0o777}	# <- bit-mask
 ,	'rec_del_max':    {'min': 0, 'default': 9000}			# <- bytes
 ,	'path_len_max':   {'min': 1, 'default': 250}			# <- symbols
 ,	'thumb_w':        {'min': 1, 'default': 200}			# <- pixels
@@ -47,7 +47,6 @@ cfg_default = {
 ,	cmd_optimize_prefix + 'png': 'optipng -i 0 -fix' 		# 'oxipng -i 0 --fix -t 1 %s'
 
 ,	'api_url_prefix': 'http://127.0.0.1:1234/'
-# ,	'run_after_stats': 'http://127.0.0.1/drawpile/add_time.php'
 
 ,	'add_pwd_session_users': '[a], [anyway]'
 }
@@ -206,7 +205,8 @@ log_file = None
 current_sessions = None
 
 time_before_task = None
-time_epoch_start = datetime_text_to_object('1970-01-01T00:00:00Z')
+time_epoch_start_text = '1970-01-01T00:00:00Z'
+time_epoch_start = datetime_text_to_object(time_epoch_start_text)
 
 time_format_iso   = '%Y-%m-%dT%H:%M:%S%z'
 time_format_print = '%Y-%m-%d %H:%M:%S%z'
@@ -430,8 +430,11 @@ def datetime_text_to_utc_epoch(t):
 	return i
 
 def fix_html_time_stamp(t):
-	u = datetime_text_to_utc_epoch(t)
-	t += ' ' + str(u)
+	if t and is_type_str(t):
+		u = datetime_text_to_utc_epoch(t)
+		t += ' ' + str(u)
+	else:
+		t = time_epoch_start_text + ' ' + str(time_epoch_start)
 
 	return re.sub(pat_time_from_text, pat_time_to_html, t)
 

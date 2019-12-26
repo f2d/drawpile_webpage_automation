@@ -17,5 +17,6 @@ admin_port=9292
 active_sessions_dir=${root_dir}sessions/
 session_templates_dir=${root_dir}session_templates/
 
+version_file_path=${root_dir}version.txt
 update_lock_dir=${root_dir}
 update_log_dir=/var/log/drawpile/

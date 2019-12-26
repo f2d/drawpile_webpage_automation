@@ -30,6 +30,22 @@ root_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )/"
 
 source "${root_dir}common-variables.sh"
 
+# Version-specific: ---------------------------------------------------------
+
+if [ -f "${version_file_path}" ]; then
+
+# https://stackoverflow.com/a/10771857
+
+	running_version=$(<"${version_file_path}")
+	target_version=2.1.14
+
+# https://stackoverflow.com/a/16939706
+
+	if [ "${target_version}" == "$(echo -ne "${target_version}\n${running_version}" |sort -V |head -n1)" ]; then
+		api_url_subdir=api/
+	fi
+fi
+
 # Prepare command: ----------------------------------------------------------
 
 # https://superuser.com/a/360986
@@ -38,7 +54,7 @@ source "${root_dir}common-variables.sh"
 run_update_cmd () {
 	local cmd_task=$1
 	local cmd_array=(
-		python
+		python2
 		"${root_dir}update.py"
 		"$@"
 		"${cmd_wait}"
@@ -47,7 +63,7 @@ run_update_cmd () {
 		"${update_log_dir}update_${cmd_task}_${log_date}.log"
 		"root = ${root_dir}"
 		"rec_src = ${active_sessions_dir}"
-		"api_url_prefix = http://127.0.0.1:${admin_port}/"
+		"api_url_prefix = http://127.0.0.1:${admin_port}/${api_url_subdir}"
 	#	"add_pwd_session_users = [a], [anyway]"
 	)
 	"${cmd_array[@]}"

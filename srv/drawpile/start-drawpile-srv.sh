@@ -59,7 +59,7 @@ fi
 
 # Save version info to file: ------------------------------------------------
 
-drawpile-srv --version | awk '/^drawpile/ {print $2}' > ${root_dir}version.txt
+drawpile-srv --version | awk '/^drawpile/ {print $2}' > "${version_file_path}"
 
 # Run server: ---------------------------------------------------------------
 
