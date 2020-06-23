@@ -214,11 +214,22 @@ time_format_print_log = '[' + time_format_print + '.%f]'
 time_format_bak  = '.%Y-%m-%d_%H-%M-%S.%f.bak'
 time_format_rec   = '%Y-%m-%dT%H-%M-%S%z'
 
-pat_session_ID_part = r'(?P<SessionID>[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12})'
+pat_session_ID_part = (
+	r'(?P<SessionID>'
++		r'[0-9a-f]{8}-'
++		r'(?:[0-9a-f]{4}-){3}'
++		r'[0-9a-f]{12}'
++	r'|'
++		r'(?<![^0-9a-z-])'
++		r'[0-9a-z]{26}'
++		r'(?![^0-9a-z-])'
++	r')'
+)
+
 pat_session_ID = re.compile(r'''^
-	(?P<Before>.*?[^0-9a-f])?
+	(?P<Before>.*?[^0-9a-z-])?
 	''' + pat_session_ID_part + '''
-	(?P<After>[^0-9a-f].*)?
+	(?P<After>[^0-9a-z-].*)?
 $''', re.I | re.X | re.DOTALL)
 
 # Log[sample]: 2018-04-17T12:13:19Z Info/Join 2;::ffff:1.2.3.4;?????@{8315280b-6293-4d6f-83dd-00a484ee59c5}: Joined session
@@ -240,9 +251,9 @@ pat_time_from_log = re.compile(r'''^
 		@
 		)?
 
-		\{
+		\{?
 			''' + pat_session_ID_part + '''
-		\}:\s+
+		\}?:\s+
 	)?
 	(?P<After>.*?)
 $''', re.I | re.X | re.DOTALL)
@@ -2229,7 +2240,7 @@ print 'Command line:', sys.argv
 
 if task == 'pipe':
 
-	pat_ID_part = r'\{' + pat_session_ID_part + '}:.+?'
+	pat_ID_part = r'\{?' + pat_session_ID_part + '\}?:.+?'
 	pat_tasks = {
 		'records' : re.compile(pat_ID_part + r'(Closing.+?session|Last.+?user.+?left)', re.I | re.DOTALL)
 	,	'stats' : re.compile(pat_ID_part + r'(Changed|Made|Tagged|preserve|(Left|Joined).+?session)', re.I | re.DOTALL)
