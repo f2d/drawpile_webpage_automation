@@ -17,7 +17,7 @@
 
 ,	regDrawpilePartStart = '^(?:.*\\/)?'
 ,	regDrawpilePartDate  = '(\\d{4}(?:\\D\\d\\d){5}\\S*) - '
-,	regDrawpilePartID    = '([0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12}|\b[0-9a-z]{26}\b)'
+,	regDrawpilePartID    = '([0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12}|\\b[0-9a-z]{26}\\b)'
 ,	regDrawpilePartEnd   = '(?:[#?].*)?$'
 
 ,	regDrawpileUserName = /^(.+?)\s(\d+)$/
