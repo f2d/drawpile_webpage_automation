@@ -82,6 +82,10 @@ table {
 .inside h3 button {
 	margin-left: 1em;
 }
+.media-row:target,
+.media-row:target th a:not(:hover) {
+	background-color: #ace;
+}
 .media-rows-table .media-row,
 .media-rows-table .media-row-info {
 	background-color: #fafafa;

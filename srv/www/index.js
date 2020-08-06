@@ -1,4 +1,5 @@
 ﻿var	LS = window.localStorage || localStorage
+,	canToggleView = true //(location.protocol === 'file:')
 
 ,	classPageLoading          = 'loading'
 ,	classSectionOpen          = 'open'
@@ -16,28 +17,47 @@
 ,	classSimpleRow            = 'simple-row'
 
 ,	regDrawpilePartStart = '^(?:.*\\/)?'
-,	regDrawpilePartDate  = '(\\d{4}(?:\\D\\d\\d){5}\\S*) - '
-,	regDrawpilePartID    = '([0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12}|\\b[0-9a-z]{26}\\b)'
 ,	regDrawpilePartEnd   = '(?:[#?].*)?$'
+,	regDrawpilePartDate  = '(\\d{4}(?:\\D\\d\\d){5}\\S*) - '
+,	regDrawpilePartID    = (
+		'('
+	+		'[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12}'
+	+	'|'
+	+		'[0-9a-z]{26}'
+	+	')'
+	)
+,	regDrawpilePartRecNum = (
+		'('
+	+		'[\\s_-]r\\d+'
+	+	'|'
+	+		'[\\s_-]?[\\[{(]\\d+[\\])}]'
+	+	')?'
+	)
 
 ,	regDrawpileUserName = /^(.+?)\s(\d+)$/
 ,	regDrawpileRecording = new RegExp(
 		regDrawpilePartStart
-	+	'(?:' + regDrawpilePartDate
-	+	'(?:' + regDrawpilePartDate + ')?)?'
-	+	'(?:(r\\d+|\\d+[g+]+) - )?'
-	+	'(?:(\\d+)s - )?'
-	+	'(?:(\\d+)u - )?'
-	+	'(?:(\\S.*?) - )?'
-	+	regDrawpilePartID
-	+	'(\\.dprec)(\\.archived)?'
+	+	'(?:' + regDrawpilePartDate		//* <- [1]
+	+	'(?:' + regDrawpilePartDate + ')?)?'	//* <- [2]
+	+	'(?:(r\\d+|\\d+[g+]+) - )?'		//* <- [3]
+	+	'(?:(\\d+)s - )?'			//* <- [4]
+	+	'(?:(\\d+)u - )?'			//* <- [5]
+	+	'(?:(\\S.*?) - )?'			//* <- [6]
+	+	regDrawpilePartID			//* <- [7]
+	+	regDrawpilePartRecNum			//* <- [8]
+	+	'(\\.(?:dprec|dptxt))'			//* <- [9]
+	+	'(\\.archived)?'			//* <- [10]
 	+	regDrawpilePartEnd
 	, 'i')
 
 ,	regDrawpileImage = new RegExp(
 		regDrawpilePartStart
-	+	regDrawpilePartID
-	+	'-(\\d+)_(full|thumb)_(\\d+)x(\\d+)(\\.\\w+)'
+	+	regDrawpilePartID	//* <- [1]
+	+	'-(\\d+)'		//* <- [2]
+	+	'_(full|thumb)'		//* <- [3]
+	+	'_(\\d+)'		//* <- [4]
+	+	'x(\\d+)'		//* <- [5]
+	+	'(\\.\\w+)'		//* <- [6]
 	+	regDrawpilePartEnd
 	, 'i')
 
@@ -47,13 +67,14 @@
 	,	'sort_order': 'ascending'
 	}
 
-,	regNum = /\d+/
+,	regNum = /\d+/g
+,	regNonNum = /\D+/g
 ,	regSlash = /[\\\/]+/g
 ,	regSpace = /\s+/g
 ,	regTrim = /^\s+|\s+$/g
-,	regTrimDots = getTrimReg('.\\s')
 ,	regTrimSlash = /^[\\\/]+|[\\\/]+$/g
 ,	regTimeBreak = /^\d+(<|>|,|$)/
+,	regSplitTime = /[^\d-]+/g
 
 ,	splitSec = 60
 ,	maxThumbWidth = 200
@@ -70,47 +91,58 @@
 
 //if (LS && !(LS.lang && LS.lang == lang)) LS.lang = lang;	//* <- use user-selectable cookie instead
 
-if (lang == 'ru') la = {
-	'toggle': {
-		'media_rows': 'Переключить вид медиафайлов'
-	,	'img_newlines': 'Переключить ряды картинок'
-	}
-,	'drawpile': {
-		'start': 'Начало'
-	,	'end': 'Конец'
-	,	'restrict': 'Ограничение'
-	,	'dl': 'Скачать'
-	,	'size': 'Вес'
-	,	'strokes': 'Черт'
-	,	'index_of_total': ' из '
-	,	'users': 'Участников'
-	,	'users_omitted': '(ещё $1)'
-	}
-}; else la = {
-	'toggle': {
-		'media_rows': 'Toggle media file view'
-	,	'img_newlines': 'Toggle image rows'
-	}
-,	'drawpile': {
-		'start': 'Start'
-	,	'end': 'End'
-	,	'restrict': 'Restrict'
-	,	'dl': 'Download'
-	,	'size': 'Size'
-	,	'strokes': 'Strokes'
-	,	'index_of_total': ' of '
-	,	'users': 'Users'
-	,	'users_omitted': '($1 more)'
-	}
-};
+if (lang == 'ru') {
+	la = {
+		'bytes': 'байт'
+	,	'toggle': {
+			'media_rows': 'Переключить вид медиафайлов'
+		,	'img_newlines': 'Переключить ряды картинок одной высоты'
+		}
+	,	'drawpile': {
+			'start': 'Начало'
+		,	'end': 'Конец'
+		,	'restrict': 'Ограничение'
+		,	'dl': 'Скачать'
+		,	'dl_num_prefix': '№ '
+		,	'dl_file_count': 'Записей'
+		,	'dl_total_size': 'Общий вес'
+		,	'size': 'Вес'
+		,	'strokes': 'Черт'
+		,	'index_of_total': ' из '
+		,	'users': 'Участников'
+		,	'users_omitted': '(ещё $1)'
+		}
+	};
+} else {
+	la = {
+		'bytes': 'bytes'
+	,	'toggle': {
+			'media_rows': 'Toggle media file view'
+		,	'img_newlines': 'Toggle image rows of same height'
+		}
+	,	'drawpile': {
+			'start': 'Start'
+		,	'end': 'End'
+		,	'restrict': 'Restrict'
+		,	'dl': 'Download'
+		,	'dl_num_prefix': '# '
+		,	'dl_file_count': 'Rec.files'
+		,	'dl_total_size': 'Total size'
+		,	'size': 'Size'
+		,	'strokes': 'Strokes'
+		,	'index_of_total': ' of '
+		,	'users': 'Users'
+		,	'users_omitted': '($1 more)'
+		}
+	};
+}
 
-//* Utility functions *--------------------------------------------------------
+//* Utility functions, mostly copypasted from old projects as is *-------------
 
-function showProps(o,r,z /*incl.zero*/) {var i,t=''; for(i in o)if(z||o[i])t+='\n'+i+'='+o[i]; if(r)return t; alert(t); return o;}
 function compareCaseless(a, b) {return a.toLowerCase() > b.toLowerCase() ? 1 : -1;}
-function gc(n,p) {try {return TOS.slice.call((p || document).getElementsByClassName(n) || []);} catch(e) {return [];}}
-function gt(n,p) {try {return TOS.slice.call((p || document).getElementsByTagName(n) || []);} catch(e) {return [];}}
-function gn(n,p) {try {return TOS.slice.call((p || document).getElementsByName(n) || []);} catch(e) {return [];}}
+function gc(n,p) {try {return Array.prototype.slice.call((p || document).getElementsByClassName(n) || []);} catch(e) {return [];}}
+function gt(n,p) {try {return Array.prototype.slice.call((p || document).getElementsByTagName(n) || []);} catch(e) {return [];}}
+function gn(n,p) {try {return Array.prototype.slice.call((p || document).getElementsByName(n) || []);} catch(e) {return [];}}
 function id(i) {return document.getElementById(i);}
 function orz(n) {return parseInt(n||0)||0;}
 function hasValue(v) {return !!v;}
@@ -208,10 +240,25 @@ function encodeTagAttr(t) {
 
 function getTagAttrIfNotEmpty(name, values, delim) {
 	if (name && values) {
-	var	a = (values.filter ? values : [values]).filter(function(v) {return !!v;});
+	var	a = (values.filter ? values : [values]).filter(function(v) { return !!v; });
 		if (a.length) return ' ' + name + '="' + encodeTagAttr(a.join(delim || ' ')) + '"';
 	}
 	return '';
+}
+
+function getFormattedNum(num) {
+var	text = String(num)
+,	funcName = 'toLocaleString'
+,	result
+	;
+
+	return (
+		(num = orz(num))[funcName]
+	&&	(result = num[funcName]())
+	&&	(text != result)
+		? result
+		: text.replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1 ')
+	);
 }
 
 function getFormattedTimezoneOffset(t) {
@@ -224,7 +271,7 @@ function getFormattedTimezoneOffset(t) {
 
 function getFormattedTime(t, plain, only_ymd) {
 	if (TOS.indexOf(typeof t) > -1) {
-	var	text = '' + t;
+	var	text = String(t);
 		if (typeof t === 'string' && Date.parse) {
 			t = Date.parse(t.replace(/(T\d+)-(\d+)-(\d+\D*)/, '$1:$2:$3'));
 		} else {
@@ -233,11 +280,13 @@ function getFormattedTime(t, plain, only_ymd) {
 		if (!t && text) return text;
 	}
 var	d = (t ? new Date(t+(t > 0 ? 0 : new Date())) : new Date());
-	t = ('FullYear,Month,Date'+(only_ymd?'':',Hours,Minutes,Seconds')).split(',').map(function(v,i) {
-		v = d['get'+v]();
-		if (i == 1) ++v;
-		return leftPad(v);
-	});
+	t = ('FullYear,Month,Date'+(only_ymd?'':',Hours,Minutes,Seconds')).split(',').map(
+		function(v,i) {
+			v = d['get'+v]();
+			if (i == 1) ++v;
+			return leftPad(v);
+		}
+	);
 var	YMD = t.slice(0,3).join('-')
 ,	HIS = t.slice(3).join(':')
 	;
@@ -251,18 +300,26 @@ var	YMD = t.slice(0,3).join('-')
 	);
 }
 
+function getFileExt(path) {
+	return (
+		path
+		.split(/\//g).pop()
+		.split(/\./g).pop()
+	)
+}
+
 function getFileSizeText(size) {
 	return (size ?
 		size.short + ' ('
-	+	size.bytes + ')'
+	+	getFormattedNum(size.bytes) + ' ' + la.bytes + ')'
 	: '');
 }
 
 function getTextOrURImatch(text, pattern) {
-var	t = '' + text;
+var	text = String(text);
 	return (
-		t.match(pattern)
-	||	decodeURIComponent(t).match(pattern)
+		text.match(pattern)
+	||	decodeURIComponent(text).match(pattern)
 	);
 }
 
@@ -333,14 +390,16 @@ var	ev = eventStop(0,1,1)
 		}
 	}
 
-	rows.sort(function(a, b) {
-		for (i in compareOrder) {
-		var	i,k = compareOrder[i];
-			if (a[k] !== b[k]) return (a[k] < b[k]) ? -1 : 1;
-		}
+	rows.sort(
+		function(a, b) {
+			for (i in compareOrder) {
+			var	i,k = compareOrder[i];
+				if (a[k] !== b[k]) return (a[k] < b[k]) ? -1 : 1;
+			}
 
-		return 1;
-	});
+			return 1;
+		}
+	);
 
 	if (arg.sort_order !== 'ascending') rows.reverse();
 
@@ -382,8 +441,7 @@ function updateDrawpileTable(e) {
 
 //* Runtime *------------------------------------------------------------------
 
-window.addEventListener('load', function() {
-
+function init() {
 	gt('time').map(function(e) {
 	var	t = e.getAttribute('data-t');
 		if (t && orz(t) > 0) e.outerHTML = getFormattedTime(t);
@@ -495,6 +553,7 @@ window.addEventListener('load', function() {
 		,	p = e.parentNode
 		,	pathLinkContainer = p
 			;
+
 			del(e);
 			p.innerHTML = p.innerHTML.replace(/[\s:.,]*$/, ': ');
 
@@ -587,6 +646,7 @@ window.addEventListener('load', function() {
 		,	recID
 		,	match
 			;
+
 			if (
 				url
 			&&	(match = getTextOrURImatch(url, regDrawpileRecording))
@@ -603,52 +663,58 @@ window.addEventListener('load', function() {
 		if (fileRecIDs.length > 0) {
 			toggleClass(eContainer, classMediaRowsEnabled, 1);
 
-			// addTopButton(la.toggle.media_rows, toggleMediaRows);
-			// addTopButton(la.toggle.img_newlines, toggleImageNewlines);
+			if (canToggleView) {
+				addTopButton(la.toggle.media_rows, toggleMediaRows);
+				addTopButton(la.toggle.img_newlines, toggleImageNewlines);
+			}
 
 		var	filesByRecID = {};
 
 			gt('a', eContainer).map(function(e) {
 			var	url = e.href
-			,	i,j,k
 			,	recID
 			,	match
 			,	specialFileExts = ['js']
 				;
+
 				if (url) {
-					for (i in fileRecIDs) if (
-						(recID = fileRecIDs[i])
+					for (var recIndex in fileRecIDs) if (
+						(recID = fileRecIDs[recIndex])
 					&&	url.indexOf(recID) >= 0
 					) {
 					var	tr = getParentByTagName(e, 'tr')
 					,	td = gt('td', tr)
-					,	f = e.textContent
-					,	s = td[1].textContent
-					,	b = td[1].title
-					,	t = gt('time', td[2])[0]
-					,	t = (t ? t.getAttribute('data-t') : 0)
+					,	fileName = e.textContent
+					,	sizeShort = td[1].textContent
+					,	sizeBytes = td[1].title
+					,	timeElement = gt('time', td[2])[0]
+					,	fileModTime = (timeElement ? timeElement.getAttribute('data-t') : '')
 					,	file = {
-							'name': f
-						,	'time': t
+							'name': fileName
+						,	'time': fileModTime
 						,	'size': {
-								'short': s
-							,	'bytes': b
-							,	'num': orz(b)
+								'short': sizeShort
+							,	'bytes': sizeBytes
+							,	'num': orz(sizeBytes)
 							}
 						}
-					,	o = filesByRecID[recID] || (filesByRecID[recID] = {})
-					,	ext
+					,	filesByType = filesByRecID[recID] || (filesByRecID[recID] = {})
 						;
 
-						if (match = getTextOrURImatch(f, regDrawpileImage)) {
-							file.index  = k = orz(match[2]);
-							file.width  = orz(match[4]);
+						if (match = getTextOrURImatch(fileName, regDrawpileImage)) {
+						var	imageIndex = orz(match[2])
+						,	imagesByIndex = filesByType.img || (filesByType.img = [])
+						,	imagesBySize = imagesByIndex[imageIndex] || (imagesByIndex[imageIndex] = {})
+						,	fullOrThumb = match[3]
+							;
+
+							imagesBySize[fullOrThumb] = file;
+
+							file.index = imageIndex;
+							file.width = orz(match[4]);
 							file.height = orz(match[5]);
-							j = o.img || (o.img = []);
-							j = j[k]  || (j[k]  = {});
-							j[match[3]] = file;
 						} else {
-							if (match = getTextOrURImatch(f, regDrawpileRecording)) {
+							if (match = getTextOrURImatch(fileName, regDrawpileRecording)) {
 								file.time = {
 									'start': match[1] || ''
 								,	'end': match[2] || ''
@@ -660,15 +726,19 @@ window.addEventListener('load', function() {
 								};
 								file.userNames = (match[6] || '').split(', ') || [];
 							}
-							if (specialFileExts.indexOf(ext = f.split(/\./g).pop()) < 0) {
+
+						var	ext = getFileExt(fileName);
+
+							if (specialFileExts.indexOf(ext) < 0) {
 								ext = 'dl';
 							} else
-							if (ext == 'js') {
+							if (ext === 'js') {
 							var	js = cre('script', document.head);
 								js.addEventListener('load', updateDrawpileTable, false);
 								js.src = file.name;
 							}
-							(o[ext] || (o[ext] = [])).push(file);
+
+							(filesByType[ext] || (filesByType[ext] = [])).push(file);
 						}
 
 						toggleClass(tr, classSimpleRow, 1);
@@ -681,13 +751,15 @@ window.addEventListener('load', function() {
 			toggleClass(simpleFileTable, classSimpleRowsContainer, 1);
 
 			if (simpleFileTable) {
-				simpleFileCount = gt('tr', simpleFileTable).filter(function(e) {
-				var	c = e.className;
-					return (
-						(!c || c.indexOf(classSimpleRow) < 0)
-					&&	gt('td', e).length > 0
-					);
-				}).length;
+				simpleFileCount = gt('tr', simpleFileTable).filter(
+					function(e) {
+					var	c = e.className;
+						return (
+							(!c || c.indexOf(classSimpleRow) < 0)
+						&&	gt('td', e).length > 0
+						);
+					}
+				).length;
 
 				if (simpleFileCount === 0) {
 					toggleClass(simpleFileTable, classSimpleRow, 1);
@@ -707,7 +779,7 @@ window.addEventListener('load', function() {
 //* 3.1. Get downloads, images and metadata:
 
 			for (recID in filesByRecID) {
-			var	o = filesByRecID[recID]
+			var	filesByType = filesByRecID[recID]
 			,	start = ''
 			,	end = ''
 			,	restrict = []
@@ -715,12 +787,14 @@ window.addEventListener('load', function() {
 			,	users = 0
 			,	size = {}
 			,	userNames = []
-			,	downloadSortOrder = ['text', 'size', 'html']
+			,	downloadSortOrder = ['index', 'date', 'size']
 			,	downloads = (
-					(o.dl || [])
+					(filesByType.dl || [])
 					.filter(hasValue)
 					.map(
 						function(file) {
+						var	i,j,k;
+
 							if (j = file.userNames) {
 								for (k in j) if (
 									(n = j[k])
@@ -742,31 +816,31 @@ window.addEventListener('load', function() {
 								if ((k = j.num) && (!size || !size.num || size.num < k)) size = j;
 							}
 
-						var	i,j,k
-						,	n = file.name
-						,	label = n.substr(n.indexOf(recID) + recID.length).replace(regTrimDots, '')
+						var	fileName = file.name
+						,	fileExt = getFileExt(fileName)
+						,	fileIndex = (
+								fileName
+								.substr(fileName.lastIndexOf(recID) + recID.length)
+								.replace(fileExt, '')
+								.replace(regNonNum, '')
+							) || '0'
 						,	downloadLink = (
 								'<a href="'
-							+		n
+							+		fileName
+							+	'" title="'
+							+		fileName
 							+	'" target="_blank" rel="nofollow">'
-							+		label
-							+	'</a> (' + j.short + ')'
-							)
-						,	downloadSize = getTagAttrIfNotEmpty('title', getFileSizeText(j))
-							;
+							+		fileExt
+							+	'</a>'
+							);
 
 							return {
-								'text': label
+								'index': fileIndex
+							,	'date': file.time.end
 							,	'size': (j ? k : 0)
-							,	'html': (
-									downloadSize ?
-										'<span'
-									+		downloadSize
-									+	'>'
-									+		downloadLink
-									+	'</span>'
-									: downloadLink
-								)
+							,	'info': j.short
+							,	'hint': getFileSizeText(j)
+							,	'link': downloadLink
 							};
 						}
 					).sort(
@@ -776,9 +850,13 @@ window.addEventListener('load', function() {
 							,	c = a[k]
 							,	d = b[k]
 								;
-								if (c !== d) return c > d ? 1 : -1;
+
+								if (c !== d) {
+									return c > d ? 1 : -1;
+								}
 							}
-							return -1;
+
+							return 0;
 						}
 					)
 				)
@@ -793,53 +871,53 @@ window.addEventListener('load', function() {
 				)
 			,	prevHeight = 0
 			,	images = (
-					(o.img || [])
+					(filesByType.img || [])
 					.filter(hasValue)
 					.map(
 						function(file, i, a) {
-					var	full = file.full || file.thumb
-					,	thumb = file.thumb || file.full
-					,	meta = (
-							'#'
-						+	full.index + la.drawpile.index_of_total
-						+	a.length + ' - '
-						+	full.width + 'x'
-						+	full.height + ', '
-						+	getFileSizeText(full.size)
-						)
-					,	width = thumb.width
-					,	height = thumb.height
-						;
+						var	full = file.full || file.thumb
+						,	thumb = file.thumb || file.full
+						,	meta = (
+								'#'
+							+	full.index + la.drawpile.index_of_total
+							+	a.length + ' - '
+							+	full.width + 'x'
+							+	full.height + ', '
+							+	getFileSizeText(full.size)
+							)
+						,	width = thumb.width
+						,	height = thumb.height
+							;
 
-						if (
-							width > maxThumbWidth
-						||	height > maxThumbHeight
-						) {
-							k = Math.max(
-								width / maxThumbWidth
-							,	height / maxThumbHeight
+							if (
+								width > maxThumbWidth
+							||	height > maxThumbHeight
+							) {
+								k = Math.max(
+									width / maxThumbWidth
+								,	height / maxThumbHeight
+								);
+								width = Math.min(maxThumbWidth, Math.round(width / k) || 1);
+								height = Math.min(maxThumbHeight, Math.round(height / k) || 1);
+							}
+
+						var	newLine = (prevHeight && prevHeight != height ? '<br>' : '');
+							prevHeight = height;
+
+							return (
+								newLine
+							+	'<a href="' + full.name
+							+	'" class="' + classMediaRowImageLink
+							+	'" title="' + meta
+							+	'" target="_blank">'
+							+		'<img src="' + thumb.name
+							+		'" width="' + width
+							+		'" height="' + height
+							+		'" alt="' + meta
+							+		'">'
+							+	'</a>'
 							);
-							width = Math.min(maxThumbWidth, Math.round(width / k) || 1);
-							height = Math.min(maxThumbHeight, Math.round(height / k) || 1);
 						}
-
-					var	newLine = (prevHeight && prevHeight != height ? '<br>' : '');
-						prevHeight = height;
-
-						return (
-							newLine
-						+	'<a href="' + full.name
-						+	'" class="' + classMediaRowImageLink
-						+	'" title="' + meta
-						+	'" target="_blank">'
-						+		'<img src="' + thumb.name
-						+		'" width="' + width
-						+		'" height="' + height
-						+		'" alt="' + meta
-						+		'">'
-						+	'</a>'
-						);
-					}
 					)
 				)
 
@@ -880,7 +958,9 @@ window.addEventListener('load', function() {
 							var	match = v.match(regNum)
 							,	num = orz(match ? match[0] : 0)
 								;
+
 								if (k < num) k = num;
+
 								return v;
 							}
 						).join(' ')
@@ -897,23 +977,51 @@ window.addEventListener('load', function() {
 					,	v
 					]
 				} : null)
-			,	rowDownloads = (
-					downloads.length > 0
-				&&	(
-						k = downloads.map(function(a) { return a.text; }).join('\n')
-					,	v = downloads.map(function(a) { return a.html; }).join(', ')
-					)
+			,	downloadsTotalSize = downloads.reduce(
+					function(sum, file) {
+						return sum + file.size;
+					}
+					, 0
+				)
+			,	rowDownloadCount = (
+					downloadsTotalSize > 0
+				||	downloads.length > 0
 				? {
-					'sort': {'dl': k}
+					'sort': {
+						'files': downloads.length,
+						'bytes': downloadsTotalSize,
+					}
 				,	'tabs': [
-						la.drawpile.dl + ':'
-					,	v
+						la.drawpile.dl_file_count + ':'
+					,	downloads.length
+					,	la.drawpile.dl_total_size + ':'
+					,	getFormattedNum(downloadsTotalSize) + ' ' + la.bytes
 					]
 				} : null)
-			,	rowUserCount = (users || strokes ? {
+			,	rowDownloadList = downloads.map(
+					function(file) {
+						return {
+							'class': 'user'
+						,	'tabs': [
+								file.link
+							,	la.drawpile.dl_num_prefix + file.index
+							,	{
+									'tip': file.hint
+								,	'html': file.info
+								}
+							// ,	file.date.split(regSplitTime)[0]
+							,	getFormattedTime(file.date)
+							]
+						};
+					}
+				)
+			,	rowUserCount = (
+					users > 0
+				||	strokes > 0
+				? {
 					'sort': {
-						'users': users
-					,	'strokes': strokes
+						'users': users,
+						'strokes': strokes,
 					}
 				,	'tabs': [
 						la.drawpile.users + ':'
@@ -930,6 +1038,7 @@ window.addEventListener('load', function() {
 					,	name = (match ? match[1] : name)
 					,	stat = (match ? orz(match[2]) : 0)
 						;
+
 						usersLeft--;
 						strokesLeft -= stat;
 
@@ -947,9 +1056,13 @@ window.addEventListener('load', function() {
 				,	rowTimeStart
 				,	rowTimeEnd
 				,	rowRestrict
-				,	rowDownloads
-				,	rowUserCount
-				].concat(rowUserList)
+				,	rowDownloadCount
+				]
+				.concat(rowDownloadList)
+				.concat([
+					rowUserCount
+				])
+				.concat(rowUserList)
 				.concat(
 					usersLeft || strokesLeft
 					? [
@@ -977,12 +1090,13 @@ window.addEventListener('load', function() {
 					,	tip = getTagAttrIfNotEmpty('title', row.tip)
 					,	lines = row.lines
 					,	tabs = row.tabs.filter(hasValue)
-					,	i, o = row.sort
+					,	rowSort = row.sort
 					,	sort = ''
+					,	i
 						;
 
-						if (o) for (i in o) {
-							sort += getTagAttrIfNotEmpty(attrSort + i, o[i]);
+						if (rowSort) for (i in rowSort) {
+							sort += getTagAttrIfNotEmpty(attrSort + i, rowSort[i]);
 						}
 
 						if (tabs && (i = tabs.length) > 0) {
@@ -990,13 +1104,16 @@ window.addEventListener('load', function() {
 						,	j = rowMaxTabCount
 						,	k = (j > i ? Math.ceil(j / i) : 1)
 							;
+
 							tabs = tabs.map(
 								function(tab) {
 								var	tip = getTagAttrIfNotEmpty('title', tab.tip)
 								,	n = Math.min(j, k)
 								,	combine = (n > 1 ? ' colspan="' + n + '"' : '')
 									;
+
 									j -= k;
+
 									return (
 										'<' + tagName + combine + tip + '>'
 									+		(tab.html || tab)
@@ -1035,14 +1152,16 @@ window.addEventListener('load', function() {
 
 		var	compareOrder = ['sort', 'id', 'html'];
 
-			tableRows.sort(function(a, b) {
-				for (i in compareOrder) {
-				var	i,k = compareOrder[i];
-					if (a[k] !== b[k]) return (a[k] < b[k]) ? -1 : 1;
-				}
+			tableRows.sort(
+				function(a, b) {
+					for (i in compareOrder) {
+					var	i,k = compareOrder[i];
+						if (a[k] !== b[k]) return (a[k] < b[k]) ? -1 : 1;
+					}
 
-				return 1;
-			});
+					return 1;
+				}
+			);
 
 			tableRows.map(
 				function(row) {
@@ -1059,7 +1178,8 @@ window.addEventListener('load', function() {
 //* END Drawpile sessions
 
 	toggleClass(document.documentElement, classPageLoading, -1);
-
-}, false);
+}
 
 toggleClass(document.documentElement, classPageLoading, 1);
+
+window.addEventListener('load', init, false);
