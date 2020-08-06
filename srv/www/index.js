@@ -692,7 +692,7 @@ function init() {
 					,	fileModTime = (timeElement ? timeElement.getAttribute('data-t') : '')
 					,	file = {
 							'name': fileName
-						,	'time': fileModTime
+						,	'mtime': fileModTime
 						,	'size': {
 								'short': sizeShort
 							,	'bytes': sizeBytes
@@ -716,7 +716,7 @@ function init() {
 							file.height = orz(match[5]);
 						} else {
 							if (match = getTextOrURImatch(fileName, regDrawpileRecording)) {
-								file.time = {
+								file.timeInterval = {
 									'start': match[1] || ''
 								,	'end': match[2] || ''
 								};
@@ -788,13 +788,15 @@ function init() {
 			,	users = 0
 			,	size = {}
 			,	userNames = []
-			,	downloadSortOrder = ['index', 'date', 'size']
+			,	downloadSortOrder = ['index', 'time', 'ext', 'size']
 			,	downloads = (
 					(filesByType.dl || [])
 					.filter(hasValue)
 					.map(
 						function(file) {
-						var	i,j,k;
+						var	fileTime = ''
+						,	i,j,k
+							;
 
 							if (j = file.userNames) {
 								for (k in j) if (
@@ -805,9 +807,9 @@ function init() {
 							if (j = file.restrict) {
 								if (!restrict || restrict.indexOf(j) < 0) restrict.push(j);
 							}
-							if (j = file.time) {
-								if ((k = j.start) && (!start || start < k)) start = k;
-								if ((k = j.end  ) && (!end   || end   > k)) end = k;
+							if (j = file.timeInterval) {
+								if ((k = j.start) && (fileTime = k) && (!start || start < k)) start = k;
+								if ((k = j.end  ) && (fileTime = k) && (!end   || end   > k)) end = k;
 							}
 							if (j = file.num) {
 								if ((k = j.strokes) && strokes < k) strokes = k;
@@ -841,7 +843,8 @@ function init() {
 
 							return {
 								'index': fileIndex
-							,	'date': file.time.end
+							,	'ext': fileExt
+							,	'time': fileTime || file.mtime
 							,	'size': (j ? k : 0)
 							,	'info': j.short
 							,	'hint': getFileSizeText(j)
@@ -1018,8 +1021,8 @@ function init() {
 									'tip': file.hint
 								,	'html': file.info
 								}
-							// ,	file.date.split(regSplitTime)[0]
-							,	getFormattedTime(file.date)
+							// ,	file.time.split(regSplitTime)[0]
+							,	getFormattedTime(file.time)
 							]
 						};
 					}
