@@ -421,7 +421,7 @@ function updateDrawpileTable(e) {
 
 		if (
 			(e = id(i))
-		&&	(a = gc('user', e))
+		&&	(a = gc('sub-list-row', e))
 		&&	(p = a[0])
 		&&	(p = p.parentNode)
 		) {
@@ -429,7 +429,7 @@ function updateDrawpileTable(e) {
 
 			for (i in d) {
 				e = cre('tr', p);
-				e.className = 'user';
+				e.className = 'sub-list-row';
 				e.innerHTML = (
 					'<td colspan="2">' + i + '</td>'
 				+	'<td colspan="2">' + d[i] + '</td>'
@@ -637,6 +637,7 @@ function init() {
 //* 1. Get all session IDs: *----/----
 
 	var	fileRecIDs = []
+	,	fileIndexFromOne = true
 	,	simpleFileTable
 	,	simpleFileCount = 0
 		;
@@ -818,12 +819,12 @@ function init() {
 
 						var	fileName = file.name
 						,	fileExt = getFileExt(fileName)
-						,	fileIndex = (
+						,	fileIndex = orz(
 								fileName
 								.substr(fileName.lastIndexOf(recID) + recID.length)
 								.replace(fileExt, '')
 								.replace(regNonNum, '')
-							) || '0'
+							)
 						,	downloadLink = (
 								'<a href="'
 							+		fileName
@@ -833,6 +834,10 @@ function init() {
 							+		fileExt
 							+	'</a>'
 							);
+
+							if (fileIndex === 1) {
+								fileIndexFromOne = false;
+							}
 
 							return {
 								'index': fileIndex
@@ -1001,10 +1006,14 @@ function init() {
 			,	rowDownloadList = downloads.map(
 					function(file) {
 						return {
-							'class': 'user'
+							'class': 'sub-list-row'
 						,	'tabs': [
 								file.link
-							,	la.drawpile.dl_num_prefix + file.index
+							,	la.drawpile.dl_num_prefix + (
+									fileIndexFromOne
+									? (file.index || 1)
+									: file.index
+								)
 							,	{
 									'tip': file.hint
 								,	'html': file.info
@@ -1043,7 +1052,7 @@ function init() {
 						strokesLeft -= stat;
 
 						return {
-							'class': 'user'
+							'class': 'sub-list-row'
 						,	'tabs': [name, stat]
 						};
 					}
@@ -1067,7 +1076,7 @@ function init() {
 					usersLeft || strokesLeft
 					? [
 						{
-							'class': 'user'
+							'class': 'sub-list-row'
 						,	'tabs': [
 								la.drawpile.users_omitted.replace('$1', usersLeft)
 							,	strokesLeft

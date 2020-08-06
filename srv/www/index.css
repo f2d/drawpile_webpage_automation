@@ -29,10 +29,10 @@ table {
 .inside td {
 	background-color: #fff;
 }
-.inside .user td {
+.inside .sub-list-row td {
 	background-color: #f3f4f5;
 }
-.inside .user:hover td {
+.inside .sub-list-row:hover td {
 	background-color: #fffaec;
 }
 .inside td, h3 {
