@@ -54,7 +54,7 @@ fi
 run_update_cmd () {
 	local cmd_task=$1
 	local cmd_array=(
-		python2
+		"${cmd_python}"
 		"${root_dir}update.py"
 		"$@"
 		"${cmd_wait}"
@@ -64,7 +64,7 @@ run_update_cmd () {
 		"root = ${root_dir}"
 		"rec_src = ${active_sessions_dir}"
 		"api_url_prefix = http://127.0.0.1:${admin_port}/${api_url_subdir}"
-	#	"add_pwd_session_users = [a], [anyway]"
+		"add_pwd_session_users = ${tags_to_add_passworded_session_users_to_txt}"
 	)
 	"${cmd_array[@]}"
 }

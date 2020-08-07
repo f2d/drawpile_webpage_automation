@@ -32,7 +32,8 @@ table {
 .inside .sub-list-row td {
 	background-color: #f3f4f5;
 }
-.inside .sub-list-row:hover td {
+.inside tr.simple-row:hover td,
+.inside tr.sub-list-row:hover td {
 	background-color: #fffaec;
 }
 .inside td, h3 {
@@ -61,7 +62,8 @@ table {
 	margin: -4px 0;
 }
 .inside .media-row[id] th a,
-.inside .simple-rows-table td a {
+.inside tr.simple-row a,
+.inside tr.sub-list-row a {
 	display: block;
 	margin: -4px -8px;
 }
