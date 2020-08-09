@@ -17,40 +17,45 @@
 ,	classSimpleRow            = 'simple-row'
 
 ,	regDrawpilePartStart = '^(?:.*\\/)?'
-,	regDrawpilePartEnd   = '(?:[#?].*)?$'
-,	regDrawpilePartDate  = '(\\d{4}(?:\\D\\d\\d){5}\\S*) - '
-,	regDrawpilePartID    = (
+,	regDrawpilePartEnd = '(?:[#?].*)?$'
+,	regDrawpilePartID = (
 		'('
-	+		'[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12}'
-	+	'|'
-	+		'[0-9a-z]{26}'
+	+	[	'[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12}'
+		,	'[0-9a-z]{26}'
+		].join('|')
 	+	')'
 	)
-,	regDrawpilePartRecNum = (
+,	regDrawpilePartIndex = (
 		'('
-	+		'[\\s_-]r\\d+'
-	+	'|'
-	+		'[\\s_-]?[\\[{(]\\d+[\\])}]'
+	+	[	'[\\s_-]r\\d+'
+		,	'[\\s_-]?[\\[{(]\\d+[\\])}]'
+		].join('|')
 	+	')?'
 	)
 
-,	regDrawpileUserName = /^(.+?)\s(\d+)$/
-,	regDrawpileRecording = new RegExp(
+,	regDrawpileRecordingFileName = new RegExp(
 		regDrawpilePartStart
-	+	'(?:' + regDrawpilePartDate		//* <- [1]
-	+	'(?:' + regDrawpilePartDate + ')?)?'	//* <- [2]
-	+	'(?:(r\\d+|\\d+[g+]+) - )?'		//* <- [3]
-	+	'(?:(\\d+)s - )?'			//* <- [4]
-	+	'(?:(\\d+)u - )?'			//* <- [5]
-	+	'(?:(\\S.*?) - )?'			//* <- [6]
-	+	regDrawpilePartID			//* <- [7]
-	+	regDrawpilePartRecNum			//* <- [8]
-	+	'(\\.(?:dprec|dptxt))'			//* <- [9]
-	+	'(\\.archived)?'			//* <- [10]
+	+	'((?:\\S.*? - )*?)'	//* <- [1] = any meta parts in any order
+	+	regDrawpilePartID	//* <- [2]
+	+	regDrawpilePartIndex	//* <- [3]
+	+	'(\\.(?:dprec|dptxt))'	//* <- [4]
+	+	'(\\.archived)?'	//* <- [5]
 	+	regDrawpilePartEnd
 	, 'i')
 
-,	regDrawpileImage = new RegExp(
+,	regDrawpileRecordingUserName = /^(.+?)\s(\d+)$/
+,	regDrawpileRecordingMetaPart = new RegExp(
+		'^(?:'
+	+	[	'part (\\d+)(?: of (\\d+))?'	//* <- [1,2] = part index/total count
+		,	'(\\d{4}(?:\\D\\d\\d){5}\\S*)'	//* <- [3] = date/time
+		,	'(r\\d+|r?\\d+[g+]+)'		//* <- [4] = restriction rating
+		,	'(\\d+)s'			//* <- [5] = strokes count
+		,	'(\\d+)u'			//* <- [6] = users count
+		].join('|')
+	+	')$'
+	, 'i')
+
+,	regDrawpileImageFileName = new RegExp(
 		regDrawpilePartStart
 	+	regDrawpilePartID	//* <- [1]
 	+	'-(\\d+)'		//* <- [2]
@@ -75,6 +80,7 @@
 ,	regTrimSlash = /^[\\\/]+|[\\\/]+$/g
 ,	regTimeBreak = /^\d+(<|>|,|$)/
 ,	regSplitTime = /[^\d-]+/g
+,	regSplitName = /\s+-\s+/g
 
 ,	splitSec = 60
 ,	maxThumbWidth = 200
@@ -650,8 +656,8 @@ function init() {
 
 			if (
 				url
-			&&	(match = getTextOrURImatch(url, regDrawpileRecording))
-			&&	(recID = match[7])
+			&&	(match = getTextOrURImatch(url, regDrawpileRecordingFileName))
+			&&	(recID = match[2])
 			&&	fileRecIDs.indexOf(recID) < 0
 			) {
 				fileRecIDs.push(recID);
@@ -702,7 +708,7 @@ function init() {
 					,	filesByType = filesByRecID[recID] || (filesByRecID[recID] = {})
 						;
 
-						if (match = getTextOrURImatch(fileName, regDrawpileImage)) {
+						if (match = getTextOrURImatch(fileName, regDrawpileImageFileName)) {
 						var	imageIndex = orz(match[2])
 						,	imagesByIndex = filesByType.img || (filesByType.img = [])
 						,	imagesBySize = imagesByIndex[imageIndex] || (imagesByIndex[imageIndex] = {})
@@ -715,17 +721,69 @@ function init() {
 							file.width = orz(match[4]);
 							file.height = orz(match[5]);
 						} else {
-							if (match = getTextOrURImatch(fileName, regDrawpileRecording)) {
-								file.timeInterval = {
-									'start': match[1] || ''
-								,	'end': match[2] || ''
-								};
-								file.restrict = match[3] || '';
-								file.num = {
-									'strokes': orz(match[4])
-								,	'users': orz(match[5])
-								};
-								file.userNames = (match[6] || '').split(', ') || [];
+							if (match = getTextOrURImatch(fileName, regDrawpileRecordingFileName)) {
+							var	metaParts = (match[1] || '').split(regSplitName)
+							,	timeStamps = []
+								;
+
+								for (var m_i in metaParts) {
+								var	v = metaParts[m_i];
+
+									if (match = v.match(regDrawpileRecordingMetaPart)) {
+										if (v = match[1]) {
+											(file.num || (file.num = {})).index = orz(v);
+
+											if (v = match[2]) {
+												file.num.parts = orz(v);
+											}
+										} else
+										if (v = match[3]) {
+											if (timeStamps.indexOf(v) < 0) {
+												timeStamps.push(v);
+											}
+										} else
+										if (v = match[4]) {
+										var	a = (file.restrict || (file.restrict = []));
+
+											if (a.indexOf(v) < 0) {
+												a.push(v);
+											}
+										} else
+										if (v = match[5]) {
+											(file.num || (file.num = {})).strokes = orz(v);
+										} else
+										if (v = match[6]) {
+											(file.num || (file.num = {})).users = orz(v);
+										}
+									} else {
+										file.users = (file.users || []).concat(
+											v.split(', ')
+										);
+									}
+								}
+
+								if (timeStamps) {
+								var	timeStart = 0
+								,	timeEnd = 0
+									;
+
+									for (var t_i in timeStamps) {
+									var	t = timeStamps[t_i];
+
+										if (!timeStart || timeStart > t) timeStart = t;
+										if (!timeEnd   || timeEnd   < t) timeEnd   = t;
+									}
+
+									file.timeInterval = {};
+
+									if (timeStart) {
+										file.timeInterval.start = timeStart;
+									}
+
+									if (timeEnd && timeEnd !== timeStart) {
+										file.timeInterval.end = timeEnd;
+									}
+								}
 							}
 
 						var	ext = getFileExt(fileName);
@@ -783,45 +841,51 @@ function init() {
 			var	filesByType = filesByRecID[recID]
 			,	start = ''
 			,	end = ''
-			,	restrict = []
 			,	strokes = 0
 			,	users = 0
 			,	size = {}
-			,	userNames = []
+			,	metaLists = {
+					'restrict': []
+				,	'users': []
+				}
 			,	downloadSortOrder = ['index', 'time', 'ext', 'size']
 			,	downloads = (
 					(filesByType.dl || [])
 					.filter(hasValue)
 					.map(
 						function(file) {
-						var	fileTime = ''
-						,	i,j,k
-							;
+						var	i,j,k,n;
 
-							if (j = file.userNames) {
-								for (k in j) if (
-									(n = j[k])
-								&&	userNames.indexOf(n) < 0
-								) userNames.push(n);
+							for (k in metaLists) {
+								if (j = file[k]) {
+									for (i in j) if (
+										(n = j[i])
+									&&	metaLists[k].indexOf(n) < 0
+									) {
+										metaLists[k].push(n);
+									}
+								}
 							}
-							if (j = file.restrict) {
-								if (!restrict || restrict.indexOf(j) < 0) restrict.push(j);
-							}
+
 							if (j = file.timeInterval) {
 								if ((k = j.start) && (fileTime = k) && (!start || start < k)) start = k;
 								if ((k = j.end  ) && (fileTime = k) && (!end   || end   > k)) end = k;
 							}
+
 							if (j = file.num) {
+								if (k = j.index) fileIndex = k;
 								if ((k = j.strokes) && strokes < k) strokes = k;
 								if ((k = j.users  ) && users   < k) users = k;
 							}
+
 							if (j = file.size) {
 								if ((k = j.num) && (!size || !size.num || size.num < k)) size = j;
 							}
 
 						var	fileName = file.name
 						,	fileExt = getFileExt(fileName)
-						,	fileIndex = orz(
+						,	fileTime = fileTime || file.mtime
+						,	fileIndex = fileIndex || orz(
 								fileName
 								.substr(fileName.lastIndexOf(recID) + recID.length)
 								.replace(fileExt, '')
@@ -842,9 +906,9 @@ function init() {
 							}
 
 							return {
-								'index': fileIndex
-							,	'ext': fileExt
-							,	'time': fileTime || file.mtime
+								'ext': fileExt
+							,	'time': fileTime
+							,	'index': fileIndex
 							,	'size': (j ? k : 0)
 							,	'info': j.short
 							,	'hint': getFileSizeText(j)
@@ -931,7 +995,7 @@ function init() {
 
 //* 3.2. Get row metadata fields:
 
-			,	userNames = userNames.sort(compareCaseless)
+			,	userNames = metaLists.users.sort(compareCaseless)
 			,	rowID = {
 					'head': 1
 				,	'sort': {'id': recID}
@@ -958,10 +1022,10 @@ function init() {
 					]
 				} : null)
 			,	rowRestrict = (
-					restrict.length > 0
+					metaLists.restrict.length > 0
 				&&	(
 						k = 0
-					,	v = restrict.map(
+					,	v = metaLists.restrict.map(
 							function(v) {
 							var	match = v.match(regNum)
 							,	num = orz(match ? match[0] : 0)
@@ -1046,7 +1110,7 @@ function init() {
 			,	strokesLeft = strokes
 			,	rowUserList = userNames.map(
 					function(line) {
-					var	match = line.match(regDrawpileUserName)
+					var	match = line.match(regDrawpileRecordingUserName)
 					,	name = (match ? match[1] : name)
 					,	stat = (match ? orz(match[2]) : 0)
 						;
