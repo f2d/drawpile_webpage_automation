@@ -5,19 +5,21 @@ Everything else should probably run as is, although not advised and not tested i
 
 ## Features:
 
-* Drawpile server launch script.
+* Launch script for Drawpile server and its message processing chain.
 * Webpage templates and static files.
 * Autoupdating stats page with currently open session list after each user join/leave.
 * Autoupdating session archive folder with stats (user names, stroke counts) and screenshots after each closed session.
 
 ## Required:
 
-* **drawpile-srv**
+* **drawpile-srv** (tested with versions 2.0.x and 2.1.x)
 * **drawpile-cmd**
 * **dprectool**
 * **bash**
-* **awk** (mawk is OK)
-* **python2** (for now)
+* **awk** (tested with mawk version 1.3.3)
+* **python** (2 or 3, tested with versions 2.7.18, 3.6.9 and 3.8.1) with modules:
+	* **dateutil**
+	* **PIL**
 * **nginx** with modules:
 	* **ngx_http_ssi_module**
 	* **ngx_http_xslt_module**
@@ -75,8 +77,10 @@ To manually run updates in terminal as your Drawpile service user, use this comm
 sudo -u drawpile-user-name /srv/drawpile/update.sh --records --stats
 ```
 
-Public archive may be deleted and regenerated as follows:
-1. Delete the whole sessions public archive folder, or any files in it, which contain relevant session ID in their filename.
+Public session archive may be deleted and regenerated as follows:
+1. Preemptively delete the whole public archive folder, or any files in it, which contain relevant session ID in their filename.
+	* This is optional, as the script will try to remove relevant leftovers from previous runs if possible, such as session recording copies and screenshots, matching to each processed session ID, in public archive and unprocessed archived folder.
+	* But if the public archive folder is somehow a parent to the working folder (not recommended), automatic preemptive cleanup will not work. Do it manually in such case.
 2. Put all relevant files from the closed sessions, which you want to process, back into active session folder without renaming or subfolders.
 3. Run manual update command, mentioned above.
 4. After update is finished, all processed source files will be moved to closed session storage. Do not delete them.

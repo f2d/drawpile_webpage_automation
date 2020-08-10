@@ -30,7 +30,7 @@
 ,	regDrawpilePartIndex = (
 		'('
 	+	[	'[\\s_]r\\d+'
-		,	'[\\s_]?[\\[{(]\\d+[\\])}]'
+		,	'[\\s_]?[\\[\\{\\(]\\d+[\\]\\)\\}]'
 		].join('|')
 	+	')?'
 	)
@@ -61,9 +61,9 @@
 		regDrawpilePartStart
 	+	regDrawpilePartID	//* <- [1] = session ID
 	+	regDrawpilePartIndex	//* <- [2] = session part index
-	+	'-(\\d+)'		//* <- [3] = image index
-	+	'_(full|thumb)'		//* <- [4] = view/preview
-	+	'_(\\d+)'		//* <- [5] = image width
+	+	'[_-](\\d+)'		//* <- [3] = image index
+	+	'[_-](full|thumb)'	//* <- [4] = view/preview
+	+	'[_-](\\d+)'		//* <- [5] = image width
 	+	'x(\\d+)'		//* <- [6] = image height
 	+	'(\\.\\w+)'		//* <- [7] = file ext
 	+	regDrawpilePartEnd
@@ -172,6 +172,29 @@ if (lang == 'ru') {
 		};
 	}
 );
+
+//* Variable level array flatten with recursion using reduce and concat:
+//* source: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/flat
+function getFlatDeepArray(values, maxLevel) {
+	if (typeof maxLevel === 'undefined') {
+		maxLevel = +Infinity;
+	}
+
+	return (
+		maxLevel > 0
+		? values.reduce(
+			function(values, value) {
+				return values.concat(
+					isArray(value)
+					? getFlatDeepArray(value, maxLevel - 1)
+					: value
+				)
+			}
+		,	[]
+		)
+		: values.slice()
+	);
+};
 
 function compareCaseless(a, b) {return a.toLowerCase() > b.toLowerCase() ? 1 : -1;}
 function gc(n,p) {try {return Array.prototype.slice.call((p || document).getElementsByClassName(n) || []);} catch(e) {return [];}}
@@ -719,7 +742,6 @@ function init() {
 
 	var	fileRecIDs = []
 	,	fileRecIDsToUpdateTable = []
-	,	fileIndexFromOne = true
 	,	simpleFileTable
 	,	simpleFileCount = 0
 		;
@@ -786,8 +808,9 @@ function init() {
 						if (match = getTextOrURImatch(fileName, regDrawpileImageFileName)) {
 						var	partIndex = (match[2] ? orz(match[2].replace(regNonNum, '')) : 0)
 						,	imageIndex = orz(match[3])
-						,	imagesByIndex = filesByType.img || (filesByType.img = [])
-						,	imagesBySize = imagesByIndex[imageIndex] || (imagesByIndex[imageIndex] = {})
+						,	imagesByPartIndex = filesByType.img || (filesByType.img = [])
+						,	imagesByImageIndex = imagesByPartIndex[partIndex] || (imagesByPartIndex[partIndex] = [])
+						,	imagesBySize = imagesByImageIndex[imageIndex] || (imagesByImageIndex[imageIndex] = {})
 						,	fullOrThumb = match[4]
 							;
 
@@ -925,6 +948,7 @@ function init() {
 
 			for (recID in filesByRecID) {
 			var	filesByType = filesByRecID[recID]
+			,	fileIndexFromOne = true
 			,	start = ''
 			,	end = ''
 			,	strokes = 0
@@ -1028,61 +1052,65 @@ function init() {
 					.join('\n')
 				)
 			,	prevHeight = 0
-			,	images = (
-					(filesByType.img || [])
-					.filter(hasValue)
-					.map(
-						function(file, i, a) {
-						var	full = file.full || file.thumb
-						,	thumb = file.thumb || file.full
-						,	meta = (
-								!full.partIndex
-								? '' :
-								la.drawpile.session_part + ' '
-							+	full.partIndex + la.drawpile.index_of_total
-							+	downloads.length + ', '
-							) + (
-								la.drawpile.screenshot + ' '
-							+	full.index + la.drawpile.index_of_total
-							+	a.length + ' - '
-							+	full.width + 'x'
-							+	full.height + ', '
-							+	getFileSizeText(full.size)
-							)
-						,	width = thumb.width
-						,	height = thumb.height
-							;
+			,	imageFiles = getFlatDeepArray(
+					filesByType.img || []
+				).filter(
+					function(file) {
+						return !!(file && (file.full || file.thumb));
+					}
+				)
+			,	imageCount = imageFiles.length
+			,	imagesHTMLParts = imageFiles.map(
+					function(file) {
+					var	full = file.full || file.thumb
+					,	thumb = file.thumb || file.full
+					,	meta = (
+							!full.partIndex
+							? '' :
+							la.drawpile.session_part + ' '
+						+	full.partIndex + la.drawpile.index_of_total
+						+	downloads.length + ', '
+						) + (
+							la.drawpile.screenshot + ' '
+						+	full.index + la.drawpile.index_of_total
+						+	imageCount + ' - '
+						+	full.width + 'x'
+						+	full.height + ', '
+						+	getFileSizeText(full.size)
+						)
+					,	width = thumb.width
+					,	height = thumb.height
+						;
 
-							if (
-								width > maxThumbWidth
-							||	height > maxThumbHeight
-							) {
-								k = Math.max(
-									width / maxThumbWidth
-								,	height / maxThumbHeight
-								);
-								width = Math.min(maxThumbWidth, Math.round(width / k) || 1);
-								height = Math.min(maxThumbHeight, Math.round(height / k) || 1);
-							}
-
-						var	newLine = (prevHeight && prevHeight != height ? '<br>' : '');
-							prevHeight = height;
-
-							return (
-								newLine
-							+	'<a href="' + full.name
-							+	'" class="' + classMediaRowImageLink
-							+	'" title="' + meta
-							+	'" target="_blank">'
-							+		'<img src="' + thumb.name
-							+		'" width="' + width
-							+		'" height="' + height
-							+		'" alt="' + meta
-							+		'">'
-							+	'</a>'
+						if (
+							width > maxThumbWidth
+						||	height > maxThumbHeight
+						) {
+							k = Math.max(
+								width / maxThumbWidth
+							,	height / maxThumbHeight
 							);
+							width = Math.min(maxThumbWidth, Math.round(width / k) || 1);
+							height = Math.min(maxThumbHeight, Math.round(height / k) || 1);
 						}
-					)
+
+					var	newLine = (prevHeight && prevHeight != height ? '<br>' : '');
+						prevHeight = height;
+
+						return (
+							newLine
+						+	'<a href="' + full.name
+						+	'" class="' + classMediaRowImageLink
+						+	'" title="' + meta
+						+	'" target="_blank">'
+						+		'<img src="' + thumb.name
+						+		'" width="' + width
+						+		'" height="' + height
+						+		'" alt="' + meta
+						+		'">'
+						+	'</a>'
+						);
+					}
 				)
 
 //* 3.2. Get row metadata fields:
@@ -1145,7 +1173,7 @@ function init() {
 					function(sum, file) {
 						return sum + file.size;
 					}
-					, 0
+				,	0
 				)
 			,	rowDownloadCount = (
 					downloadsTotalSize > 0
@@ -1314,7 +1342,7 @@ function init() {
 					+		dataRows.join('')
 					+	'</table>'
 					+	'<span class="' + classMediaRowImages + '">'
-					+		images.join('')
+					+		imagesHTMLParts.join('')
 					+	'</span>'
 					)
 				});
