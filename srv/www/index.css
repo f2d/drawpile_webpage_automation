@@ -100,7 +100,8 @@ table {
 	text-align: left;
 	vertical-align: top;
 }
-.media-row-info tr>*:nth-child(2n) {
+.media-row-info tr>*:nth-child(2n),
+.media-row-info tr.sub-list-row > td:not(:first-child) {
 	text-align: right;
 }
 .simple-rows-table th,

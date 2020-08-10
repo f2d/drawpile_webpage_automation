@@ -13,6 +13,8 @@
 ,	classMediaRowImages       = 'media-row-images'
 ,	classMediaRowImageBreaks  = 'media-row-img-newlines'
 ,	classMediaRowImageLink    = 'media-row-img'
+,	classMediaRowStatsDL      = 'sub-list-row download'
+,	classMediaRowStatsUser    = 'sub-list-row user'
 ,	classSimpleRowsContainer  = 'simple-rows-table'
 ,	classSimpleRow            = 'simple-row'
 
@@ -27,8 +29,8 @@
 	)
 ,	regDrawpilePartIndex = (
 		'('
-	+	[	'[\\s_-]r\\d+'
-		,	'[\\s_-]?[\\[{(]\\d+[\\])}]'
+	+	[	'[\\s_]r\\d+'
+		,	'[\\s_]?[\\[{(]\\d+[\\])}]'
 		].join('|')
 	+	')?'
 	)
@@ -36,10 +38,10 @@
 ,	regDrawpileRecordingFileName = new RegExp(
 		regDrawpilePartStart
 	+	'((?:\\S.*? - )*?)'	//* <- [1] = any meta parts in any order
-	+	regDrawpilePartID	//* <- [2]
-	+	regDrawpilePartIndex	//* <- [3]
-	+	'(\\.(?:dprec|dptxt))'	//* <- [4]
-	+	'(\\.archived)?'	//* <- [5]
+	+	regDrawpilePartID	//* <- [2] = session ID
+	+	regDrawpilePartIndex	//* <- [3] = session part index
+	+	'(\\.(?:dprec|dptxt))'	//* <- [4] = file ext
+	+	'(\\.archived)?'	//* <- [5] = file ext optional suffix
 	+	regDrawpilePartEnd
 	, 'i')
 
@@ -57,12 +59,20 @@
 
 ,	regDrawpileImageFileName = new RegExp(
 		regDrawpilePartStart
-	+	regDrawpilePartID	//* <- [1]
-	+	'-(\\d+)'		//* <- [2]
-	+	'_(full|thumb)'		//* <- [3]
-	+	'_(\\d+)'		//* <- [4]
-	+	'x(\\d+)'		//* <- [5]
-	+	'(\\.\\w+)'		//* <- [6]
+	+	regDrawpilePartID	//* <- [1] = session ID
+	+	regDrawpilePartIndex	//* <- [2] = session part index
+	+	'-(\\d+)'		//* <- [3] = image index
+	+	'_(full|thumb)'		//* <- [4] = view/preview
+	+	'_(\\d+)'		//* <- [5] = image width
+	+	'x(\\d+)'		//* <- [6] = image height
+	+	'(\\.\\w+)'		//* <- [7] = file ext
+	+	regDrawpilePartEnd
+	, 'i')
+
+,	regDrawpileMetaFileName = new RegExp(
+		regDrawpilePartStart
+	+	regDrawpilePartID	//* <- [1] = session ID
+	+	'(\\.\\w+)'		//* <- [2] = file ext
 	+	regDrawpilePartEnd
 	, 'i')
 
@@ -114,6 +124,8 @@ if (lang == 'ru') {
 		,	'dl_total_size': 'Общий вес'
 		,	'size': 'Вес'
 		,	'strokes': 'Черт'
+		,	'session_part': 'запись сессии'
+		,	'screenshot': 'снимок'
 		,	'index_of_total': ' из '
 		,	'users': 'Участников'
 		,	'users_omitted': '(ещё $1)'
@@ -136,6 +148,8 @@ if (lang == 'ru') {
 		,	'dl_total_size': 'Total size'
 		,	'size': 'Size'
 		,	'strokes': 'Strokes'
+		,	'session_part': 'session part'
+		,	'screenshot': 'screenshot'
 		,	'index_of_total': ' of '
 		,	'users': 'Users'
 		,	'users_omitted': '($1 more)'
@@ -144,6 +158,20 @@ if (lang == 'ru') {
 }
 
 //* Utility functions, mostly copypasted from old projects as is *-------------
+
+//* create type-checking functions, e.g. "isString()" or "isImageElement()":
+//* source: https://stackoverflow.com/a/17772086
+[
+	'Array',
+].forEach(
+	(typeName) => {
+		window[
+			'is' + typeName.replace('HTML', '')
+		] = function(value) {
+			return (toString.call(value).slice(8, -1) === typeName);
+		};
+	}
+);
 
 function compareCaseless(a, b) {return a.toLowerCase() > b.toLowerCase() ? 1 : -1;}
 function gc(n,p) {try {return Array.prototype.slice.call((p || document).getElementsByClassName(n) || []);} catch(e) {return [];}}
@@ -415,31 +443,78 @@ var	ev = eventStop(0,1,1)
 }
 
 function updateDrawpileTable(e) {
+
+	function addStatsRow(userName, statsContent) {
+		statsRow = cre('tr', statsContainer);
+		statsRow.className = classMediaRowStatsUser;
+		statsRow.innerHTML = (
+			'<td colspan="2">' + userName + '</td>'
+		+	'<td colspan="2">' + statsContent + '</td>'
+		);
+	}
+
+var	js = (e && e.target ? e.target : e)
+,	match
+	;
+
 	if (
-		e
-	&&	(e.target ? (e = e.target) : e).src
-	&&	(i = e.src.match(regDrawpilePartID))
+		js
+	&&	js.src
+	&&	(match = js.src.match(regDrawpileMetaFileName))
 	) {
-	var	a,p
-	,	i = i[1]
-	,	d = dprecMetaByID[i]
+	var	recID = match[1]
+	,	stats = dprecMetaByID[recID]
+	,	sessionContainer = id(recID)
+	,	statsContainer
+	,	statsSummary
+	,	statsRows
 		;
 
 		if (
-			(e = id(i))
-		&&	(a = gc('sub-list-row', e))
-		&&	(p = a[0])
-		&&	(p = p.parentNode)
+			stats
+		&&	sessionContainer
+		&&	(statsRows = gc('user', sessionContainer))
+		&&	(statsSummary = statsRows[0].previousSibling)
+		&&	(statsContainer = statsRows[0].parentNode)
 		) {
-			del(a);
+			del(statsRows);
 
-			for (i in d) {
-				e = cre('tr', p);
-				e.className = 'sub-list-row';
-				e.innerHTML = (
-					'<td colspan="2">' + i + '</td>'
-				+	'<td colspan="2">' + d[i] + '</td>'
+			if (isArray(stats)) {
+			var	userNames = []
+			,	statsCombined = {}
+			,	statsSum = 0
+				;
+
+				stats.map(
+					function(stats) {
+						for (var userName in stats) {
+						var	userStatValue = stats[userName];
+
+							if (userNames.indexOf(userName) < 0) {
+								userNames.push(userName);
+								statsCombined[userName] = userStatValue;
+							} else {
+								statsCombined[userName] += userStatValue;
+							}
+
+							statsSum += userStatValue;
+						}
+					}
 				);
+
+			var	statsSumFields = gt('td', statsSummary);
+				statsSumFields[1].textContent = userNames.length;
+				statsSumFields[3].textContent = statsSum;
+
+				userNames.sort();
+				userNames.map(
+					function(userName) {
+						addStatsRow(userName, statsCombined[userName]);
+					}
+				);
+			} else
+			for (var userName in stats) {
+				addStatsRow(userName, stats[userName]);
 			}
 		}
 	}
@@ -643,6 +718,7 @@ function init() {
 //* 1. Get all session IDs: *----/----
 
 	var	fileRecIDs = []
+	,	fileRecIDsToUpdateTable = []
 	,	fileIndexFromOne = true
 	,	simpleFileTable
 	,	simpleFileCount = 0
@@ -681,7 +757,6 @@ function init() {
 			var	url = e.href
 			,	recID
 			,	match
-			,	specialFileExts = ['js']
 				;
 
 				if (url) {
@@ -709,17 +784,19 @@ function init() {
 						;
 
 						if (match = getTextOrURImatch(fileName, regDrawpileImageFileName)) {
-						var	imageIndex = orz(match[2])
+						var	partIndex = (match[2] ? orz(match[2].replace(regNonNum, '')) : 0)
+						,	imageIndex = orz(match[3])
 						,	imagesByIndex = filesByType.img || (filesByType.img = [])
 						,	imagesBySize = imagesByIndex[imageIndex] || (imagesByIndex[imageIndex] = {})
-						,	fullOrThumb = match[3]
+						,	fullOrThumb = match[4]
 							;
 
 							imagesBySize[fullOrThumb] = file;
 
+							file.partIndex = partIndex;
 							file.index = imageIndex;
-							file.width = orz(match[4]);
-							file.height = orz(match[5]);
+							file.width = orz(match[5]);
+							file.height = orz(match[6]);
 						} else {
 							if (match = getTextOrURImatch(fileName, regDrawpileRecordingFileName)) {
 							var	metaParts = (match[1] || '').split(regSplitName)
@@ -788,13 +865,22 @@ function init() {
 
 						var	ext = getFileExt(fileName);
 
-							if (specialFileExts.indexOf(ext) < 0) {
-								ext = 'dl';
-							} else
 							if (ext === 'js') {
-							var	js = cre('script', document.head);
-								js.addEventListener('load', updateDrawpileTable, false);
-								js.src = file.name;
+							var	match = fileName.match(regDrawpileMetaFileName);
+
+								if (match) {
+								var	recID = match[1];
+
+									if (fileRecIDsToUpdateTable.indexOf(recID) < 0) {
+										fileRecIDsToUpdateTable.push(recID);
+									}
+
+								var	js = cre('script', document.head);
+									js.addEventListener('load', updateDrawpileTable, false);
+									js.src = file.name;
+								}
+							} else {
+								ext = 'dl';
 							}
 
 							(filesByType[ext] || (filesByType[ext] = [])).push(file);
@@ -950,7 +1036,13 @@ function init() {
 						var	full = file.full || file.thumb
 						,	thumb = file.thumb || file.full
 						,	meta = (
-								'#'
+								!full.partIndex
+								? '' :
+								la.drawpile.session_part + ' '
+							+	full.partIndex + la.drawpile.index_of_total
+							+	downloads.length + ', '
+							) + (
+								la.drawpile.screenshot + ' '
 							+	full.index + la.drawpile.index_of_total
 							+	a.length + ' - '
 							+	full.width + 'x'
@@ -1073,7 +1165,7 @@ function init() {
 			,	rowDownloadList = downloads.map(
 					function(file) {
 						return {
-							'class': 'sub-list-row'
+							'class': classMediaRowStatsDL
 						,	'tabs': [
 								file.link
 							,	la.drawpile.dl_num_prefix + (
@@ -1108,21 +1200,25 @@ function init() {
 				} : null)
 			,	usersLeft = users
 			,	strokesLeft = strokes
-			,	rowUserList = userNames.map(
-					function(line) {
-					var	match = line.match(regDrawpileRecordingUserName)
-					,	name = (match ? match[1] : name)
-					,	stat = (match ? orz(match[2]) : 0)
-						;
+			,	rowUserList = (
+					fileRecIDsToUpdateTable.indexOf(recID) >= 0
+					? '' :
+					userNames.map(
+						function(line) {
+						var	match = line.match(regDrawpileRecordingUserName)
+						,	name = (match ? match[1] : name)
+						,	stat = (match ? orz(match[2]) : 0)
+							;
 
-						usersLeft--;
-						strokesLeft -= stat;
+							usersLeft--;
+							strokesLeft -= stat;
 
-						return {
-							'class': 'sub-list-row'
-						,	'tabs': [name, stat]
-						};
-					}
+							return {
+								'class': classMediaRowStatsUser
+							,	'tabs': [name, stat]
+							};
+						}
+					)
 				)
 
 //* 3.3. Get row metadata table rows:
@@ -1143,7 +1239,7 @@ function init() {
 					usersLeft || strokesLeft
 					? [
 						{
-							'class': 'sub-list-row'
+							'class': classMediaRowStatsUser
 						,	'tabs': [
 								la.drawpile.users_omitted.replace('$1', usersLeft)
 							,	strokesLeft
