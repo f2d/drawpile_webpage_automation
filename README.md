@@ -12,7 +12,7 @@ Everything else should probably run as is, although not advised and not tested i
 
 ## Required:
 
-* **drawpile-srv** (tested with versions 2.0.x and 2.1.x)
+* **drawpile-srv** (tested with versions 2.0.10 and 2.1.17)
 * **drawpile-cmd**
 * **dprectool**
 * **bash**

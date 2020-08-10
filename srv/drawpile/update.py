@@ -784,15 +784,19 @@ def sanitize_filename(input_text, safe_only=False):
 
 	return result_text
 
-def get_sanitized_filename_from_array(input_array):
+def get_filename_from_array(input_array):
 	parts = list(filter(None, input_array))
 
 	if len(parts) > 0:
 		if READ_ONLY:
 			print_with_time_stamp('File name parts:\n%s' % get_obj_pretty_print(parts))
 
-		text = ' - '.join(parts)
+		return ' - '.join(parts)
 
+	return ''
+
+def get_sanitized_filename_from_text(text):
+	if len(text) > 0:
 		try:
 			return sanitize_filename(text)
 		except:
@@ -2292,7 +2296,7 @@ def process_archived_session(session_ID, src_files):
 				rec_stats_text = ' - '.join(rec_stats_parts)
 
 				while True:
-					public_rec_filename = get_sanitized_filename_from_array([
+					unsafe_filename = get_filename_from_array([
 						rec_stats_text
 					,	(
 							', '.join(sorted(
@@ -2305,6 +2309,7 @@ def process_archived_session(session_ID, src_files):
 					,	public_rec_ext
 					])
 
+					public_rec_filename = get_sanitized_filename_from_text(unsafe_filename)
 					path_len = dir_len + len(public_rec_filename)
 
 					if len(usernames_list) > 0 and path_len > max_len:
@@ -2315,7 +2320,11 @@ def process_archived_session(session_ID, src_files):
 					else:
 						break
 
-				if session_part_index or shortened:
+				if (
+					session_part_index
+				or	shortened
+				or	unsafe_filename != public_rec_filename
+				):
 					public_meta_content_parts.append(
 						json.dumps(
 							user_stats_by_name
@@ -2328,6 +2337,9 @@ def process_archived_session(session_ID, src_files):
 
 
 				if READ_ONLY:
+					if unsafe_filename != public_rec_filename:
+						print_with_time_stamp('Unsafe file name: "%s"' % unsafe_filename)
+
 					print_with_time_stamp('Public session file name: "%s"' % public_rec_filename)
 				else:
 					public_filenames_to_move.append([
