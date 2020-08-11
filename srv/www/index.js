@@ -76,7 +76,7 @@
 	+	regDrawpilePartEnd
 	, 'i')
 
-,	attrSort = 'data-sort-'
+,	attrSort = 'data-sortable-'
 ,	argSort = {
 		'sort_by': 'name'
 	,	'sort_order': 'ascending'
@@ -422,7 +422,7 @@ var	a = url.split(/"/g)
 }
 
 function sortByColumn(e) {
-var	ev = eventStop(0,1,1)
+var	evt = eventStop(0,1,1)
 ,	arg = getSortFromURL(e.href || e)
 ,	table = getParentByTagName(e, 'table')
 ,	tbody,tr,td
@@ -465,7 +465,7 @@ var	ev = eventStop(0,1,1)
 	}
 }
 
-function updateDrawpileTable(e) {
+function updateDrawpileTable(evt) {
 
 	function addStatsRow(userName, statsContent) {
 		statsRow = cre('tr', statsContainer);
@@ -476,7 +476,7 @@ function updateDrawpileTable(e) {
 		);
 	}
 
-var	js = (e && e.target ? e.target : e)
+var	js = (evt && evt.target ? evt.target : evt)
 ,	match
 	;
 
@@ -546,43 +546,49 @@ var	js = (e && e.target ? e.target : e)
 //* Runtime *------------------------------------------------------------------
 
 function init() {
-	gt('time').map(function(e) {
-	var	t = e.getAttribute('data-t');
-		if (t && orz(t) > 0) e.outerHTML = getFormattedTime(t);
+	gt('time').map(function(timeElement) {
+	var	timeStamp = timeElement.getAttribute('data-t');
+		if (timeStamp && orz(timeStamp) > 0) {
+			timeElement.outerHTML = getFormattedTime(timeStamp);
+		}
 	});
 
-	gc('inside').map(function(eContainer) {
+	gc('inside').map(function(pageCenterContainer) {
 
-		function addPathLink(text, link) {
-		var	p = pathLinkContainer || topButtonContainer || eContainer
-		,	a = cre('a', p)
+		function addPathLink(text, url) {
+		var	parent = pathLinkContainer || topButtonContainer || pageCenterContainer
+		,	a = cre('a', parent)
 			;
 
-			a.textContent = text || link;
-			a.href = link || text;
+			a.textContent = text || url;
+			a.href = url || text;
 		}
 
 		function addTopButton(text, func) {
-		var	p = topButtonContainer || pathLinkContainer || eContainer
-		,	b = cre('button', p)
+		var	parent = topButtonContainer || pathLinkContainer || pageCenterContainer
+		,	button = cre('button', parent)
 			;
 
-			b.textContent = text;
-			b.onclick = func;
+			button.textContent = text;
+			button.onclick = func;
 		}
 
 //* Simple dir/file list sort:
 
-	var	p = id('path')
-	,	p = (p ? p.parentNode : eContainer.firstElementChild)
-	,	topButtonContainer = p
-	,	pathLinkContainer = p
+	var	currentPathElement = id('path')
+	,	currentPathContainer = (
+			currentPathElement
+			? currentPathElement.parentNode
+			: pageCenterContainer.firstElementChild
+		)
+	,	topButtonContainer = currentPathContainer
+	,	pathLinkContainer = currentPathContainer
 	,	countByType = {}
 	,	dirsInside = []
 	,	dirsAround = []
 		;
 
-		gt('tr', eContainer).map(function(tr) {
+		gt('tr', pageCenterContainer).map(function(tr) {
 		var	a,e,f,g,h,i,j,k,v;
 
 			if (i = (a = gt('td', tr)).length) {
@@ -637,7 +643,7 @@ function init() {
 
 		if (
 			!countByType.file
-		&&	(a = gt('th', eContainer)).length > 0
+		&&	(a = gt('th', pageCenterContainer)).length > 0
 		) {
 			a[0].setAttribute('colspan', 2);
 			del(a[1]);
@@ -746,7 +752,7 @@ function init() {
 	,	simpleFileCount = 0
 		;
 
-		gt('a', eContainer).map(function(e) {
+		gt('a', pageCenterContainer).map(function(e) {
 		var	url = e.href
 		,	recID
 		,	match
@@ -766,7 +772,7 @@ function init() {
 //* 2. Get all files by session IDs: *----/----
 
 		if (fileRecIDs.length > 0) {
-			toggleClass(eContainer, classMediaRowsEnabled, 1);
+			toggleClass(pageCenterContainer, classMediaRowsEnabled, 1);
 
 			if (canToggleView) {
 				addTopButton(la.toggle.media_rows, toggleMediaRows);
@@ -775,7 +781,7 @@ function init() {
 
 		var	filesByRecID = {};
 
-			gt('a', eContainer).map(function(e) {
+			gt('a', pageCenterContainer).map(function(e) {
 			var	url = e.href
 			,	recID
 			,	match
@@ -936,7 +942,7 @@ function init() {
 
 //* 3. Make separate table with rows by session IDs: *----/----
 
-		var	table = cre('table', eContainer)
+		var	table = cre('table', pageCenterContainer)
 		,	tableRows = []
 		,	recID
 		,	a,b,c,d,e,f,g,h,i,j,k,m,n,v
@@ -953,7 +959,6 @@ function init() {
 			,	end = ''
 			,	strokes = 0
 			,	users = 0
-			,	size = {}
 			,	metaLists = {
 					'restrict': []
 				,	'users': []
@@ -978,18 +983,14 @@ function init() {
 							}
 
 							if (j = file.timeInterval) {
-								if ((k = j.start) && (fileTime = k) && (!start || start < k)) start = k;
-								if ((k = j.end  ) && (fileTime = k) && (!end   || end   > k)) end = k;
+								if ((k = j.start) && (fileTime = k) && (!start || start > k)) start = k;
+								if ((k = j.end  ) && (fileTime = k) && (!end   || end   < k)) end = k;
 							}
 
 							if (j = file.num) {
 								if (k = j.index) fileIndex = k;
 								if ((k = j.strokes) && strokes < k) strokes = k;
 								if ((k = j.users  ) && users   < k) users = k;
-							}
-
-							if (j = file.size) {
-								if ((k = j.num) && (!size || !size.num || size.num < k)) size = j;
 							}
 
 						var	fileName = file.name
@@ -1019,9 +1020,9 @@ function init() {
 								'ext': fileExt
 							,	'time': fileTime
 							,	'index': fileIndex
-							,	'size': (j ? k : 0)
-							,	'info': j.short
-							,	'hint': getFileSizeText(j)
+							,	'size': (file.size ? file.size.num : 0)
+							,	'info': (file.size ? file.size.short : '')
+							,	'hint': getFileSizeText(file.size)
 							,	'link': downloadLink
 							};
 						}
@@ -1118,7 +1119,7 @@ function init() {
 			,	userNames = metaLists.users.sort(compareCaseless)
 			,	rowID = {
 					'head': 1
-				,	'sort': {'id': recID}
+				,	'sortable': {'id': recID}
 				,	'tabs': [
 						'<a href="#'
 					+		recID
@@ -1128,14 +1129,14 @@ function init() {
 					]
 				}
 			,	rowTimeStart = (start ? {
-					'sort': {'start': start}
+					'sortable': {'start': start}
 				,	'tabs': [
 						la.drawpile.start + ':'
 					,	{'tip': start, 'html': getFormattedTime(start)}
 					]
 				} : null)
 			,	rowTimeEnd = (end ? {
-					'sort': {'end': end}
+					'sortable': {'end': end}
 				,	'tabs': [
 						la.drawpile.end + ':'
 					,	{'tip': end, 'html': getFormattedTime(end)}
@@ -1163,7 +1164,7 @@ function init() {
 						)
 					)
 				? {
-					'sort': {'restrict': v}
+					'sortable': {'restrict': v}
 				,	'tabs': [
 						la.drawpile.restrict + ':'
 					,	v
@@ -1179,7 +1180,7 @@ function init() {
 					downloadsTotalSize > 0
 				||	downloads.length > 0
 				? {
-					'sort': {
+					'sortable': {
 						'files': downloads.length,
 						'bytes': downloadsTotalSize,
 					}
@@ -1215,7 +1216,7 @@ function init() {
 					users > 0
 				||	strokes > 0
 				? {
-					'sort': {
+					'sortable': {
 						'users': users,
 						'strokes': strokes,
 					}
@@ -1284,23 +1285,23 @@ function init() {
 					}
 				,	0
 				)
+			,	fileSortableValues = {}
 			,	dataRows = dataRows.map(
 					function(row) {
 					var	className = getTagAttrIfNotEmpty('class', row['class'])
 					,	tip = getTagAttrIfNotEmpty('title', row.tip)
 					,	lines = row.lines
 					,	tabs = row.tabs.filter(hasValue)
-					,	rowSort = row.sort
-					,	sort = ''
-					,	i
+					,	rowSortableValues = row.sortable
 						;
 
-						if (rowSort) for (i in rowSort) {
-							sort += getTagAttrIfNotEmpty(attrSort + i, rowSort[i]);
+						if (rowSortableValues) for (key in rowSortableValues) {
+							fileSortableValues[key] = rowSortableValues[key];
 						}
 
 						if (tabs && (i = tabs.length) > 0) {
 						var	tagName = (row.head ? 'th' : 'td')
+						,	i
 						,	j = rowMaxTabCount
 						,	k = (j > i ? Math.ceil(j / i) : 1)
 							;
@@ -1324,7 +1325,7 @@ function init() {
 						}
 
 						return tabs ? (
-							'<tr' + className + tip + sort + '>'
+							'<tr' + className + tip + '>'
 						+		tabs.join('')
 						+	'</tr>'
 						) : '';
@@ -1335,8 +1336,9 @@ function init() {
 //* 3.4. Get media table row with all relevant files:
 
 				tableRows.push({
-					'sort': tableRowName
-				,	'id': recID
+					'id': recID
+				,	'sort_key': tableRowName
+				,	'sortable': fileSortableValues
 				,	'html': (
 						'<table class="' + classMediaRowInfoTable + '">'
 					+		dataRows.join('')
@@ -1350,7 +1352,7 @@ function init() {
 
 //* 3.4. Add rows to media table:
 
-		var	compareOrder = ['sort', 'id', 'html'];
+		var	compareOrder = ['sort_key', 'id', 'html'];
 
 			tableRows.sort(
 				function(a, b) {
@@ -1365,11 +1367,18 @@ function init() {
 
 			tableRows.map(
 				function(row) {
-				var	e = cre('tr', table);
-					e = cre('td', e);
-					e.id = row.id;
-					e.className = classMediaRow;
-					e.innerHTML = row.html;
+				var	tr = cre('tr', table)
+				,	td = cre('td', tr)
+				,	fileSortableValues = row.sortable
+					;
+
+					for (var key in fileSortableValues) {
+						tr.setAttribute(attrSort + key, fileSortableValues[key]);
+					}
+
+					td.id = row.id;
+					td.className = classMediaRow;
+					td.innerHTML = row.html;
 				}
 			);
 		}
