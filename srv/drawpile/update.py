@@ -598,7 +598,7 @@ def get_rec_time_text(time_arg):
 	return time_text
 
 def bytes_to_text(content, encoding=file_enc, trim=False):
-	try:	content = content.decode(encoding)
+	try:	content = content.decode(encoding or default_enc)
 	except:	pass
 
 	try:	content = unicode(content)
@@ -1681,6 +1681,9 @@ def get_and_print_cmd_result(
 	if not cmd_args:
 		return None
 
+	if TEST:
+		print_cmd_output = True
+
 	print_with_time_stamp('Run command%s%s%s:\n%s' % (
 		(' with PIPE' if '|' in cmd_args else '')
 	,	(' via pipe handler' if callback_for_each_line else '')
@@ -1707,7 +1710,7 @@ def get_and_print_cmd_result(
 			else:
 				subprocess.check_call(cmd_line, shell=True)
 
-			# - TODO, maybe (still not needed):
+			# - Not needed, not finished code part:
 
 			# p1 = subprocess.Popen(['command_1', 'args'], stdout=subprocess.PIPE)
 			# p2 = subprocess.Popen(['command_2', 'args'], stdout=subprocess.PIPE, stdin=p1.stdout)
@@ -1729,10 +1732,7 @@ def get_and_print_cmd_result(
 				lines_count += 1
 				line_text = bytes_to_text(line, trim=True)
 
-				if (
-					print_cmd_output
-				or	TEST
-				):
+				if print_cmd_output:
 					print('line %d: %s' % (lines_count, line_text))
 
 				if return_cmd_output:
@@ -1762,11 +1762,12 @@ def get_and_print_cmd_result(
 	except FileNotFoundError as exception:
 		print_with_time_stamp('Command error: %r' % exception)
 
-	cmd_output = (
-		'\n'
-		.join(map(bytes_to_text, cmd_output_parts))
-		.strip(' \t\r\n')
-	)
+	if return_cmd_output or (print_cmd_output and not callback_for_each_line):
+		cmd_output = (
+			'\n'
+			.join(map(bytes_to_text, cmd_output_parts))
+			.rstrip(' \t\r\n')
+		)
 
 	if callback_for_each_line:
 		print_with_time_stamp('Command finished processing %d lines.' % lines_count)
@@ -1785,11 +1786,10 @@ def get_recording_stats_for_each_user(
 	source_rec_file_path
 ,	users_by_ID=None
 ):
-	global rec_stats_multiline, rec_stats_users_by_ID, rec_stats_total_strokes
+	global rec_stats_multiline, rec_stats_users_by_ID
 
-	rec_stats_multiline = ''
+	rec_stats_multiline = []
 	rec_stats_users_by_ID = {}
-	rec_stats_total_strokes = 0
 
 	pat_username = re.compile(r'^(?P<ID>\d+)\s+(?:\S+\s+)*name=(?P<Name>[^\r\n]*)', re.I | re.U | re.DOTALL)
 	pat_stroke = re.compile(r'^(?P<ID>\d+)\s+penup', re.I | re.U | re.DOTALL)
@@ -1804,16 +1804,15 @@ def get_recording_stats_for_each_user(
 	# - Find usernames by ID and their stroke counts:
 
 	def callback_for_each_line(line):
-		global rec_stats_multiline, rec_stats_users_by_ID, rec_stats_total_strokes
+		global rec_stats_multiline, rec_stats_users_by_ID
 
 		if rec_stats_multiline or line[-1 : ] == '{':
+			rec_stats_multiline.append(line)
 
 			if line == '}':
-				line = rec_stats_multiline + line
-				rec_stats_multiline = ''
+				line = '\n'.join(rec_stats_multiline)
+				rec_stats_multiline = []
 			else:
-				rec_stats_multiline += line + '\n'
-
 				return
 
 		match_username = re.search(pat_username, line)
@@ -1822,11 +1821,9 @@ def get_recording_stats_for_each_user(
 
 		if match:
 			user_ID = match.group('ID')
-			added_user = rec_stats_users_by_ID.get(user_ID)
+			user = rec_stats_users_by_ID.get(user_ID)
 
-			if added_user:
-				user = added_user
-			else:
+			if not user:
 				user = rec_stats_users_by_ID[user_ID] = {
 					'name': '#' + user_ID
 				,	'strokes': 0
@@ -1840,13 +1837,12 @@ def get_recording_stats_for_each_user(
 
 			if match_stroke:
 				user['strokes'] += 1
-				rec_stats_total_strokes += 1
 
 	def callback_for_final_check():
 		if rec_stats_multiline:
 			callback_for_each_line('}')
 
-		return rec_stats_total_strokes > 0
+		return bool(rec_stats_users_by_ID)
 
 	get_print_and_check_cmd_result(
 		cfg['cmd_rec_stats']
@@ -1922,9 +1918,9 @@ def get_recording_screenshots_saved(source_rec_file_path):
 				path = path[ : dot_pos]
 
 	marker_text = ' Writing '
-	path_prefixes = [
+	markers = [
 		[marker_text, len(marker_text)]
-	,	source_prefix
+	,	[source_prefix, 0]
 	]
 
 	# - Save image files and grab their paths:
@@ -1932,8 +1928,8 @@ def get_recording_screenshots_saved(source_rec_file_path):
 	def callback_for_each_line(line):
 		global rec_img_paths
 
-		for path_prefix in path_prefixes:
-			prefix, offset = path_prefix if is_type_arr(path_prefix) else (path_prefix, 0)
+		for marker in markers:
+			prefix, offset = marker
 
 			pos = line.find(prefix)
 			if pos >= 0:
@@ -2271,7 +2267,6 @@ def process_archived_session(session_ID, src_files):
 
 				print_with_time_stamp('usernames_count: %d' % usernames_count)
 				print_with_time_stamp('strokes_count: %d' % strokes_count)
-				print_with_time_stamp('rec_stats_total_strokes: %d' % rec_stats_total_strokes)
 
 	# - Construct public session recording filename:
 
