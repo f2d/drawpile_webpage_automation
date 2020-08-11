@@ -29,8 +29,8 @@ a, b, del, button {
 }
 a, b, i, del, button {
 	background-color: #ccc;
-/*	border: 8px solid #aaa;
-	border-radius: 8px;*/
+	/* border: 8px solid #aaa; */
+	/* border-radius: 8px; */
 	border: none;
 	padding: 8px;
 	white-space: nowrap;
@@ -97,10 +97,20 @@ i+i {
 	border-color: #ff9898;
 	color: #ffdf3d;
 }
+.gray {
+	background-color: #ddd;
+	border-color: #999;
+	color: #666;
+}
 .purple {
 	background-color: #dfd6ff;
 	border-color: #a19dde;
 	color: #747386;
+}
+.orange {
+	background-color: #fbe0a0;
+	border-color: #dabd8d;
+	color: #a17c5d;
 }
 .red {
 	background-color: #f4e1ea;
@@ -117,14 +127,19 @@ i+i {
 	border-color: #ace;
 	color: #4988ba;
 }
-.col-width u>*>*:not(form):not(small):first-child {
-	min-width: 93px;
+.col-width u>*>*:not(form):not(img):not(small) {
+	/* min-width: 256px; */
 }
-.col-width u>*>*:not(form):not(small):last-child {
-	min-width: 245px;
+.col-width u>*>*:not(form):not(img):not(small):first-child {
+	/* min-width: 93px; */
+	width: 50%;
 }
-.col-width.drawpile u>*>*:not(form):not(small):last-child {
-	min-width: 174px;
+.col-width u>*>*:not(form):not(img):not(small):last-child {
+	/* min-width: 245px; */
+}
+.col-width.drawpile u>*>*:not(form):not(img):not(small):last-child {
+	/* min-width: 174px; */
+	min-width: 50%;
 }
 .o:not(.toggle) {
 	display: block;
@@ -139,3 +154,6 @@ i+i {
 .o:not(.box):not(.toggle) {
 	background-size: cover;
 }
+.box {	background-image: url(box.png); background-size: 100px;}
+.e403 {	background-image: url(i/49c66d4d10bf4a798dc05ef55600f96c.png);}
+.e404 {	background-image: url(i/be708058f14755dabed5a608568d0977.png);}

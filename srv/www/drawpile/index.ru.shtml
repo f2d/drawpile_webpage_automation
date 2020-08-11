@@ -44,10 +44,16 @@
 				<a class="explain" href="https://letsencrypt.org/2015/11/09/why-90-days.html">каждые 2-3 месяца</a>.
 			</i>
 		</u>
-		<u>
-			<s><b>Вернуться на главную страницу:</b><a href="/">
-				<!--#include file="hostname.txt" stub="www.example.com"-->/
-			</a></s>
+			<s>
+				<b>Исходный код архива:</b>
+				<a href="https://github.com/f2d/drawpile_webpage_automation">github.com/f2d/drawpile_webpage_automation</a>
+			</s>
+			<s>
+				<b>Вернуться на главную страницу:</b>
+				<a href="/">
+					<!--#include file="hostname.txt" stub="www.example.com"-->/
+				</a>
+			</s>
 		</u>
 		<u>
 			<s>

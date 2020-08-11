@@ -45,9 +45,16 @@
 			</i>
 		</u>
 		<u>
-			<s><b>Back to main page:</b><a href="/">
-				<!--#include file="hostname.txt" stub="www.example.com"-->/
-			</a></s>
+			<s>
+				<b>Archive source code:</b>
+				<a href="https://github.com/f2d/drawpile_webpage_automation">github.com/f2d/drawpile_webpage_automation</a>
+			</s>
+			<s>
+				<b>Back to main page:</b>
+				<a href="/">
+					<!--#include file="hostname.txt" stub="www.example.com"-->/
+				</a>
+			</s>
 		</u>
 		<u>
 			<s>
