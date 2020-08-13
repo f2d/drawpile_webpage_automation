@@ -164,7 +164,7 @@ if (lang == 'ru') {
 [
 	'Array',
 ].forEach(
-	(typeName) => {
+	function(typeName) {
 		window[
 			'is' + typeName.replace('HTML', '')
 		] = function(value) {
