@@ -77,6 +77,7 @@
 	, 'i')
 
 ,	attrSort = 'data-sortable-'
+,	argSortNumeric = ['size', 'time', 'mtime']
 ,	argSort = {
 		'sort_by': 'name'
 	,	'sort_order': 'ascending'
@@ -110,6 +111,7 @@
 if (lang == 'ru') {
 	la = {
 		'bytes': 'байт'
+	,	'go_to': 'Перейти к'
 	,	'toggle': {
 			'media_rows': 'Переключить вид медиафайлов'
 		,	'img_newlines': 'Переключить ряды картинок одной высоты'
@@ -134,6 +136,7 @@ if (lang == 'ru') {
 } else {
 	la = {
 		'bytes': 'bytes'
+	,	'go_to': 'Go to'
 	,	'toggle': {
 			'media_rows': 'Toggle media file view'
 		,	'img_newlines': 'Toggle image rows of same height'
@@ -238,6 +241,13 @@ function del(e) {
 	if (p = e.parentNode) p.removeChild(e);
 	return p;
 }
+
+function delAllChildNodes(parent) {
+	while (del(parent.lastChild));
+
+	return parent;
+}
+
 function eventStop(e,i,d) {
 	if ((e && e.eventPhase !== null) ? e : (e = window.event)) {
 		if (d && e.preventDefault) e.preventDefault();
@@ -440,10 +450,16 @@ var	evt = eventStop(0,1,1)
 				'row_e': tr
 			,	'text': tr.textContent
 			,	'type': i
-			,	'value': (arg.sort_by === 'name' ? j : orz(j))
+			,	'value': (
+					argSortNumeric.indexOf(arg.sort_by) >= 0
+					? orz(j)
+					: j
+				)
 			});
 
-			if (!tbody) tbody = tr.parentNode;
+			if (!tbody) {
+				tbody = tr.parentNode;
+			}
 		}
 	}
 
@@ -451,7 +467,10 @@ var	evt = eventStop(0,1,1)
 		function(a, b) {
 			for (i in compareOrder) {
 			var	i,k = compareOrder[i];
-				if (a[k] !== b[k]) return (a[k] < b[k]) ? -1 : 1;
+
+				if (a[k] !== b[k]) {
+					return (a[k] < b[k]) ? -1 : 1;
+				}
 			}
 
 			return 1;
@@ -592,34 +611,51 @@ function init() {
 		var	a,e,f,g,h,i,j,k,v;
 
 			if (i = (a = gt('td', tr)).length) {
-				j = {};
+			var	sortableValues = {};
 
 				while (i--) if (e = a[i]) {
-					k = v = '';
-					if (f = gt('a', e)[0]) {
-						k = 'name';
-						v = f.getAttribute('href');
+				var	sortType = ''
+				,	sortValue = ''
+				,	sortRef = ''
+					;
+
+					if (sortRef = gt('a', e)[0]) {
+						sortType = 'name';
+						sortValue = sortRef.getAttribute('href');
 					} else
-					if (f = gt('time', e)[0]) {
-						k = 'mtime';
-						v = orz(f.getAttribute('data-t'));
+					if (sortRef = gt('time', e)[0]) {
+						sortType = 'mtime';
+						sortValue = orz(sortRef.getAttribute('data-t'));
 					} else
-					if (f = e.title) {
-						k = 'size';
-						v = orz(f);
+					if (sortRef = e.title) {
+						sortType = 'size';
+						sortValue = orz(sortRef);
+					} else
+					if (sortRef = e.textContent) {
+						sortType = 'ext';
+						sortValue = String(sortRef);
 					}
-					if (k) j[k] = v;
+
+					if (sortType) {
+						sortableValues[sortType] = sortValue;
+					}
 				}
 
-				if (j) {
-					j.type = g = ('size' in j ? 'file' : 'dir');
-					if (LS && g == 'dir') dirsInside.push(j.name);
-					for (i in j) tr.setAttribute(attrSort + i, j[i]);
+				if (sortableValues) {
+				var	sortGroup = sortableValues.type = ('size' in sortableValues ? 'file' : 'dir');
 
-					if (g in countByType) {
-						countByType[g] += 1;
+					if (LS && sortGroup == 'dir') {
+						dirsInside.push(sortableValues.name);
+					}
+
+					for (var sortType in sortableValues) {
+						tr.setAttribute(attrSort + sortType, sortableValues[sortType]);
+					}
+
+					if (sortGroup in countByType) {
+						countByType[sortGroup] += 1;
 					} else {
-						countByType[g] = 1;
+						countByType[sortGroup] = 1;
 					}
 				}
 			} else
@@ -645,8 +681,20 @@ function init() {
 			!countByType.file
 		&&	(a = gt('th', pageCenterContainer)).length > 0
 		) {
-			a[0].setAttribute('colspan', 2);
-			del(a[1]);
+		var	k = a.length - 1
+		,	headerTime = a.pop()
+		,	headerName = a.shift()
+		,	parent = headerName.parentNode
+			;
+
+			delAllChildNodes(parent);
+
+			parent.appendChild(headerName);
+			parent.appendChild(headerTime);
+
+			if (k > 1) {
+				headerName.setAttribute('colspan', k);
+			}
 		}
 
 		if (e = id('path')) {
@@ -722,6 +770,8 @@ function init() {
 					k = a.length;
 					if (k > 0) {
 						p = pathLinkContainer;
+						cre('span', p).textContent = la.go_to + ': ';
+
 						e = pathLinkContainer = cre('span', p);
 						e.className = classLinksChain;
 
@@ -793,13 +843,26 @@ function init() {
 					&&	url.indexOf(recID) >= 0
 					) {
 					var	tr = getParentByTagName(e, 'tr')
-					,	td = gt('td', tr)
+					,	td = gt('td', tr)[0]
 					,	fileName = e.textContent
-					,	sizeShort = td[1].textContent
-					,	sizeBytes = td[1].title
-					,	timeElement = gt('time', td[2])[0]
+					,	timeElement = gt('time', tr)[0]
 					,	fileModTime = (timeElement ? timeElement.getAttribute('data-t') : '')
-					,	file = {
+					,	sizeShort = ''
+					,	sizeBytes = ''
+						;
+
+						while (td) {
+							if (td.title) {
+								sizeShort = td.textContent;
+								sizeBytes = td.title;
+
+								break;
+							}
+
+							td = td.nextElementSibling;
+						}
+
+					var	file = {
 							'name': fileName
 						,	'mtime': fileModTime
 						,	'size': {

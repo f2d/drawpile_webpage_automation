@@ -12,6 +12,12 @@ table {
 .outside td {
 	text-align: center;
 }
+.inside h3 {
+	text-align: left;
+}
+.inside h3 button {
+	float: right;
+}
 .inside, div.media-row-images {
 	display: inline-block;
 }
@@ -28,6 +34,7 @@ table {
 }
 .inside td {
 	background-color: #fff;
+	text-align: left;
 }
 .inside .sub-list-row td {
 	background-color: #f3f4f5;
@@ -36,15 +43,12 @@ table {
 .inside .sub-list-row:hover td {
 	background-color: #fffaec;
 }
-.inside td, h3 {
-	text-align: left;
-}
 .inside .links-chain {
 	display: inline-block;
 	background-color: #ddd;
 }
-.inside .links-chain:not(:first-child) {
-	margin: 0 1em;
+.inside .links-chain:not(:last-child) {
+	margin-right: 1em;
 }
 .inside a {
 	display: inline-block;

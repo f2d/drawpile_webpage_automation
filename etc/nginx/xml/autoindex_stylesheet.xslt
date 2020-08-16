@@ -12,7 +12,7 @@
 
 <xsl:variable name="lang_index">
 	<xsl:choose>
-		<xsl:when test="$lang = 'ru'">Содержание</xsl:when>
+		<xsl:when test="$lang = 'ru'">Содержание папки</xsl:when>
 		<xsl:otherwise>Index of</xsl:otherwise>
 	</xsl:choose>
 </xsl:variable>
@@ -28,6 +28,13 @@
 	<xsl:choose>
 		<xsl:when test="$lang = 'ru'">Имя</xsl:when>
 		<xsl:otherwise>Name</xsl:otherwise>
+	</xsl:choose>
+</xsl:variable>
+
+<xsl:variable name="lang_ext">
+	<xsl:choose>
+		<xsl:when test="$lang = 'ru'">Тип</xsl:when>
+		<xsl:otherwise>Type</xsl:otherwise>
 	</xsl:choose>
 </xsl:variable>
 
@@ -116,6 +123,25 @@
 	</xsl:call-template>
 </xsl:template>
 
+<xsl:template name="get-file-extension">
+	<xsl:param name="path"/>
+	<xsl:choose>
+		<xsl:when test="contains($path, '/')">
+			<xsl:call-template name="get-file-extension">
+				<xsl:with-param name="path" select="substring-after($path, '/')"/>
+			</xsl:call-template>
+		</xsl:when>
+		<xsl:when test="contains($path, '.')">
+			<xsl:call-template name="get-file-extension">
+				<xsl:with-param name="path" select="substring-after($path, '.')"/>
+			</xsl:call-template>
+		</xsl:when>
+		<xsl:otherwise>
+			<xsl:value-of select="$path"/>
+		</xsl:otherwise>
+	</xsl:choose>
+</xsl:template>
+
 <xsl:template name="get-formatted-size-text">
 	<xsl:param name="num" />
 	<xsl:param name="div" />
@@ -181,33 +207,35 @@
 
 <xsl:template name="directory">
 	<tr>
-		<xsl:variable name="url-escaped-name">
-			<xsl:call-template name="get-url-escaped-name" />
-			<xsl:text>/</xsl:text>
-		</xsl:variable>
-
 		<xsl:variable name="name">
 			<xsl:value-of select="normalize-space(.)" />
 			<xsl:text>/</xsl:text>
 		</xsl:variable>
 
-		<td colspan="2"><a href="{$url-escaped-name}"><xsl:value-of select="$name" /></a></td>
+		<xsl:variable name="url_escaped_name">
+			<xsl:call-template name="get-url-escaped-name" />
+			<xsl:text>/</xsl:text>
+		</xsl:variable>
+
+		<td colspan="3"><a href="{$url_escaped_name}"><xsl:value-of select="$name" /></a></td>
 		<td><time data-t="{@mtime}"><xsl:value-of select="@mtime" /></time></td>
 	</tr>
 </xsl:template>
 
 <xsl:template name="file">
 	<tr>
-		<xsl:variable name="url-escaped-name">
-			<xsl:call-template name="get-url-escaped-name" />
-		</xsl:variable>
-
 		<xsl:variable name="name">
 			<xsl:value-of select="normalize-space(.)" />
 		</xsl:variable>
 
-		<xsl:variable name="name_length">
-			<xsl:value-of select="string-length($name)" />
+		<xsl:variable name="url_escaped_name">
+			<xsl:call-template name="get-url-escaped-name" />
+		</xsl:variable>
+
+		<xsl:variable name="file_ext">
+			<xsl:call-template name="get-file-extension">
+				<xsl:with-param name="path" select="$name" />
+			</xsl:call-template>
 		</xsl:variable>
 
 		<xsl:variable name="size_bytes">
@@ -223,14 +251,22 @@
 		</xsl:variable>
 
 		<xsl:choose>
-			<xsl:when test="$name_length > 5 and substring($name, $name_length - 5) = '.dprec'">
-				<td><a href="{$url-escaped-name}" target="_blank" rel="nofollow"><xsl:value-of select="$name" /></a></td>
+			<xsl:when test="
+				$file_ext = 'bin'
+			or	$file_ext = 'dat'
+			or	$file_ext = 'dprec'
+			or	$file_ext = 'dptxt'
+			or	$file_ext = 'pck'
+			or	$file_ext = 'wasm'
+			">
+				<td><a href="{$url_escaped_name}" target="_blank" rel="nofollow"><xsl:value-of select="$name" /></a></td>
 			</xsl:when>
 			<xsl:otherwise>
-				<td><a href="{$url-escaped-name}" target="_blank"><xsl:value-of select="$name" /></a></td>
+				<td><a href="{$url_escaped_name}" target="_blank"><xsl:value-of select="$name" /></a></td>
 			</xsl:otherwise>
 		</xsl:choose>
 
+		<td><xsl:value-of select="$file_ext" /></td>
 		<td title="{$size_bytes}"><xsl:value-of select="$size_formatted" /></td>
 		<td><time data-t="{@mtime}"><xsl:value-of select="@mtime" /></time></td>
 	</tr>
@@ -288,6 +324,13 @@
 
 							<xsl:call-template name="column">
 								<xsl:with-param name="title">
+									<xsl:value-of select="$lang_ext" />
+								</xsl:with-param>
+								<xsl:with-param name="by">ext</xsl:with-param>
+							</xsl:call-template>
+
+							<xsl:call-template name="column">
+								<xsl:with-param name="title">
 									<xsl:value-of select="$lang_size" />
 								</xsl:with-param>
 								<xsl:with-param name="by">size</xsl:with-param>
@@ -307,7 +350,7 @@
 								<xsl:sort select="." data-type="text" order="{$sort_order}" />
 								<xsl:call-template name="directory" />
 							</xsl:for-each>
-							
+
 							<xsl:for-each select="list/file">
 								<xsl:sort select="@*[name()=$sort_by]" data-type="{$sort_data_type}" order="{$sort_order}" />
 								<xsl:sort select="." data-type="text" order="{$sort_order}" />
