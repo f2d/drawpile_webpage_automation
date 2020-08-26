@@ -1,4 +1,4 @@
-<html lang="ru"><!--# block name="hostname"-->www.example.com<!--# endblock -->
+<html lang="ru">
 <head>
 	<meta charset="utf-8">
 	<link rel="stylesheet" type="text/css" href="index.css">
@@ -12,18 +12,18 @@
 <body>
 	<table width="100%" height="100%"><tr><td align="center">
 	<u><b class="col-width drawpile">
-		<u><i class="purple">Сервер для рисования на общем полотне:</i></u>
+		<u><i class="purple">Drawpile - сервер для рисования через сеть на общем полотне:</i></u>
 		<u>
 			<s><b>Программа для участия:	</b><a href="https://drawpile.net/download/">drawpile.net/download/</a></s>
 			<s><b>Адрес сервера:		</b><i>
-				<!--#include file="hostname.txt" stub="hostname"-->:9002
+				<!--# block name="hostname"-->www.example.com<!--# endblock --><!--#include file="hostname.txt" stub="hostname"-->:<!--# block name="port"-->9002<!--# endblock --><!--#include file="port.txt" stub="port"-->
 			</i></s>
 			<s><b>Архив записей:		</b><a href="/drawpile/record/">
-				<!--#include file="hostname.txt" stub="hostname"-->/drawpile/record/
+				<!--#include file="hostname.txt" stub="hostname"--><!--# block name="records"-->/drawpile/record/<!--# endblock --><!--#include file="records.txt" stub="records"-->
 			</a></s>
 		</u>
-		<u><!--# block name="not_found"-->не найдено<!--# endblock -->
-			<i class="blue">Версия сервера: <!--#include file="version.txt" stub="not_found"--></i><!--# block name="none"-->
+		<u>
+			<i class="blue">Версия сервера: <!--# block name="not_found"-->не найдено<!--# endblock --><!--#include file="version.txt" stub="not_found"--></i><!--# block name="none"-->
 			<i class="blue">Активные сессии: 0</i>
 			<i class="blue">Участники: 0</i>
 			<i class="blue">Обновлено: 0000-00-00 <small>00:00:00</small></i><!--# endblock --><!--#include file="stats.ru.htm" stub="none"-->
@@ -45,6 +45,7 @@
 				<a class="explain" href="https://letsencrypt.org/2015/11/09/why-90-days.html">каждые 2-3 месяца</a>.
 			</i>
 		</u>
+		<u>
 			<s>
 				<b>Исходный код архива:</b>
 				<a href="https://github.com/f2d/drawpile_webpage_automation">github.com/f2d/drawpile_webpage_automation</a>

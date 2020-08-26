@@ -1,4 +1,4 @@
-<html lang="en"><!--# block name="hostname"-->www.example.com<!--# endblock -->
+<html lang="en">
 <head>
 	<meta charset="utf-8">
 	<link rel="stylesheet" type="text/css" href="index.css">
@@ -7,23 +7,23 @@
 	<link rel="alternate" hreflang="en" href="index.en.shtml">
 	<link rel="alternate" hreflang="ru" href="index.ru.shtml">
 	<script src="index.js"></script>
-	<title>Drawpile server info</title>
+	<title>Drawpile - dedicated server - info</title>
 </head>
 <body>
 	<table width="100%" height="100%"><tr><td align="center">
 	<u><b class="col-width drawpile">
-		<u><i class="purple">Drawpile server:</i></u>
+		<u><i class="purple">Drawpile - server for drawing online on a shared canvas:</i></u>
 		<u>
 			<s><b>Download client:	</b><a href="https://drawpile.net/download/">drawpile.net/download/</a></s>
 			<s><b>Join server:	</b><i>
-				<!--#include file="hostname.txt" stub="hostname"-->:9002
+				<!--# block name="hostname"-->www.example.com<!--# endblock --><!--#include file="hostname.txt" stub="hostname"-->:<!--# block name="port"-->9002<!--# endblock --><!--#include file="port.txt" stub="port"-->
 			</i></s>
 			<s><b>Replays:		</b><a href="/drawpile/record/">
-				<!--#include file="hostname.txt" stub="hostname"-->/drawpile/record/
+				<!--#include file="hostname.txt" stub="hostname"--><!--# block name="records"-->/drawpile/record/<!--# endblock --><!--#include file="records.txt" stub="records"-->
 			</a></s>
 		</u>
-		<u><!--# block name="not_found"-->not found<!--# endblock -->
-			<i class="blue">Server version: <!--#include file="version.txt" stub="not_found"--></i><!--# block name="none"-->
+		<u>
+			<i class="blue">Server version: <!--# block name="not_found"-->not found<!--# endblock --><!--#include file="version.txt" stub="not_found"--></i><!--# block name="none"-->
 			<i class="blue">Active sessions: 0</i>
 			<i class="blue">Users: 0</i>
 			<i class="blue">Last updated: 0000-00-00 <small>00:00:00</small></i><!--# endblock --><!--#include file="stats.en.htm" stub="none"-->
