@@ -490,7 +490,7 @@ function updateDrawpileTable(evt) {
 		statsRow = cre('tr', statsContainer);
 		statsRow.className = classMediaRowStatsUser;
 		statsRow.innerHTML = (
-			'<td colspan="2">' + userName + '</td>'
+			'<td colspan="2">' + encodeHTMLSpecialChars(userName) + '</td>'
 		+	'<td colspan="2">' + statsContent + '</td>'
 		);
 	}

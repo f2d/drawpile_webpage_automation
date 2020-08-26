@@ -1,8 +1,9 @@
-<html lang="en">
+<html lang="en"><!--# block name="hostname"-->www.example.com<!--# endblock -->
 <head>
 	<meta charset="utf-8">
 	<link rel="stylesheet" type="text/css" href="index.css">
 	<link rel="shortcut icon" type="image/png" href="index.png">
+	<!--# block name="canon"--><link rel="canonical" href="."><!--# endblock --><!--#include file="canonical.txt" stub="canon"-->
 	<link rel="alternate" hreflang="en" href="index.en.shtml">
 	<link rel="alternate" hreflang="ru" href="index.ru.shtml">
 	<script src="index.js"></script>
@@ -15,10 +16,10 @@
 		<u>
 			<s><b>Download client:	</b><a href="https://drawpile.net/download/">drawpile.net/download/</a></s>
 			<s><b>Join server:	</b><i>
-				<!--#include file="hostname.txt" stub="www.example.com"-->:9002
+				<!--#include file="hostname.txt" stub="hostname"-->:9002
 			</i></s>
 			<s><b>Replays:		</b><a href="/drawpile/record/">
-				<!--#include file="hostname.txt" stub="www.example.com"-->/drawpile/record/
+				<!--#include file="hostname.txt" stub="hostname"-->/drawpile/record/
 			</a></s>
 		</u>
 		<u><!--# block name="not_found"-->not found<!--# endblock -->
@@ -52,7 +53,7 @@
 			<s>
 				<b>Back to main page:</b>
 				<a href="/">
-					<!--#include file="hostname.txt" stub="www.example.com"-->/
+					<!--#include file="hostname.txt" stub="hostname"-->/
 				</a>
 			</s>
 		</u>
