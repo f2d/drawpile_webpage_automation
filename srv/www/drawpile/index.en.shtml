@@ -7,12 +7,12 @@
 	<link rel="alternate" hreflang="en" href="index.en.shtml">
 	<link rel="alternate" hreflang="ru" href="index.ru.shtml">
 	<script src="index.js"></script>
-	<title>Drawpile - dedicated server - info</title>
+	<title>Drawpile - server for drawing online on a shared canvas</title>
 </head>
 <body>
 	<table width="100%" height="100%"><tr><td align="center">
 	<u><b class="col-width drawpile">
-		<u><i class="purple">Drawpile - server for drawing online on a shared canvas:</i></u>
+		<u><i class="purple">Drawpile - server for drawing online on a shared canvas</i></u>
 		<u>
 			<s><b>Download client:	</b><a href="https://drawpile.net/download/">drawpile.net/download/</a></s>
 			<s><b>Join server:	</b><i>
