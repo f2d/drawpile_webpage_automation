@@ -21,5 +21,8 @@ version_file_path=${root_dir}version.txt
 update_lock_dir=${root_dir}
 update_log_dir=/var/log/drawpile/
 
-cmd_python=python
+cmd_name_drawpile_srv=drawpile-srv
+cmd_name_awk=mawk
+cmd_name_python=python3
+
 tags_to_add_passworded_session_users_to_txt='[a], [anyway]'

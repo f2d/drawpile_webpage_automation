@@ -18,8 +18,8 @@ Everything else should probably run as is, although not advised and not tested i
 * **bash**
 * **awk** (tested with mawk version 1.3.3)
 * **python** (2 or 3, tested with versions 2.7.18, 3.6.9 and 3.8.1) with modules:
-	* **dateutil**
-	* **PIL**
+	* **dateutil** (python-dateutil)
+	* **PIL** (Pillow)
 * **nginx** with modules:
 	* **ngx_http_ssi_module**
 	* **ngx_http_xslt_module**

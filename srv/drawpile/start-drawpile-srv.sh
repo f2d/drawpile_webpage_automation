@@ -38,7 +38,7 @@ done
 # Use array for storing arguments:
 
 cmd_drawpile=(
-	drawpile-srv
+	${cmd_name_drawpile_srv}
 	--port           "${client_port}"
 	--web-admin-port "${admin_port}"
 	--local-host     "${hostname}"
@@ -59,14 +59,14 @@ fi
 
 # Save version info to file: ------------------------------------------------
 
-drawpile-srv --version | awk '/^drawpile/ {print $2}' > "${version_file_path}"
+${cmd_name_drawpile_srv} --version | ${cmd_name_awk} '/^drawpile/ {print $2}' > "${version_file_path}"
 
 # Run server: ---------------------------------------------------------------
 
 "${cmd_drawpile[@]}" \
 "${cmd_ssl_cert[@]}" \
 2>&1 \
-| awk \
+| ${cmd_name_awk} \
 -Winteractive \
 -f "${root_dir}event-listener.awk" \
 -v "sessions_logs_dir=${active_sessions_dir}" \

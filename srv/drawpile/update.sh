@@ -54,7 +54,7 @@ fi
 run_update_cmd () {
 	local cmd_task=$1
 	local cmd_array=(
-		"${cmd_python}"
+		"${cmd_name_python}"
 		"${root_dir}update.py"
 		"$@"
 		"${cmd_wait}"
