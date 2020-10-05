@@ -52,19 +52,28 @@ To start the Drawpile server, use this command:
 sudo -u drawpile /srv/drawpile/start-drawpile-srv.sh
 ```
 
-Or put it into drawpile-srv service config and use:
+To add it as an autostarting service, put the service config into `/lib/systemd/system/drawpile-srv.service` and then use these commands to enable and start it:
 ```
+systemctl daemon-reload
+systemctl enable drawpile-srv
 service drawpile-srv start
 ```
 
-`service drawpile-srv stop` is recommended for maintenance safety before editing any scripts in `/srv/drawpile/`.
-`service drawpile-srv restart` is required for `common-variables.sh`, `start-drawpile-srv.sh` and `event-listener.awk` script changes to take effect.
+Service stop is recommended for maintenance safety before editing any scripts in `/srv/drawpile/`. Example command:
+```
+service drawpile-srv stop
+```
 
-To start Drawpile with its default SSL certificate, in `/srv/drawpile/common-variables.sh` set `cert_dir` path to empty or leave it commented. This is default.
+Service restart is required for `common-variables.sh`, `start-drawpile-srv.sh` and `event-listener.awk` script changes to take effect. Example command:
+```
+service drawpile-srv restart
+```
+
+To start Drawpile with its default SSL certificate, in `/srv/drawpile/common-variables.sh` set `cert_dir` path to empty or leave it commented. This is default and recommended.
 
 For custom SSL certificates, the filenames used are `privkey.pem` and `fullchain.pem`.
 Also the Drawpile service user account must be allowed to read those certificate files.
-Loose command example:
+Loose command example to allow this:
 ```
 chmod -r 0755 /etc/letsencrypt/live/ /etc/letsencrypt/archive/
 ```

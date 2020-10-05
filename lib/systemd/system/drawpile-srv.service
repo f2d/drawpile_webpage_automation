@@ -1,0 +1,14 @@
+[Unit]
+Description=Drawpile dedicated server
+After=network.target
+Documentation=man:drawpile-srv
+
+[Service]
+ExecStart=/srv/drawpile/drawpile-srv
+Type=simple
+Restart=always
+RestartPreventExitStatus=2 203
+User=drawpile
+
+[Install]
+WantedBy=multi-user.target
