@@ -62,3 +62,8 @@ then
 		fi
 	done
 fi
+
+if [ ! -f "${drawpile_root_dir}drawpile-srv" ]
+then
+	ln -s "${drawpile_root_dir}start-drawpile-srv.sh" "${drawpile_root_dir}drawpile-srv"
+fi
