@@ -40,9 +40,16 @@ Set all *.sh files to be executable:
 chmod +x /srv/drawpile/*.sh
 ```
 
+It is possible to configure all paths to write changes directly to a public web folder.
+By default symlinks from web pages to drawpile are used.
+To create service user accounts and the symlinks, use this command:
+```
+sudo /srv/drawpile/root-do-initial-setup.sh
+```
+
 To start the Drawpile server, use this command:
 ```
-/srv/drawpile/start-drawpile-srv.sh
+sudo -u drawpile /srv/drawpile/start-drawpile-srv.sh
 ```
 
 Or put it into drawpile-srv service config and use:
@@ -50,31 +57,26 @@ Or put it into drawpile-srv service config and use:
 service drawpile-srv start
 ```
 
-For maintenance safety, `stop` the service before editing any scripts in `/srv/drawpile/`, do not edit them while it's running.
-Service `restart` is required for script changes to take effect (except `update.py`).
+`service drawpile-srv stop` is recommended for maintenance safety before editing any scripts in `/srv/drawpile/`.
+`service drawpile-srv restart` is required for `common-variables.sh`, `start-drawpile-srv.sh` and `event-listener.awk` script changes to take effect.
 
-It is possible to configure all paths to write changes directly to a public web folder.
-Otherwise, create symlinks as following for example (written as link -> real target, assuming `/srv/www/` is the web root):
-```
-/srv/www/drawpile/record/      -> /srv/drawpile/sessions/public_archive/
-/srv/www/drawpile/stats.en.htm -> /srv/drawpile/stats.en.htm
-/srv/www/drawpile/stats.ru.htm -> /srv/drawpile/stats.ru.htm
-/srv/www/drawpile/users.txt    -> /srv/drawpile/users.txt
-```
+To start Drawpile with its default SSL certificate, in `/srv/drawpile/common-variables.sh` set `cert_dir` path to empty or leave it commented. This is default.
 
-To start drawpile-srv with its default SSL certificate, in `/srv/drawpile/common-variables.sh` set `cert_dir` path to empty or leave it commented (by default).
-
-Certificate filenames used are `privkey.pem` and `fullchain.pem`.
-
-If you want to use custom SSL certificates, then the user in system, under whose name the Drawpile service will run, must be allowed to read those certificate files.
+For custom SSL certificates, the filenames used are `privkey.pem` and `fullchain.pem`.
+Also the Drawpile service user account must be allowed to read those certificate files.
 Loose command example:
 ```
 chmod -r 0755 /etc/letsencrypt/live/ /etc/letsencrypt/archive/
 ```
 
-To manually run updates in terminal as your Drawpile service user, use this command example:
+To manually run updates in terminal as the Drawpile service user account, use this command example:
 ```
-sudo -u drawpile-user-name /srv/drawpile/update.sh --records --stats
+sudo -u drawpile /srv/drawpile/update.sh --records --stats
+```
+
+To manually run updates in background, use this command:
+```
+sudo /srv/drawpile/root-do-update-in-bg.sh --records --stats
 ```
 
 Public session archive may be deleted and regenerated as follows:

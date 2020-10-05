@@ -3,7 +3,7 @@
 	<meta charset="utf-8">
 	<link rel="stylesheet" type="text/css" href="index.css">
 	<link rel="shortcut icon" type="image/png" href="index.png">
-	<!--# block name="canon"--><link rel="canonical" href="."><!--# endblock --><!--#include file="canonical.txt" stub="canon"-->
+	<!--# block name="canon"--><link rel="canonical" href="."><!--# endblock --><!--#include file="canonical.htm" stub="canon"-->
 	<link rel="alternate" hreflang="en" href="index.en.shtml">
 	<link rel="alternate" hreflang="ru" href="index.ru.shtml">
 	<script src="index.js"></script>

@@ -26,13 +26,13 @@ done
 # Getting the source directory of a Bash script from within:
 # It will work as long as the last component of the path used to find the script is not a symlink (directory links are OK).
 
-root_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )/"
-
-source "${root_dir}common-variables.sh"
+drawpile_root_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )/"
+source "${drawpile_root_dir}common-variables.sh"
 
 # Version-specific: ---------------------------------------------------------
 
-if [ -f "${version_file_path}" ]; then
+if [ -f "${version_file_path}" ]
+then
 
 # https://stackoverflow.com/a/10771857
 
@@ -41,7 +41,8 @@ if [ -f "${version_file_path}" ]; then
 
 # https://stackoverflow.com/a/16939706
 
-	if [ "${target_version}" == "$(echo -ne "${target_version}\n${running_version}" |sort -V |head -n1)" ]; then
+	if [ "${target_version}" == "$(echo -ne "${target_version}\n${running_version}" |sort -V |head -n1)" ]
+	then
 		api_url_subdir=api/
 	fi
 fi
@@ -55,13 +56,13 @@ run_update_cmd () {
 	local cmd_task=$1
 	local cmd_array=(
 		"${cmd_name_python}"
-		"${root_dir}update.py"
+		"${drawpile_root_dir}update.py"
 		"$@"
 		"${cmd_wait}"
 		"${cmd_readonly}"
 		"${update_lock_dir}update_${cmd_task}.lock"
 		"${update_log_dir}update_${cmd_task}_${log_date}.log"
-		"root = ${root_dir}"
+		"root = ${drawpile_root_dir}"
 		"rec_src = ${active_sessions_dir}"
 		"api_url_prefix = http://127.0.0.1:${admin_port}/${api_url_subdir}"
 		"add_pwd_session_users = ${tags_to_add_passworded_session_users_to_txt}"
