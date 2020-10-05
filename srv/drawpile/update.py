@@ -121,6 +121,7 @@ def print_help():
 	,	' * <Option> in any order, optional:'
 	,	''
 	,	'ro, readonly: Don\'t save or change anything, only show output, for testing.'
+	,	'copyrec: Copy session recording files to public archive instead of symlink.'
 	,	''
 	,	'</path/to/file>.log:  Log file to print messages.      ' + get_cfg_for_help('log')
 	,	'</path/to/file>.lock: Lock file to queue self runs.    ' + get_cfg_for_help('lock')
@@ -450,6 +451,13 @@ def print_whats_wrong(exception, title='Error:'):
 			print_with_time_stamp(exception)
 
 	print('')
+
+def print_action_path(prefix, path):
+	print_with_time_stamp('%s: "%s"' % (prefix, path), tell_if_readonly=True)
+
+def print_action_paths(prefix, from_path, to_path):
+	print_with_time_stamp('%s from: "%s"' % (prefix, from_path), tell_if_readonly=True)
+	print_with_time_stamp('%s to:   "%s"' % (prefix, to_path), tell_if_readonly=True)
 
 # https://stackoverflow.com/a/919684
 def print_with_time_stamp(*list_args, **keyword_args):
@@ -905,6 +913,9 @@ def is_user_included_in_txt(user_session_id=None):
 
 	return False
 
+def is_any_option_set(*list_args):
+	return bool(set(list_args).intersection(options))
+
 # - Check arguments: ----------------------------------------------------------
 
 argc = len(sys.argv)
@@ -914,8 +925,9 @@ options = sys.argv[2 : ] if argc > 2 else []
 
 # - Check options: ------------------------------------------------------------
 
-READ_ONLY = set(('readonly', 'ro')).intersection(options)
-TEST      = set(('TEST'    , 'T' )).intersection(options)
+COPY_REC_FILES = is_any_option_set('copyrec')
+READ_ONLY = is_any_option_set('readonly', 'ro')
+TEST = is_any_option_set('TEST', 'T' )
 
 cfg = {}
 
@@ -1535,43 +1547,81 @@ def fetch_url(url):
 	,	'content': content
 	}
 
-def check_and_move(src_path, dest_path):
+def get_path_type(path):
+	text_parts = []
+
+	if os.path.isdir(path):  text_parts.append('folder')
+	if os.path.isfile(path): text_parts.append('file')
+	if os.path.islink(path): text_parts.append('symlink')
+
+	return ' '.join(text_parts)
+
+def check_and_remove(path, title=None, skip_done_message=False):
+	title = ' '.join(filter(None, [
+		'Remove'
+	,	title
+	,	get_path_type(path)
+	]))
+
+	print_action_path(title, path)
+
+	if not READ_ONLY:
+		os.remove(path)
+
+		if not skip_done_message:
+			print_with_time_stamp('Done.')
+
+		return 1
+
+	return 0
+
+def check_and_move(src_path, dest_path, make_symlink=False):
 	src_path = fix_slashes(src_path)
 	dest_path = fix_slashes(dest_path)
 
-	if os.path.isdir(dest_path.encode(path_enc)):
-		print_with_time_stamp('Error: destination path is an existing folder: "%s"' % dest_path)
+	src_path_encoded = src_path.encode(path_enc)
+	dest_path_encoded = dest_path.encode(path_enc)
 
-	elif os.path.isfile(dest_path.encode(path_enc)):
-		print_with_time_stamp('Error: destination path is an existing file: "%s"' % dest_path)
+	if os.path.exists(dest_path_encoded):
+		print_with_time_stamp('Error: destination path is an existing %s: "%s"' % (get_path_type(dest_path), dest_path))
 
-	elif os.path.isfile(src_path.encode(path_enc)):
-		if dest_path.find('/') < 0:
-			dest_dir = '.'
-		else:
+	elif os.path.isfile(src_path_encoded):
+		is_nested_path = (dest_path.find('/') >= 0)
+
+		if is_nested_path:
 			dest_dir = dest_path.rsplit('/', 1)[0]
+		else:
+			dest_dir = '.'
 
-			if not os.path.exists(dest_dir.encode(path_enc)):
-				print_with_time_stamp('Make dirs with rights %#03o: "%s"' % (new_dir_rights, dest_dir), tell_if_readonly=True)
+		dest_dir_encoded = dest_dir.encode(path_enc)
 
-				if not READ_ONLY:
-					os.makedirs(dest_dir.encode(path_enc), new_dir_rights)
+		if is_nested_path and not os.path.exists(dest_dir_encoded):
+			print_action_path('Make dirs with rights %#03o' % new_dir_rights, dest_dir)
 
-					print_with_time_stamp('Done.')
-
-		print_with_time_stamp('Move file from: "%s"' % src_path, tell_if_readonly=True)
-		print_with_time_stamp('Move file to:   "%s"' % dest_path, tell_if_readonly=True)
-
-		if not READ_ONLY:
-			if os.path.isdir(dest_dir.encode(path_enc)):
-				os.rename(src_path.encode(path_enc), dest_path.encode(path_enc))
+			if not READ_ONLY:
+				os.makedirs(dest_dir_encoded, new_dir_rights)
 
 				print_with_time_stamp('Done.')
+
+		print_action_paths('Make symlink' if make_symlink else 'Move file', src_path, dest_path)
+
+		if not READ_ONLY:
+			if os.path.isdir(dest_dir_encoded):
+				if make_symlink:
+					os.symlink(src_path_encoded, dest_path_encoded)
+				else:
+					os.rename(src_path_encoded, dest_path_encoded)
+
+				print_with_time_stamp('Done.')
+
+				return 1
 			else:
 				print_with_time_stamp('Error: destination path was not created: "%s"' % dest_dir)
 
 	else:
 		print_with_time_stamp('Error: source file does not exist: "%s"' % src_path)
+
+	return 0
 
 	# os.rename(src, dst):
 	# Rename the file or directory src to dst. If dst is a directory, OSError will be raised. On Unix, if dst exists and is a file, it will be replaced silently if the user has permission. The operation may fail on some Unix flavors if src and dst are on different filesystems. If successful, the renaming will be an atomic operation (this is a POSIX requirement). On Windows, if dst already exists, OSError will be raised even if it is a file; there may be no way to implement an atomic rename when dst names an existing file.
@@ -1627,6 +1677,10 @@ def get_cmd_with_path(cmd_line, subject='', exe_suffix=''):
 		,	exe_path_arg
 		]
 
+	if TEST:
+		print('Exe paths to check:')
+		print('\n'.join(exe_path_variants))
+
 	for exe_path in exe_path_variants:
 		if exe_path and os.path.isfile(exe_path):
 			arr[0] = exe_path
@@ -1644,10 +1698,20 @@ def get_print_and_check_cmd_result(
 ,	print_cmd_output=True
 ,	return_cmd_output=True
 ):
+	if not retry_exe_suffixes:
+		retry_exe_suffixes = []
+
 	retry_exe_suffixes.append('')
 	retry_exe_suffixes = sorted(set(map(str, retry_exe_suffixes)))
 
+	if TEST:
+		print('Exe suffixes to try:')
+		print('\n'.join(retry_exe_suffixes))
+
 	for exe_suffix in retry_exe_suffixes:
+
+		if TEST:
+			print('Trying exe suffix: ' + (exe_suffix or 'none'))
 
 		cmd_result = get_and_print_cmd_result(
 			get_cmd_with_path(cmd_line, filename, exe_suffix)
@@ -1786,10 +1850,11 @@ def get_recording_stats_for_each_user(
 	source_rec_file_path
 ,	users_by_ID=None
 ):
-	global rec_stats_multiline, rec_stats_users_by_ID
+	global rec_stats_multiline, rec_stats_users_by_ID, rec_stats_total_strokes
 
 	rec_stats_multiline = []
 	rec_stats_users_by_ID = {}
+	rec_stats_total_strokes = 0
 
 	pat_username = re.compile(r'^(?P<ID>\d+)\s+(?:\S+\s+)*name=(?P<Name>[^\r\n]*)', re.I | re.U | re.DOTALL)
 	pat_stroke = re.compile(r'^(?P<ID>\d+)\s+penup', re.I | re.U | re.DOTALL)
@@ -1804,7 +1869,7 @@ def get_recording_stats_for_each_user(
 	# - Find usernames by ID and their stroke counts:
 
 	def callback_for_each_line(line):
-		global rec_stats_multiline, rec_stats_users_by_ID
+		global rec_stats_multiline, rec_stats_users_by_ID, rec_stats_total_strokes
 
 		if rec_stats_multiline or line[-1 : ] == '{':
 			rec_stats_multiline.append(line)
@@ -1837,12 +1902,13 @@ def get_recording_stats_for_each_user(
 
 			if match_stroke:
 				user['strokes'] += 1
+				rec_stats_total_strokes += 1
 
 	def callback_for_final_check():
 		if rec_stats_multiline:
 			callback_for_each_line('}')
 
-		return bool(rec_stats_users_by_ID)
+		return bool(rec_stats_users_by_ID) and rec_stats_total_strokes > 0
 
 	get_print_and_check_cmd_result(
 		cfg['cmd_rec_stats']
@@ -2072,12 +2138,8 @@ def process_archived_session(session_ID, src_files):
 			print_with_time_stamp('Old temp files, removing:')
 
 		for filename in temp_filenames_to_remove:
-			file_path = dir_active + '/' + filename
-			print_with_time_stamp('"%s"' % file_path)
-
-			if not READ_ONLY:
-				os.remove(file_path)
-				done_files += 1
+			file_path = fix_slashes(dir_active + '/' + filename)
+			done_files += check_and_remove(file_path, 'old temp', skip_done_message=True)
 
 		if done_files:
 			print_with_time_stamp('Removed %d files.' % done_files)
@@ -2091,11 +2153,7 @@ def process_archived_session(session_ID, src_files):
 			print_with_time_stamp('Old public files, removing:')
 
 		for file_path in old_public_file_paths_to_remove:
-			print_with_time_stamp('"%s"' % file_path)
-
-			if not READ_ONLY:
-				os.remove(file_path)
-				done_files += 1
+			done_files += check_and_remove(file_path, 'old public', skip_done_message=True)
 
 		if done_files:
 			print_with_time_stamp('Removed %d files.' % done_files)
@@ -2220,6 +2278,9 @@ def process_archived_session(session_ID, src_files):
 
 	# - Process session to put into archive:
 
+	if not COPY_REC_FILES:
+		public_filenames_to_link = {}
+
 	if is_session_good_to_keep:
 		session_part_index = 0
 		session_part_label = ''
@@ -2239,13 +2300,19 @@ def process_archived_session(session_ID, src_files):
 			source_rec_filename = session_ID + session_part_label + session_rec_ext + session_temp_copy_ext
 			source_rec_file_path = fix_slashes(dir_active + '/' + source_rec_filename)
 
-			print_with_time_stamp('Copy file from: "%s"' % selected_rec_file_path, tell_if_readonly=True)
-			print_with_time_stamp('Copy file to:   "%s"' % source_rec_file_path, tell_if_readonly=True)
+			print_action_paths(
+				'Copy file' if COPY_REC_FILES else 'Make symlink'
+			,	selected_rec_file_path
+			,	source_rec_file_path
+			)
 
 			if READ_ONLY:
 				source_rec_file_path = selected_rec_file_path
 			else:
-				shutil.copy2(selected_rec_file_path, source_rec_file_path)
+				if COPY_REC_FILES:
+					shutil.copy2(selected_rec_file_path, source_rec_file_path)
+				else:
+					os.symlink(selected_rec_file_path, source_rec_file_path)
 
 				print_with_time_stamp('Done.')
 
@@ -2336,11 +2403,16 @@ def process_archived_session(session_ID, src_files):
 						print_with_time_stamp('Unsafe file name: "%s"' % unsafe_filename)
 
 					print_with_time_stamp('Public session file name: "%s"' % public_rec_filename)
-				else:
+				elif COPY_REC_FILES:
 					public_filenames_to_move.append([
 						source_rec_filename
 					,	public_rec_filename
 					])
+				else:
+					public_filenames_to_link[selected_rec_file_path] = [
+						source_rec_filename
+					,	public_rec_filename
+					]
 
 	# - Save public screenshots + thumbs:
 
@@ -2394,22 +2466,34 @@ def process_archived_session(session_ID, src_files):
 	dir_target = None
 
 	if is_session_good_to_keep:
-		dir_target = dir_closed + '/' + subdir_end + '/'
+		dir_target = dir_closed + '/' + subdir_end
 	elif dir_removed:
-		dir_target = dir_removed + '/' + subdir_del + '/'
+		dir_target = dir_removed + '/' + subdir_del
 
 	for filename in all_filenames_to_move:
-		file_path = dir_active + '/' + filename
+		file_path = fix_slashes(dir_active + '/' + filename)
+		target_path = fix_slashes(dir_target + '/' + filename)
 
 		if dir_target == None:
-			print_with_time_stamp('Small session, remove file: "%s"' % file_path, tell_if_readonly=True)
-
-			if not READ_ONLY:
-				os.remove(file_path)
-
-				print_with_time_stamp('Done.')
+			check_and_remove(file_path, 'small session')
 		else:
-			check_and_move(file_path, dir_target + filename)
+			check_and_move(file_path, target_path)
+
+		if not COPY_REC_FILES:
+			filenames = public_filenames_to_link.get(file_path)
+
+			if filenames:
+				source_rec_filename, public_rec_filename = filenames
+
+				if source_rec_filename:
+					source_rec_file_path = fix_slashes(dir_active + '/' + source_rec_filename)
+
+					check_and_remove(source_rec_file_path, 'temp source')
+
+				if public_rec_filename:
+					public_rec_file_path = fix_slashes(dir_public + '/' + subdir_pub + '/' + public_rec_filename)
+
+					check_and_move(target_path, public_rec_file_path, make_symlink=True)
 
 	# - END process_archived_session
 
