@@ -2531,7 +2531,7 @@ def do_task_records():
 	src_files = os.listdir(dir_active)
 
 	session_closed_suffix = session_cfg_ext + session_closed_ext
-	session_closed_suffix_len = len(session_closed_double_ext)
+	session_closed_suffix_len = len(session_closed_suffix)
 
 	for filename in src_files:
 		try:
