@@ -2127,15 +2127,16 @@ def process_archived_session(session_ID, src_files):
 		]
 	)
 
+
 	# - Remove leftovers of previous runs:
 
 	if temp_filenames_to_remove:
 		done_files = 0
 
-		if READ_ONLY:
-			print_with_time_stamp('Old temp files to remove:')
-		else:
-			print_with_time_stamp('Old temp files, removing:')
+		print_with_time_stamp(
+			'Old temp files to remove:' if READ_ONLY else
+			'Old temp files, removing:'
+		)
 
 		for filename in temp_filenames_to_remove:
 			file_path = fix_slashes(dir_active + '/' + filename)
@@ -2147,10 +2148,10 @@ def process_archived_session(session_ID, src_files):
 	if old_public_file_paths_to_remove:
 		done_files = 0
 
-		if READ_ONLY:
-			print_with_time_stamp('Old public files to remove:')
-		else:
-			print_with_time_stamp('Old public files, removing:')
+		print_with_time_stamp(
+			'Old public files to remove:' if READ_ONLY else
+			'Old public files, removing:'
+		)
 
 		for file_path in old_public_file_paths_to_remove:
 			done_files += check_and_remove(file_path, 'old public', skip_done_message=True)
@@ -2167,10 +2168,12 @@ def process_archived_session(session_ID, src_files):
 	bak_parts_count = len(bak_files_to_publish)
 
 	if rec_parts_count or bak_parts_count:
+
 		print_with_time_stamp('Found %d session recording parts:\n%s' % (
 			rec_parts_count
 		,	get_obj_pretty_print(rec_files_to_publish)
 		))
+
 		print_with_time_stamp('Found %d fallback recording parts:\n%s' % (
 			bak_parts_count
 		,	get_obj_pretty_print(bak_files_to_publish)
@@ -2403,6 +2406,7 @@ def process_archived_session(session_ID, src_files):
 						print_with_time_stamp('Unsafe file name: "%s"' % unsafe_filename)
 
 					print_with_time_stamp('Public session file name: "%s"' % public_rec_filename)
+
 				elif COPY_REC_FILES:
 					public_filenames_to_move.append([
 						source_rec_filename
@@ -2526,10 +2530,13 @@ def do_task_records():
 	IDs_done = []
 	src_files = os.listdir(dir_active)
 
+	session_closed_suffix = session_cfg_ext + session_closed_ext
+	session_closed_suffix_len = len(session_closed_double_ext)
+
 	for filename in src_files:
 		try:
-			ext = get_file_ext(filename, include_dot=True)
-			if ext == session_closed_ext:
+			if filename[-session_closed_suffix_len : ] == session_closed_suffix:
+
 				match = re.search(pat_session_ID, filename)
 				if match:
 					session_ID = match.group('SessionID')
