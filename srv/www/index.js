@@ -490,7 +490,7 @@ function updateDrawpileTable(evt) {
 		statsRow = cre('tr', statsContainer);
 		statsRow.className = classMediaRowStatsUser;
 		statsRow.innerHTML = (
-			'<td colspan="2">' + encodeHTMLSpecialChars(userName) + '</td>'
+			'<td colspan="2">' + userName + '</td>'
 		+	'<td colspan="2">' + statsContent + '</td>'
 		);
 	}
@@ -825,6 +825,7 @@ function init() {
 			toggleClass(pageCenterContainer, classMediaRowsEnabled, 1);
 
 			if (canToggleView) {
+				topButtonContainer = cre('div', currentPathContainer);
 				addTopButton(la.toggle.media_rows, toggleMediaRows);
 				addTopButton(la.toggle.img_newlines, toggleImageNewlines);
 			}

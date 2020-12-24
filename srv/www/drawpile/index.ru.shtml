@@ -11,59 +11,62 @@
 </head>
 <body>
 	<table width="100%" height="100%"><tr><td align="center">
-	<u><b class="col-width drawpile">
-		<u><i class="purple">Drawpile - сервер для рисования через сеть на общем полотне</i></u>
+	<u><i class="col-width drawpile">
+		<u><b class="purple">Drawpile - сервер для рисования через сеть на общем полотне</b></u>
 		<u>
-			<s><b>Программа для участия:	</b><a href="https://drawpile.net/download/">drawpile.net/download/</a></s>
-			<s><b>Адрес сервера:		</b><i>
+			<s><i>Программа для участия:	</i><a href="https://drawpile.net/download/">drawpile.net/download/</a></s>
+			<s><i>Адрес сервера:		</i><b class="gray">
 				<!--# block name="hostname"-->www.example.com<!--# endblock --><!--#include file="hostname.txt" stub="hostname"-->:<!--# block name="port"-->9002<!--# endblock --><!--#include file="port.txt" stub="port"-->
-			</i></s>
-			<s><b>Архив записей:		</b><a href="/drawpile/record/">
+			</b></s>
+			<s><i>Архив записей:		</i><a href="/drawpile/record/">
 				<!--#include file="hostname.txt" stub="hostname"--><!--# block name="records"-->/drawpile/record/<!--# endblock --><!--#include file="records.txt" stub="records"-->
 			</a></s>
 		</u>
+		<u><b class="gray">На данный момент:</b></u>
 		<u>
-			<i class="blue">Версия сервера: <!--# block name="not_found"-->не найдено<!--# endblock --><!--#include file="version.txt" stub="not_found"--></i><!--# block name="none"-->
-			<i class="blue">Активные сессии: 0</i>
-			<i class="blue">Участники: 0</i>
-			<i class="blue">Обновлено: 0000-00-00 <small>00:00:00</small></i><!--# endblock --><!--#include file="stats.ru.htm" stub="none"-->
+			<b class="blue">Версия сервера: <!--# block name="not_found"-->не найдено<!--# endblock --><!--#include file="version.txt" stub="not_found"--></b><!--# block name="none"-->
+			<b class="blue">Активные сессии: 0</b>
+			<b class="blue">Участники: 0</b>
+			<b class="blue">Обновлено: 0000-00-00 <small>00:00:00</small></b><!--# endblock --><!--#include file="stats.ru.htm" stub="none"-->
 		</u>
+		<u><b class="gray">Справка:</b></u>
 		<u>
 			<a class="green toggle" onclick="toggle(this)">Как присоединиться</a>
-			<i class="green"><img src="how_to_join.ru.png"></i>
+			<b class="green"><img src="how_to_join.ru.png"></b>
 		</u>
 		<u>
 			<a class="green toggle" onclick="toggle(this)">Примеры настроек для инструментов</a>
-			<i class="green"><img src="example_tools.png"></i>
+			<b class="green"><img src="example_tools.png"></b>
 		</u>
 		<u>
 			<a class="green toggle" onclick="toggle(this)">Если обнаружена смена сертификата</a>
-			<i class="green">
+			<b class="green">
 				<img src="certificate_changed.png">
 				<br>
 				Это нормально, SSL-сертификат сервера обновляется
 				<a class="explain" href="https://letsencrypt.org/2015/11/09/why-90-days.html">каждые 2-3 месяца</a>.
-			</i>
+			</b>
 		</u>
 		<u>
 			<s>
-				<b>Исходный код архива:</b>
+				<i>Исходный код архива:</i>
 				<a href="https://github.com/f2d/drawpile_webpage_automation">github.com/f2d/drawpile_webpage_automation</a>
 			</s>
 			<s>
-				<b>Вернуться на главную страницу:</b>
+				<i>Вернуться на главную страницу:</i>
 				<a href="/">
 					<!--#include file="hostname.txt" stub="hostname"-->/
 				</a>
 			</s>
 		</u>
+		<u><b class="gray">На других языках:</b></u>
 		<u>
 			<s>
 				<a href="index.en.shtml">EN</a>
 				<a href="index.ru.shtml">RU</a>
 			</s>
 		</u>
-	</b></u>
+	</i></u>
 	</td></tr></table>
 </body>
 </html>

@@ -1,9 +1,10 @@
 body {
+	/* font-family: sans-serif; */
 	background-color: #eee;
 }
 table {
 	border: none;
-	border-spacing: 2px;
+	border-spacing: 0.125em;
 }
 .outside>table {
 	width: 100%;
@@ -15,6 +16,7 @@ table {
 .inside h3 {
 	text-align: left;
 }
+.inside h3 div,
 .inside h3 button {
 	float: right;
 }
@@ -24,8 +26,11 @@ table {
 .inside>table {
 	width: 100%;
 }
+.inside>table.media-rows-table {
+	width: calc(100vw - 1em);
+}
 .inside th, td {
-	padding: 4px 8px;
+	padding: 0.25em;
 }
 .inside th,
 .inside thead td,
@@ -33,8 +38,11 @@ table {
 	background-color: #ccc;
 }
 .inside td {
-	background-color: #fff;
+	background-color: #f5f5f5;
 	text-align: left;
+}
+.inside .media-row-info td {
+	background-color: #fff;
 }
 .inside .sub-list-row td {
 	background-color: #f3f4f5;
@@ -52,29 +60,32 @@ table {
 }
 .inside a {
 	display: inline-block;
-	padding: 4px 8px;
 	color: #4988ba;
 }
 .inside a:visited {
 	color: #576ca3;
 }
+.inside a,
 .inside th a {
-	padding: 4px;
+	padding: 0.25em;
+}
+.inside h3 a {
+	padding: 0.25em 0.5em;
 }
 .inside th a,
 .inside td a {
-	margin: -4px 0;
+	margin: -0.25em 0;
 }
 .inside .media-row[id] th a,
 .inside .simple-rows-table td a,
 .inside .sub-list-row a {
 	display: block;
-	margin: -4px -8px;
+	margin: -0.25em;
 }
 .inside a.media-row-img {
-	padding: 4px;
-	margin: -4px;
-	border: 2px solid transparent;
+	padding: 0.25em;
+	margin: -0.25em;
+	border: 0.25em solid transparent;
 }
 .inside a.media-row-img:hover {
 	position: relative;
@@ -91,6 +102,10 @@ table {
 .media-row:target,
 .media-row:target th a:not(:hover) {
 	background-color: #ace;
+}
+.media-rows-table {
+	border-spacing: 1em;
+	margin: -1em;
 }
 .media-rows-table .media-row,
 .media-rows-table .media-row-info {
