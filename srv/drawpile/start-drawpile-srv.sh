@@ -28,7 +28,7 @@ do
 			echo "$i"
 			echo "Aborted."
 
-			exit
+			exit 1
 		fi
 	fi
 done
@@ -40,7 +40,7 @@ then
 	echo "Could not get Drawpile server version."
 	echo "Aborted."
 
-	exit
+	exit 2
 fi
 
 # Use configured text parts: ------------------------------------------------
