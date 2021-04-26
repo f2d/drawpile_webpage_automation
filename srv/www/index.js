@@ -162,16 +162,17 @@ if (lang == 'ru') {
 
 //* Utility functions, mostly copypasted from old projects as is *-------------
 
-//* create type-checking functions, e.g. "isString()" or "isImageElement()":
-//* source: https://stackoverflow.com/a/17772086
+//* Create type-checking functions, e.g. "isString()" or "isImageElement()":
+//* Source: https://stackoverflow.com/a/17772086
 [
-	'Array',
+	'Array',	//* <- matches anything with 'Array' at the end, e.g. 'Uint8Array'
+	'String',
 ].forEach(
 	function(typeName) {
 		window[
-			'is' + typeName.replace('HTML', '')
-		] = function(value) {
-			return (toString.call(value).slice(8, -1) === typeName);
+			'is' + typeName
+		] = function (value) {
+			return (toString.call(value).slice(-1 - typeName.length, -1) === typeName);
 		};
 	}
 );
@@ -339,7 +340,7 @@ function getFormattedTimezoneOffset(t) {
 function getFormattedTime(t, plain, only_ymd) {
 	if (TOS.indexOf(typeof t) > -1) {
 	var	text = String(t);
-		if (typeof t === 'string' && Date.parse) {
+		if (isString(t) && Date.parse) {
 			t = Date.parse(t.replace(/(T\d+)-(\d+)-(\d+\D*)/, '$1:$2:$3'));
 		} else {
 			t = n * 1000;
