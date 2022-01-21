@@ -360,11 +360,22 @@ var	YMD = t.slice(0,3).join('-')
 	;
 	return (
 		plain
-		? YMD+' '+HIS
-		: '<time datetime="'+YMD+'T'+HIS
-		+	getFormattedTimezoneOffset(t)
-		+	'" data-t="'+Math.floor(d/1000)
-		+	'">'+YMD+' <small>'+HIS+'</small></time>'
+		? (
+			only_ymd
+			? YMD
+			: plain < 0
+			? YMD+'T'+HIS+getFormattedTimezoneOffset(t)
+			: YMD+' '+HIS
+		) : (
+			'<time datetime="'
+		+		YMD+'T'+HIS
+		+		getFormattedTimezoneOffset(t)
+		+	'" data-t="'
+		+		Math.floor(d/1000)
+		+	'">'
+		+		YMD
+		+	' <small>'+HIS+'</small></time>'
+		)
 	);
 }
 
@@ -909,6 +920,8 @@ function init() {
 											}
 										} else
 										if (v = match[3]) {
+											v = getFormattedTime(v, -1);
+
 											if (timeStamps.indexOf(v) < 0) {
 												timeStamps.push(v);
 											}
