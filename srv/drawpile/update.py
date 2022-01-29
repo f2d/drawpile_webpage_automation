@@ -1142,7 +1142,7 @@ if task == 'stats' or task == 'pipe':
 						''
 					,	u'<span title="title">"$title"</span>'
 					,	u'<span title="minimal user age requirement">($nsfm</span>'
-					,	u'<span title="persistent session, will not end without users">$persistent</span>'
+					,	u'<span title="persistent session, will not end without users remaining">$persistent</span>'
 					,	u'<span title="need password to join">$hasPassword</span>'
 					,	u'<span title="protocol version">$protocol)</span>'
 					])
@@ -1155,7 +1155,7 @@ if task == 'stats' or task == 'pipe':
 						''
 					,	u'<span title="название">"$title"</span>'
 					,	u'<span title="минимальный возраст для участия">($nsfm</span>'
-					,	u'<span title="постоянная сессия, не закроется пользователей">$persistent</span>'
+					,	u'<span title="постоянная сессия, не закроется без оставшихся пользователей">$persistent</span>'
 					,	u'<span title="нужен пароль, чтобы зайти">$hasPassword</span>'
 					,	u'<span title="версия протокола">$protocol)</span>'
 					])
