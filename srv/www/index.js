@@ -167,13 +167,15 @@ if (lang == 'ru') {
 [
 	'Array',	//* <- matches anything with 'Array' at the end, e.g. 'Uint8Array'
 	'String',
-].forEach(
-	function(typeName) {
-		window[
-			'is' + typeName
-		] = function (value) {
-			return (toString.call(value).slice(-1 - typeName.length, -1) === typeName);
-		};
+].map(
+	function (typeName) {
+	var	functionName = 'is' + typeName;
+
+		if (typeof window[functionName] !== 'function') {
+			window[functionName] = function (value) {
+				return (toString.call(value).slice(-1 - typeName.length, -1) === typeName);
+			};
+		}
 	}
 );
 
