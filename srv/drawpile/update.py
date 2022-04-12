@@ -594,17 +594,19 @@ def get_time_now_html(format=time_format_print, content_type='html', lang='en'):
 		reason = cfg.get('reason')
 
 		if reason:
-			for each_reason_group in output_update_reasons:
+			for reason_group in output_update_reasons:
 
-				reason_parts = each_reason_group.get('reasons')
-				reason_text = each_reason_group.get('output')
+				possible_reasons = reason_group.get('reasons')
+				outputs_by_lang  = reason_group.get('output')
 
-				if reason_parts and reason_text:
+				if possible_reasons and outputs_by_lang:
+					reason_text = outputs_by_lang.get(lang)
 
-					for part in reason_parts:
+					if reason_text:
+						for possible_part in possible_reasons:
 
-						if part in reason:
-							return '%s<br>(%s)' % (time_html, reason_text)
+							if possible_part in reason:
+								return u'%s<br>(%s)' % (time_html, reason_text)
 
 		return time_html
 
@@ -962,7 +964,7 @@ def is_any_option_set(*list_args):
 
 argc = len(sys.argv)
 
-task = sys.argv[1] if argc > 1 else 'help'
+task = sys.argv[1].strip('-') if argc > 1 else 'help'
 options = sys.argv[2 : ] if argc > 2 else []
 
 # - Check options: ------------------------------------------------------------
@@ -986,6 +988,7 @@ for arg in options:
 			for x in
 			arg.split('=', 1)
 		]
+		var_name = var_name.strip('-')
 
 	known_var_name = var_name and var_name in cfg_default
 
@@ -1281,10 +1284,22 @@ if task == 'stats' or task == 'pipe':
 			,	'ru': u'Изменения настроек сессии'
 			}
 		},{
+			'reasons': ['expired']
+		,	'output': {
+				'en': u'Closed session that was idle too long'
+			,	'ru': u'Закрыта долго неиспользуемая сессия'
+			}
+		},{
 			'reasons': ['httpd']
 		,	'output': {
 				'en': u'Restarted server'
 			,	'ru': u'Перезапуск сервера'
+			}
+		},{
+			'reasons': ['manual_update']
+		,	'output': {
+				'en': u'Manual update'
+			,	'ru': u'Ручное обновление'
 			}
 		}
 	]

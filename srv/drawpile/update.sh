@@ -15,6 +15,7 @@ do
 		-ro|--readonly)		cmd_readonly="readonly";;
 		-r|--records)		cmd_records="records";;
 		-s|--stats)		cmd_stats="stats";;
+		--reason=*)		cmd_reason="$1";;
 		[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]*)	log_date=$1;;
 	esac
 	shift
@@ -60,6 +61,7 @@ run_update_cmd () {
 		"$@"
 		"${cmd_wait}"
 		"${cmd_readonly}"
+		"${cmd_reason}"
 		"${update_lock_dir}update_${cmd_task}.lock"
 		"${update_log_dir}update_${cmd_task}_${log_date}.log"
 		"root = ${drawpile_root_dir}"
@@ -72,6 +74,7 @@ run_update_cmd () {
 
 # Run update: ---------------------------------------------------------------
 
+if   [ -z "$cmd_reason"  ]; then cmd_reason="reason = manual_update"; fi
 if   [ -z "$cmd_silent"  ]; then echo "Update started: ${start_date}"; fi
 if ! [ -z "$cmd_stats"   ]; then echo "Update stats:";   run_update_cmd stats;   fi
 if ! [ -z "$cmd_records" ]; then echo "Update records:"; run_update_cmd records; fi
