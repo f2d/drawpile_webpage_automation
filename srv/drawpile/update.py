@@ -77,6 +77,7 @@ cfg_default = {
 ,	'api_url_prefix': 'http://127.0.0.1:80/'
 
 ,	'add_pwd_session_users': ''					# '[a], [anyway]'
+,	'reason': ''
 }
 
 def print_help():
@@ -158,6 +159,7 @@ def print_help():
 	,	', '.join(cfg_var_name_by_exts) + ' = </path/to/file>: Same as above options.'
 	,	''
 	,	'task = <task>: Override first task argument.'
+	,	'reason = <text>: The drawpile-srv log line that caused this script to run.'
 	,	'run_after_<task> = <URL or command line>: Call after specified task finishes.'
 	,	''
 	,	'wait  = <number of seconds>: Pause before task in single mode. ' + get_cfg_for_help('wait')
@@ -588,7 +590,23 @@ def get_time_now_text(format=time_format_print_log, before_task=False):
 
 def get_time_now_html(format=time_format_print, content_type='html', lang='en'):
 	if content_type == 'html':
-		return fix_html_time_stamp(get_time_now_text(format))
+		time_html = fix_html_time_stamp(get_time_now_text(format))
+		reason = cfg.get('reason')
+
+		if reason:
+			for each_reason_group in output_update_reasons:
+
+				reason_parts = each_reason_group.get('reasons')
+				reason_text = each_reason_group.get('output')
+
+				if reason_parts and reason_text:
+
+					for part in reason_parts:
+
+						if part in reason:
+							return '%s<br>(%s)' % (time_html, reason_text)
+
+		return time_html
 
 	if content_type == 'txt':
 		return get_time_now_text(format)
@@ -1239,6 +1257,34 @@ if task == 'stats' or task == 'pipe':
 		,	'output_title': {
 				'en': u'Last updated'
 			,	'ru': u'Обновлено'
+			}
+		}
+	]
+
+	output_update_reasons = [
+		{
+			'reasons': ['Joined']
+		,	'output': {
+				'en': u'User joined'
+			,	'ru': u'Участник зашёл'
+			}
+		},{
+			'reasons': ['Left']
+		,	'output': {
+				'en': u'User left'
+			,	'ru': u'Участник ушёл'
+			}
+		},{
+			'reasons': ['Changed', 'Made', 'Tagged', 'preserve']
+		,	'output': {
+				'en': u'Session settings changed'
+			,	'ru': u'Изменения настроек сессии'
+			}
+		},{
+			'reasons': ['httpd']
+		,	'output': {
+				'en': u'Restarted server'
+			,	'ru': u'Перезапуск сервера'
 			}
 		}
 	]
