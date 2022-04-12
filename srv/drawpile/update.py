@@ -11,6 +11,17 @@ from dateutil.parser import parse as datetime_text_to_object
 from dateutil.tz import tzlocal, tzutc
 from PIL import Image, ImageChops
 
+# Use colored text if available:
+try:
+	from termcolor import colored, cprint
+	import colorama
+
+	colorama.init()
+
+except ImportError:
+	def colored(*list_args, **keyword_args): return list_args[0]
+	def cprint(*list_args, **keyword_args): print(list_args[0])
+
 # https://stackoverflow.com/a/17510727
 try:
 	# Python 3.0 and later:
@@ -87,16 +98,22 @@ def print_help():
 
 			cmd_optimize_lines.append(arg + pad_text + ' = <command line>. ' + get_cfg_for_help(arg))
 
+	default_enc_text = '<encoding name>. ' + colored('Default: ', 'yellow') + default_enc
+
 	help_text_lines = [
 		line_sep
 
-	,	' * Usage:'
+	,	colored(' * Usage:', 'yellow')
 	,	''
-	,	'"%s" [<task>] [<option>] ["<option = value>"] [<option>] [...]' % self_name
+	,	'"%s"' % self_name
+		+	colored(' [<task>]', 'cyan')
+		+	colored(' [<option>] ["<option = value>"] [<option>] [...]', 'magenta')
 
 	,	line_sep
 
-	,	' * <Task> is always the first and required argument. May be any of:'
+	,	colored(' * ', 'yellow')
+		+	colored('<Task>', 'cyan')
+		+	colored(' is always the first and required argument. May be any of:', 'yellow')
 	,	''
 	,	'h, help: Show this text.'
 	,	'r, records: Once, process and move all files of closed/archived sessions.'
@@ -112,13 +129,17 @@ def print_help():
 	,	'	including drawpile-srv itself, to apply changes to updater script.'
 	,	'	Also it is likely less robust to errors and exceptions.'
 	,	''
-	,	' * <Function name as task>, call for each optional file path argument:'
+	,	colored(' * ', 'yellow')
+		+	colored('<Function name as task>', 'cyan')
+		+	colored(', call for each optional file path argument:', 'yellow')
 	,	''
 	,	'\n'.join(tasks_as_function_name)
 
 	,	line_sep
 
-	,	' * <Option> in any order, optional:'
+	,	colored(' * ', 'yellow')
+		+	colored('<Option>', 'magenta')
+		+	colored(' in any order, optional:', 'yellow')
 	,	''
 	,	'ro, readonly: Don\'t save or change anything, only show output, for testing.'
 	,	'copyrec: Copy session recording files to public archive instead of symlink.'
@@ -130,7 +151,9 @@ def print_help():
 
 	,	line_sep
 
-	,	' * <Option = value> in any order, optional:'
+	,	colored(' * ', 'yellow')
+		+	colored('<Option = value>', 'magenta')
+		+	colored(' in any order, optional:', 'yellow')
 	,	''
 	,	', '.join(cfg_var_name_by_exts) + ' = </path/to/file>: Same as above options.'
 	,	''
@@ -160,7 +183,7 @@ def print_help():
 	,	'	Stop on the first variant that returns viable result.'
 	,	'		' + get_cfg_for_help('cmd_rec_versions')
 	,	''
-	,	' * Commands for processing (%s for subject filename, or it will be appended):'
+	,	colored(' * Commands for processing (%s for subject filename, or it will be appended):', 'yellow')
 	,	''
 	,	'cmd_rec_stats      = <command line>. ' + get_cfg_for_help('cmd_rec_stats')
 	,	'cmd_rec_render     = <command line>. ' + get_cfg_for_help('cmd_rec_render')
@@ -168,38 +191,38 @@ def print_help():
 	,	cmd_optimize_prefix + '<ext> = <command line>. Custom formats may be added here.'
 	,	'\n'.join(cmd_optimize_lines)
 	,	''
-	,	' * Source to process:'
+	,	colored(' * Source to process:', 'yellow')
 	,	''
 	,	'root    = </path/to/root/folder/>.        ' + get_cfg_for_help('root')
 	,	'rec_src = </path/to/active/sessions/>.    ' + get_cfg_for_help('rec_src')
 	,	''
-	,	' * Destination to keep:'
+	,	colored(' * Destination to keep:', 'yellow')
 	,	''
 	,	'rec_end = </path/to/closed/sessions/>.    ' + get_cfg_for_help('rec_end')
 	,	'rec_pub = </path/to/public/web/archive/>. ' + get_cfg_for_help('rec_pub')
 	,	''
-	,	' * Destination to remove (no path = delete at once):'
+	,	colored(' * Destination to remove (no path = delete at once):', 'yellow')
 	,	''
 	,	'rec_del = </path/to/removed/sessions/>.   ' + get_cfg_for_help('rec_del')
 	,	'rec_del_max = <number of bytes>: Max record size to remove. ' + get_cfg_for_help('rec_del_max')
 	,	''
-	,	' * Destination subfolders (YMD/HNS/I = date/ID from filenames):'
+	,	colored(' * Destination subfolders (YMD/HNS/I = date/ID from filenames):', 'yellow')
 	,	''
 	,	'sub_del = <Y-M-D/HNS_I>. ' + get_cfg_for_help('sub_del')
 	,	'sub_end = <Y-M-D/HNS_I>. ' + get_cfg_for_help('sub_end')
 	,	'sub_pub = <Y/Y-M/Y-M-D>. ' + get_cfg_for_help('sub_pub')
 	,	''
-	,	' * Text encoding:'
+	,	colored(' * Text encoding:', 'yellow')
 	,	''
-	,	'print_enc = <encoding name>. Default: ' + default_enc
-	,	'path_enc  = <encoding name>. Default: ' + default_enc
-	,	'file_enc  = <encoding name>. Default: ' + default_enc
-	,	'log_enc   = <encoding name>. Default: ' + default_enc
-	,	'web_enc   = <encoding name>. Default: ' + default_enc
+	,	'print_enc = ' + default_enc_text
+	,	'path_enc  = ' + default_enc_text
+	,	'file_enc  = ' + default_enc_text
+	,	'log_enc   = ' + default_enc_text
+	,	'web_enc   = ' + default_enc_text
 
 	,	line_sep
 
-	,	' * Result status codes:'
+	,	colored(' * Result status codes:', 'yellow')
 	,	''
 	,	'0: All done, or cycle was interrupted by user.'
 	,	'1: Nothing done, help shown.'
@@ -441,7 +464,7 @@ def dump(obj, check_list=[]):
 	return result_text
 
 def print_whats_wrong(exception, title='Error:'):
-	print_with_time_stamp(title or 'Error:')
+	print_with_time_stamp(colored(title or 'Error:', 'red'))
 	traceback.print_exc()
 
 	if TEST:
@@ -841,8 +864,9 @@ def get_cfg_default(var_name):
 def get_cfg_for_help(var_name):
 	result = get_cfg_default(var_name)
 
-	return 'Default: %s' % (
-		('"%s"' % result) if is_type_str(result) else
+	return '%s %s' % (
+		colored('Default:', 'yellow')
+	,	('"%s"' % result) if is_type_str(result) else
 		('%d' % result) if is_type_int(result) else
 		('%r' % result)
 	)
