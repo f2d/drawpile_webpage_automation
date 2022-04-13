@@ -594,6 +594,11 @@ def get_time_now_html(format=time_format_print, content_type='html', lang='en'):
 		reason = cfg.get('reason')
 
 		if reason:
+			index = reason.find(':')
+
+			if index >= 0:
+				reason = reason[index + 1 : ].strip() or reason
+
 			for reason_group in output_update_reasons:
 
 				possible_reasons = reason_group.get('reasons')
