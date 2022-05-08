@@ -62,6 +62,8 @@ cfg_default = {
 
 ,	'new_dir_rights': {'min': 0, 'default': 0o755, 'max': 0o777}	# <- bit-mask
 ,	'rec_del_max':    {'min': 0, 'default': 9000}			# <- bytes
+,	'rec_del_max_users':   {'min': 0, 'default': 0}
+,	'rec_del_max_strokes': {'min': 0, 'default': 0}
 ,	'path_len_max':   {'min': 1, 'default': 250}			# <- symbols
 ,	'thumb_w':        {'min': 1, 'default': 200}			# <- pixels
 ,	'thumb_h':        {'min': 1, 'default': 200}			# <- pixels
@@ -206,7 +208,9 @@ def print_help():
 	,	colored(' * Destination to remove (no path = delete at once):', 'yellow')
 	,	''
 	,	'rec_del = </path/to/removed/sessions/>.   ' + get_cfg_for_help('rec_del')
-	,	'rec_del_max = <number of bytes>: Max record size to remove. ' + get_cfg_for_help('rec_del_max')
+	,	'rec_del_max = <number of bytes>: Remove if file size sum fits. ' + get_cfg_for_help('rec_del_max')
+	,	'rec_del_max_users    = <number>: Remove if user count sum fits. ' + get_cfg_for_help('rec_del_max_users')
+	,	'rec_del_max_strokes  = <number>: Remove if stroke count sum fits. ' + get_cfg_for_help('rec_del_max_strokes')
 	,	''
 	,	colored(' * Destination subfolders (YMD/HNS/I = date/ID from filenames):', 'yellow')
 	,	''
@@ -1149,6 +1153,7 @@ if task == 'stats' or task == 'pipe':
 		['<', '&lt;']
 	,	['>', '&gt;']
 	]
+
 	replace_whitespace = [
 		[re.compile(r'\s+'), ' ']
 	]
@@ -1163,16 +1168,13 @@ if task == 'stats' or task == 'pipe':
 						{
 							'id': 'startTime'
 						,	'replace': [fix_html_time_stamp]
-						}
-					,	{
+						},{
 							'id': 'persistent'
 						,	'replace': ['&#x231b;', ' ']
-						}
-					,	{
+						},{
 							'id': 'hasPassword'
 						,	'replace': ['&#x1F512;', ' ']
-						}
-					,	{
+						},{
 							'get_by_id': 'nsfm'
 						,	'put_by_id': 'nsfm'
 						,	'replace': ['18+', '0+']
@@ -1215,8 +1217,7 @@ if task == 'stats' or task == 'pipe':
 				])
 			}
 		,	'output_entry_separator': indent_newline
-		}
-	,	{
+		},{
 			'input': [
 				{
 					'api_endpoint': 'users'
@@ -1236,8 +1237,7 @@ if task == 'stats' or task == 'pipe':
 			,	'ru': u'Участники'
 			}
 		,	'output_entry_separator': ', '
-		}
-	,	{
+		},{
 			'input': [
 				{
 					'api_endpoint': 'users'
@@ -1258,8 +1258,7 @@ if task == 'stats' or task == 'pipe':
 			]
 		,	'output': ['txt']
 		,	'output_entry_separator': '\n'
-		}
-	,	{
+		},{
 			'input': get_time_now_html
 		,	'output': ['html']
 		,	'output_title': {
@@ -1291,7 +1290,7 @@ if task == 'stats' or task == 'pipe':
 		},{
 			'reasons': ['expired']
 		,	'output': {
-				'en': u'Closed session that was idle too long'
+				'en': u'Closed session, idle time out'
 			,	'ru': u'Закрыта долго неиспользуемая сессия'
 			}
 		},{
@@ -2377,6 +2376,11 @@ def process_archived_session(session_ID, src_files):
 	if is_session_good_to_keep:
 		session_part_index = 0
 		session_part_label = ''
+
+		total_strokes_count = 0
+		total_usernames_list = []
+
+		rec_file_paths_to_save_screenshots = []
 		public_meta_content_parts = []
 		public_filenames_to_move = []
 
@@ -2424,6 +2428,9 @@ def process_archived_session(session_ID, src_files):
 
 				usernames_count = len(usernames_list)
 				strokes_count = sum(user_stats_by_name.values())
+
+				total_usernames_list += usernames_list
+				total_strokes_count += strokes_count
 
 				print_with_time_stamp('usernames_count: %d' % usernames_count)
 				print_with_time_stamp('strokes_count: %d' % strokes_count)
@@ -2508,9 +2515,22 @@ def process_archived_session(session_ID, src_files):
 					,	public_rec_filename
 					]
 
+				rec_file_paths_to_save_screenshots.append(source_rec_file_path)
+
+		total_usernames_count = len(set(total_usernames_list))
+
+		if not (
+			total_usernames_count > cfg['rec_del_max_users']
+		and	total_strokes_count   > cfg['rec_del_max_strokes']
+		):
+			is_session_good_to_keep = False
+
+	if is_session_good_to_keep:
+
 	# - Save public screenshots + thumbs:
 
-				public_filenames_to_move += get_recording_screenshots_saved(source_rec_file_path)
+		for source_rec_file_path in rec_file_paths_to_save_screenshots:
+			public_filenames_to_move += get_recording_screenshots_saved(source_rec_file_path)
 
 	# - Save some session stats into separate file instead of session filename:
 
