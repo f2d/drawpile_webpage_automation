@@ -1203,7 +1203,7 @@ function init() {
 				,	'tabs': [
 						'<a href="#'
 					+		recID
-					+	'">'
+					+	'" class="anchor">'
 					+		recID
 					+	'</a>'
 					]

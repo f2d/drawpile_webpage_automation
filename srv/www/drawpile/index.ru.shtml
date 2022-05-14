@@ -11,62 +11,111 @@
 </head>
 <body>
 	<table width="100%" height="100%"><tr><td align="center">
-	<u><i class="col-width drawpile">
-		<u><b class="purple">Drawpile - сервер для рисования через сеть на общем полотне</b></u>
-		<u>
-			<s><i>Программа для участия:	</i><a href="https://drawpile.net/download/">drawpile.net/download/</a></s>
-			<s><i>Адрес сервера:		</i><b class="gray">
-				<!--# block name="hostname"-->www.example.com<!--# endblock --><!--#include file="hostname.txt" stub="hostname"-->:<!--# block name="port"-->9002<!--# endblock --><!--#include file="port.txt" stub="port"-->
-			</b></s>
-			<s><i>Архив записей:		</i><a href="/drawpile/record/">
-				<!--#include file="hostname.txt" stub="hostname"--><!--# block name="records"-->/drawpile/record/<!--# endblock --><!--#include file="records.txt" stub="records"-->
-			</a></s>
-		</u>
-		<u><b class="gray">На данный момент:</b></u>
-		<u>
-			<b class="blue">Версия сервера: <!--# block name="not_found"-->не найдено<!--# endblock --><!--#include file="version.txt" stub="not_found"--></b><!--# block name="none"-->
-			<b class="blue">Активные сессии: 0</b>
-			<b class="blue">Участники: 0</b>
-			<b class="blue">Обновлено: 0000-00-00 <small>00:00:00</small></b><!--# endblock --><!--#include file="stats.ru.htm" stub="none"-->
-		</u>
-		<u><b class="gray">Справка:</b></u>
-		<u>
-			<a class="green toggle" onclick="toggle(this)">Как присоединиться</a>
-			<b class="green"><img src="how_to_join.ru.png"></b>
-		</u>
-		<u>
-			<a class="green toggle" onclick="toggle(this)">Примеры настроек для инструментов</a>
-			<b class="green"><img src="example_tools.png"></b>
-		</u>
-		<u>
-			<a class="green toggle" onclick="toggle(this)">Если обнаружена смена сертификата</a>
-			<b class="green">
-				<img src="certificate_changed.png">
-				<br>
-				Это нормально, SSL-сертификат сервера обновляется
-				<a class="explain" href="https://letsencrypt.org/2015/11/09/why-90-days.html">каждые 2-3 месяца</a>.
+	<t><div class="col-width drawpile">
+		<t><b class="purple">Drawpile - сервер для рисования через сеть на общем полотне</b></t>
+		<t>
+			<p>
+				<label>	Программа для участия:	</label>
+				<a href="https://drawpile.net/download/">drawpile.net/download/</a>
+			</p>
+			<p>
+				<label>	Адрес сервера:		</label>
+				<b class="gray"><!--# block name="hostname"-->www.example.com<!--# endblock --><!--#include file="hostname.txt" stub="hostname"-->:<!--# block name="port"-->9002<!--# endblock --><!--#include file="port.txt" stub="port"--></b>
+			</p>
+			<p>
+				<label>	Архив записей:		</label>
+				<a href="/drawpile/record/?sort_by=name&sort_order=descending"><!--#include file="hostname.txt" stub="hostname"--><!--# block name="records"-->/drawpile/record/<!--# endblock --><!--#include file="records.txt" stub="records"--></a>
+			</p>
+		</t>
+		<t><b class="gray">	На данный момент:	</b></t>
+		<t>
+			<p><b class="blue">	Версия сервера: <!--# block name="not_found"-->не найдено<!--# endblock --><!--#include file="version.txt" stub="not_found"--></b></p><!--# block name="none"-->
+			<p><b class="blue">	Активные сессии:	0</b></p>
+			<p><b class="blue">	Участники:		0</b></p>
+			<p><b class="blue">	Обновлено:	0000-00-00 <small>00:00:00</small></b></p><!--# endblock --><!--#include file="stats.ru.htm" stub="none"-->
+		</t>
+		<t><b class="gray">	Справка:		</b></t>
+		<details class="aqua">
+			<summary class="green">	Как присоединиться			</summary>
+			<b>
+				<ol>
+					<li>	Скачайте программу для участия по ссылке наверху страницы.	</li>
+					<li>	Установите программу, запустите её и следуйте шагам ниже.	</li>
+				</ol>
 			</b>
-		</u>
-		<u>
-			<s>
-				<i>Исходный код архива:</i>
+			<img src="how_to_join.ru.png" onload="this.title=this.alt;" alt="
+Верхнее меню - Сессия - Присоединиться.
+Вписать адрес сервера.
+Вписать свой псевдоним (или позже в некоторых версиях).
+Нажать Присоединиться.
+
+Если сессий нету (то есть никого на сервере нет):
+
+Верхнее меню - Сессия - Начать.
+Вписать адрес сервера в графу Удалённый.
+Вписать имя сессии, и т.д.
+Нажать Начать.
+">
+		</details>
+		<details class="aqua">
+			<summary class="green">	Примеры настроек для инструментов	</summary>
+			<img src="example_tools.png" onload="this.title=this.alt;" alt="
+1. Кисть (серая), Размер: 1 px
+Непрозрачность:  100%, Жёсткость: 100%
+Интервал:  10%,  Давление: Непрозрачность
+
+2. Кисть (серая), Размер: 4 px
+Непрозрачность:  47%, Жёсткость: 100%
+Интервал:  10%, Давление: Непрозрачность
+
+3. Кисть (белая), Размер: 11 px
+Непрозрачность:  100%, Жёсткость: 68%
+Интервал:  10%,  Давление: Размер
+
+4. Кисть (серая), Размер: 23 px
+Непрозрачность:  4%,  Жёсткость: 100%
+Интервал:  10%, Давление: Размер, Непрозрачность
+
+5. Акварель (серая), Размер: 73 px
+Непрозрачность:  4%,  Жёсткость: 100%
+Смазывание: 1%,  Подбор цвета: 1/3
+Интервал:  10%, Давление: Размер, Непрозрачность
+
+6. Кисть (белая/стёрка), Размер: 61 px
+Непрозрачность:  100%, Жёсткость: 59%
+Интервал:  10%,  Давление: Размер
+">
+		</details>
+		<details class="aqua">
+			<summary class="green">	Если обнаружена смена сертификата	</summary>
+			<b>
+				<p>
+					Это нормально, SSL-сертификат сервера может обновляться
+					<a class="explain" href="https://letsencrypt.org/2015/11/09/why-90-days.html">каждые 2-3 месяца</a>.
+				</p>
+			</b>
+			<img src="certificate_changed.png" onload="this.title=this.alt;" alt="
+Если сертификат сервера сменился, нажмите Продолжить.
+">
+		</details>
+		<t>
+			<p>
+				<label>		Исходный код архива:	</label>
 				<a href="https://github.com/f2d/drawpile_webpage_automation">github.com/f2d/drawpile_webpage_automation</a>
-			</s>
-			<s>
-				<i>Вернуться на главную страницу:</i>
-				<a href="/">
-					<!--#include file="hostname.txt" stub="hostname"-->/
-				</a>
-			</s>
-		</u>
-		<u><b class="gray">На других языках:</b></u>
-		<u>
-			<s>
+			</p>
+			<p>
+				<label>		Вернуться на главную страницу:		</label>
+				<a href="/"><!--#include file="hostname.txt" stub="hostname"-->/</a>
+			</p>
+		</t>
+		<t><b class="gray">		На других языках:	</b></t>
+		<t>
+			<p>
 				<a href="index.en.shtml">EN</a>
 				<a href="index.ru.shtml">RU</a>
-			</s>
-		</u>
-	</i></u>
+			</p>
+		</t>
+	</div></t>
 	</td></tr></table>
 </body>
 </html>

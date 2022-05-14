@@ -1140,8 +1140,8 @@ if task == 'stats' or task == 'pipe':
 	timeout = 30
 	ssl_context = None
 
-	block_start = '<b class="blue">'
-	block_end = '</b>'
+	block_start = '<p><b class="blue">'
+	block_end = '</b></p>'
 	indent_block = '\n\t\t\t'
 	indent_inline = indent_block + '\t'
 	indent_newline = indent_inline + '<br><br>'
