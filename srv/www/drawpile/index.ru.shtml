@@ -1,3 +1,4 @@
+﻿<!doctype html>
 <html lang="ru">
 <head>
 	<meta charset="utf-8">
@@ -9,41 +10,39 @@
 	<script src="index.js"></script>
 	<title>Drawpile - сервер для рисования через сеть на общем полотне</title>
 </head>
-<body>
-	<table width="100%" height="100%"><tr><td align="center">
-	<t><div class="col-width drawpile">
-		<t><b class="purple">Drawpile - сервер для рисования через сеть на общем полотне</b></t>
-		<t>
-			<p>
-				<label>	Программа для участия:	</label>
-				<a href="https://drawpile.net/download/">drawpile.net/download/</a>
-			</p>
-			<p>
-				<label>	Адрес сервера:		</label>
-				<b class="gray"><!--# block name="hostname"-->www.example.com<!--# endblock --><!--#include file="hostname.txt" stub="hostname"-->:<!--# block name="port"-->9002<!--# endblock --><!--#include file="port.txt" stub="port"--></b>
-			</p>
-			<p>
-				<label>	Архив записей:		</label>
-				<a href="/drawpile/record/?sort_by=name&sort_order=descending"><!--#include file="hostname.txt" stub="hostname"--><!--# block name="records"-->/drawpile/record/<!--# endblock --><!--#include file="records.txt" stub="records"--></a>
-			</p>
-		</t>
-		<t><b class="gray">	На данный момент:	</b></t>
-		<t>
-			<p><b class="blue">	Версия сервера: <!--# block name="not_found"-->не найдено<!--# endblock --><!--#include file="version.txt" stub="not_found"--></b></p><!--# block name="none"-->
-			<p><b class="blue">	Активные сессии:	0</b></p>
-			<p><b class="blue">	Участники:		0</b></p>
-			<p><b class="blue">	Обновлено:	0000-00-00 <small>00:00:00</small></b></p><!--# endblock --><!--#include file="stats.ru.htm" stub="none"-->
-		</t>
-		<t><b class="gray">	Справка:		</b></t>
-		<details class="aqua">
-			<summary class="green">	Как присоединиться			</summary>
-			<b>
-				<ol>
-					<li>	Скачайте программу для участия по ссылке наверху страницы.	</li>
-					<li>	Установите программу, запустите её и следуйте шагам ниже.	</li>
-				</ol>
-			</b>
-			<img src="how_to_join.ru.png" onload="this.title=this.alt;" alt="
+<body class="drawpile t col-width">
+	<t><b class="purple">Drawpile - сервер для рисования через сеть на общем полотне</b></t>
+	<t>
+		<p>
+			<label>	Программа для участия:	</label>
+			<a href="https://drawpile.net/download/">drawpile.net/download/</a>
+		</p>
+		<p>
+			<label>	Адрес сервера:		</label>
+			<b class="gray"><!--# block name="hostname"-->www.example.com<!--# endblock --><!--#include file="hostname.txt" stub="hostname"-->:<!--# block name="port"-->9002<!--# endblock --><!--#include file="port.txt" stub="port"--></b>
+		</p>
+		<p>
+			<label>	Архив записей:		</label>
+			<a href="/drawpile/record/?sort_by=name&sort_order=descending"><!--#include file="hostname.txt" stub="hostname"--><!--# block name="records"-->/drawpile/record/<!--# endblock --><!--#include file="records.txt" stub="records"--></a>
+		</p>
+	</t>
+	<t><b class="gray">	На данный момент:	</b></t>
+	<t>
+		<p><b class="blue">	Версия сервера: <!--# block name="not_found"-->не найдено<!--# endblock --><!--#include file="version.txt" stub="not_found"--></b></p><!--# block name="none"-->
+		<p><b class="blue">	Активные сессии:	0</b></p>
+		<p><b class="blue">	Участники:		0</b></p>
+		<p><b class="blue">	Обновлено:	0000-00-00 <small>00:00:00</small></b></p><!--# endblock --><!--#include file="stats.ru.htm" stub="none"-->
+	</t>
+	<t><b class="gray">	Справка:		</b></t>
+	<details class="aqua">
+		<summary class="green">	Как присоединиться			</summary>
+		<b>
+			<ol>
+				<li>	Скачайте программу для участия по ссылке наверху страницы.	</li>
+				<li>	Установите программу, запустите её и следуйте шагам ниже.	</li>
+			</ol>
+		</b>
+		<img src="how_to_join.ru.png" onload="this.title=this.alt;" alt="
 Верхнее меню - Сессия - Присоединиться.
 Вписать адрес сервера.
 Вписать свой псевдоним (или позже в некоторых версиях).
@@ -56,10 +55,11 @@
 Вписать имя сессии, и т.д.
 Нажать Начать.
 ">
-		</details>
-		<details class="aqua">
-			<summary class="green">	Примеры настроек для инструментов	</summary>
-			<img src="example_tools.png" onload="this.title=this.alt;" alt="
+	</details>
+	<details class="aqua">
+		<summary class="green">	Примеры настроек для инструментов	</summary>
+		<b><p>	Настройки в разных версиях программы могут отличаться.	</p></b>
+		<img src="example_tools.png" onload="this.title=this.alt;" alt="
 1. Кисть (серая), Размер: 1 px
 Непрозрачность:  100%, Жёсткость: 100%
 Интервал:  10%,  Давление: Непрозрачность
@@ -85,37 +85,35 @@
 Непрозрачность:  100%, Жёсткость: 59%
 Интервал:  10%,  Давление: Размер
 ">
-		</details>
-		<details class="aqua">
-			<summary class="green">	Если обнаружена смена сертификата	</summary>
-			<b>
-				<p>
-					Это нормально, SSL-сертификат сервера может обновляться
-					<a class="explain" href="https://letsencrypt.org/2015/11/09/why-90-days.html">каждые 2-3 месяца</a>.
-				</p>
-			</b>
-			<img src="certificate_changed.png" onload="this.title=this.alt;" alt="
+	</details>
+	<details class="aqua">
+		<summary class="green">	Если обнаружена смена сертификата	</summary>
+		<b>
+			<p>
+				Это нормально, SSL-сертификат сервера может обновляться
+				<a class="explain" href="https://letsencrypt.org/2015/11/09/why-90-days.html">каждые 2-3 месяца</a>.
+			</p>
+		</b>
+		<img src="certificate_changed.png" onload="this.title=this.alt;" alt="
 Если сертификат сервера сменился, нажмите Продолжить.
 ">
-		</details>
-		<t>
-			<p>
-				<label>		Исходный код архива:	</label>
-				<a href="https://github.com/f2d/drawpile_webpage_automation">github.com/f2d/drawpile_webpage_automation</a>
-			</p>
-			<p>
-				<label>		Вернуться на главную страницу:		</label>
-				<a href="/"><!--#include file="hostname.txt" stub="hostname"-->/</a>
-			</p>
-		</t>
-		<t><b class="gray">		На других языках:	</b></t>
-		<t>
-			<p>
-				<a href="index.en.shtml">EN</a>
-				<a href="index.ru.shtml">RU</a>
-			</p>
-		</t>
-	</div></t>
-	</td></tr></table>
+	</details>
+	<t>
+		<p>
+			<label>		Исходный код архива:	</label>
+			<a href="https://github.com/f2d/drawpile_webpage_automation">github.com/f2d/drawpile_webpage_automation</a>
+		</p>
+		<p>
+			<label>		Вернуться на главную страницу:		</label>
+			<a href="/"><!--#include file="hostname.txt" stub="hostname"-->/</a>
+		</p>
+	</t>
+	<t><b class="gray">		На других языках:	</b></t>
+	<t>
+		<p>
+			<a href="index.en.shtml">EN</a>
+			<a href="index.ru.shtml">RU</a>
+		</p>
+	</t>
 </body>
 </html>

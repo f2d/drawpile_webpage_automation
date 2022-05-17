@@ -1,3 +1,11 @@
+
+if ('HTMLDetailsElement' in window);
+else {
+var	script = document.createElement('script');
+	script.src = '../check-details.js';
+	document.head.appendChild(script);
+}
+
 var	regSpace = /\s+/g
 ,	regTrim = /^\s+|\s+$/g
 ,	regTimeBreak = /^\d+(<|>|,|$)/

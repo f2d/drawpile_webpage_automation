@@ -1,3 +1,4 @@
+﻿<!doctype html>
 <html lang="en">
 <head>
 	<meta charset="utf-8">
@@ -9,41 +10,39 @@
 	<script src="index.js"></script>
 	<title>Drawpile - server for drawing online on a shared canvas</title>
 </head>
-<body>
-	<table width="100%" height="100%"><tr><td align="center">
-	<t><div class="col-width drawpile">
-		<t><b class="purple">Drawpile - server for drawing online on a shared canvas</b></t>
-		<t>
-			<p>
-				<label>	Download client:	</label>
-				<a href="https://drawpile.net/download/">drawpile.net/download/</a>
-			</p>
-			<p>
-				<label>	Join server:		</label>
-				<b class="gray"><!--# block name="hostname"-->www.example.com<!--# endblock --><!--#include file="hostname.txt" stub="hostname"-->:<!--# block name="port"-->9002<!--# endblock --><!--#include file="port.txt" stub="port"--></b>
-			</p>
-			<p>
-				<label>	Replays:		</label>
-				<a href="/drawpile/record/?sort_by=name&sort_order=descending"><!--#include file="hostname.txt" stub="hostname"--><!--# block name="records"-->/drawpile/record/<!--# endblock --><!--#include file="records.txt" stub="records"--></a>
-			</p>
-		</t>
-		<t><b class="gray">	At this moment:		</b></t>
-		<t>
-			<p><b class="blue">	Server version: <!--# block name="not_found"-->not found<!--# endblock --><!--#include file="version.txt" stub="not_found"--></b></p><!--# block name="none"-->
-			<p><b class="blue">	Active sessions:	0</b></p>
-			<p><b class="blue">	Users:			0</b></p>
-			<p><b class="blue">	Last updated:	0000-00-00 <small>00:00:00</small></b></p><!--# endblock --><!--#include file="stats.en.htm" stub="none"-->
-		</t>
-		<t><b class="gray">	Help:			</b></t>
-		<details class="aqua">
-			<summary class="green">	How to join			</summary>
-			<b>
-				<ol>
-					<li>	Download the client program using the link at the top of page.	</li>
-					<li>	Install the client program and follow the steps below.		</li>
-				</ol>
-			</b>
-			<img src="how_to_join.en.png" onload="this.title=this.alt;" alt="
+<body class="drawpile t col-width">
+	<t><b class="purple">Drawpile - server for drawing online on a shared canvas</b></t>
+	<t>
+		<p>
+			<label>	Download client:	</label>
+			<a href="https://drawpile.net/download/">drawpile.net/download/</a>
+		</p>
+		<p>
+			<label>	Join server:		</label>
+			<b class="gray"><!--# block name="hostname"-->www.example.com<!--# endblock --><!--#include file="hostname.txt" stub="hostname"-->:<!--# block name="port"-->9002<!--# endblock --><!--#include file="port.txt" stub="port"--></b>
+		</p>
+		<p>
+			<label>	Replays:		</label>
+			<a href="/drawpile/record/?sort_by=name&sort_order=descending"><!--#include file="hostname.txt" stub="hostname"--><!--# block name="records"-->/drawpile/record/<!--# endblock --><!--#include file="records.txt" stub="records"--></a>
+		</p>
+	</t>
+	<t><b class="gray">	At this moment:		</b></t>
+	<t>
+		<p><b class="blue">	Server version: <!--# block name="not_found"-->not found<!--# endblock --><!--#include file="version.txt" stub="not_found"--></b></p><!--# block name="none"-->
+		<p><b class="blue">	Active sessions:	0</b></p>
+		<p><b class="blue">	Users:			0</b></p>
+		<p><b class="blue">	Last updated:	0000-00-00 <small>00:00:00</small></b></p><!--# endblock --><!--#include file="stats.en.htm" stub="none"-->
+	</t>
+	<t><b class="gray">	Help:			</b></t>
+	<details class="aqua">
+		<summary class="green">	How to join			</summary>
+		<b>
+			<ol>
+				<li>	Download the client program using the link at the top of page.	</li>
+				<li>	Install the client program and follow the steps below.		</li>
+			</ol>
+		</b>
+		<img src="how_to_join.en.png" onload="this.title=this.alt;" alt="
 Top menu - Session - Join.
 Enter the server address.
 Enter your username (or later for some versions).
@@ -56,10 +55,11 @@ Enter the server address into the Remote section.
 Enter your username, session title, etc.
 Press Host.
 ">
-		</details>
-		<details class="aqua">
-			<summary class="green">	Example drawing tool settings	</summary>
-			<img src="example_tools.png" onload="this.title=this.alt;" alt="
+	</details>
+	<details class="aqua">
+		<summary class="green">	Example drawing tool settings	</summary>
+		<b><p>	Settings in different versions of the program may vary.	</p></b>
+		<img src="example_tools.png" onload="this.title=this.alt;" alt="
 1. Brush (gray), Size: 1 px
 Opacity:  100%, Hardness: 100%
 Spacing:  10%,  Pressure: Opacity
@@ -85,37 +85,35 @@ Spacing:  10%, Pressure: Size, Opacity
 Opacity:  100%, Hardness: 59%
 Spacing:  10%,  Pressure: Size
 ">
-		</details>
-		<details class="aqua">
-			<summary class="green">	If certificate change detected	</summary>
-			<b>
-				<p>
-					This is OK, the server SSL certificate may change
-					<a class="explain" href="https://letsencrypt.org/2015/11/09/why-90-days.html">every 2-3 months</a>.
-				</p>
-			</b>
-			<img src="certificate_changed.png" onload="this.title=this.alt;" alt="
+	</details>
+	<details class="aqua">
+		<summary class="green">	If certificate change detected	</summary>
+		<b>
+			<p>
+				This is OK, the server SSL certificate may change
+				<a class="explain" href="https://letsencrypt.org/2015/11/09/why-90-days.html">every 2-3 months</a>.
+			</p>
+		</b>
+		<img src="certificate_changed.png" onload="this.title=this.alt;" alt="
 If the certificate of the server has changed, press Continue.
 ">
-		</details>
-		<t>
-			<p>
-				<label>		Archive source code:	</label>
-				<a href="https://github.com/f2d/drawpile_webpage_automation">github.com/f2d/drawpile_webpage_automation</a>
-			</p>
-			<p>
-				<label>		Back to main page:		</label>
-				<a href="/"><!--#include file="hostname.txt" stub="hostname"-->/</a>
-			</p>
-		</t>
-		<t><b class="gray">		In other languages:	</b></t>
-		<t>
-			<p>
-				<a href="index.en.shtml">EN</a>
-				<a href="index.ru.shtml">RU</a>
-			</p>
-		</t>
-	</div></t>
-	</td></tr></table>
+	</details>
+	<t>
+		<p>
+			<label>		Archive source code:	</label>
+			<a href="https://github.com/f2d/drawpile_webpage_automation">github.com/f2d/drawpile_webpage_automation</a>
+		</p>
+		<p>
+			<label>		Back to main page:		</label>
+			<a href="/"><!--#include file="hostname.txt" stub="hostname"-->/</a>
+		</p>
+	</t>
+	<t><b class="gray">		In other languages:	</b></t>
+	<t>
+		<p>
+			<a href="index.en.shtml">EN</a>
+			<a href="index.ru.shtml">RU</a>
+		</p>
+	</t>
 </body>
 </html>
