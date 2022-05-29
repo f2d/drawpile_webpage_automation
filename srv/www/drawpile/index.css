@@ -1,4 +1,4 @@
-html {
+﻿html {
 	min-height: 100%;
 	display: flex;
 	align-items: center;
@@ -76,15 +76,16 @@ details[open] > *:not(summary) {
 }
 .check-details details > input[id*="check-details"]:not(:checked) +
 label[for*="check-details"]::before {
-	content: "\25B6";
+	content: "►";
 }
 .check-details details > input[id*="check-details"]:checked +
 label[for*="check-details"]::before {
-	content: "\25BC";
+	content: "▼";
 }
 .check-details details > input[id*="check-details"] +
 label[for*="check-details"]::before {
 	/* float: left; */
+	opacity: 0.5;
 }
 t > form,
 t > p {
