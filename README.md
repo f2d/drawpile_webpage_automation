@@ -5,7 +5,7 @@ Everything else should probably run as is, although not advised and not tested i
 
 ## Features:
 
-* Launch script for Drawpile server and its message processing chain.
+* Launch script for [Drawpile](https://github.com/drawpile/) server and its message processing chain.
 * Webpage templates and static files.
 * Autoupdating stats page with currently open session list after each user join/leave.
 * Autoupdating session archive folder with stats (user names, stroke counts) and screenshots after each closed session.
@@ -41,7 +41,7 @@ chmod +x /srv/drawpile/*.sh
 ```
 
 It is possible to configure all paths to write changes directly to a public web folder.
-By default symlinks from web pages to drawpile are used.
+Symlinks from public web files to Drawpile working folder are used by default.
 To create service user accounts and the symlinks, use this command:
 ```
 sudo /srv/drawpile/root-do-initial-setup.sh

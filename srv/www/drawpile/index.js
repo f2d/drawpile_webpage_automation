@@ -20,7 +20,96 @@ function gc(n,p) {try {return TOS.slice.call((p || document).getElementsByClassN
 function gn(n,p) {try {return TOS.slice.call((p || document).getElementsByTagName(n) || []);} catch(e) {return [];}}
 function id(i) {return document.getElementById(i);}
 function orz(n) {return parseInt(n||0)||0;}
-function leftPad(n) {n = orz(n); return n > 9 || n < 0?n:'0'+n;}
+function leftPad(n, len, pad) {
+	n = String(orz(n));
+	len = orz(len) || 2;
+	pad = String(pad || 0);
+
+	while (n.length < len) n = pad+n;
+
+	return n;
+}
+
+//* Accepts a Date object or date string that is recognized by the Date.parse() method
+function getDayOfWeek(date) {
+
+//* https://stackoverflow.com/a/27347503
+
+	if (date.toLocaleString) {
+		return date.toLocaleString(window.navigator.language, { weekday : 'long' });
+	}
+
+//* https://stackoverflow.com/a/17964373
+
+	var dayOfWeek = new Date(date).getDay();
+
+	return (
+		isNaN(dayOfWeek)
+		? null :
+		// ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
+		['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+		[dayOfWeek]
+	);
+}
+
+function getFormattedTimezoneOffset(t) {
+	return (
+		(t = (t && t.getTimezoneOffset ? t : new Date).getTimezoneOffset())
+		? (t < 0 ? (t = -t, '+') : '-')+leftPad(Math.floor(t/60))+':'+leftPad(t%60)
+		: 'Z'
+	);
+}
+
+function getFormattedTime(t, plain, only_ymd, for_filename) {
+	if (TOS.indexOf(typeof t) > -1) {
+		t = orz(t) * 1000;
+	}
+
+	var d = (
+		t
+		? new Date(t > 0 ? t : t + new Date)
+		: new Date
+	);
+
+	var t = (
+		('FullYear,Month,Date'+(only_ymd ? '' : ',Hours,Minutes,Seconds'))
+		.split(',')
+		.map(
+			function(v,i) {
+				v = d['get'+v]();
+				if (i == 1) ++v;
+
+				return leftPad(v);
+			}
+		)
+	);
+
+	var YMD = t.slice(0,3).join('-');
+	var HIS = (only_ymd ? '' : t.slice(3).join(for_filename ? '-' : ':'));
+
+	if (plain) {
+		return (HIS ? YMD+(for_filename ? '_' : ' ')+HIS : YMD);
+	}
+
+	var tz = getFormattedTimezoneOffset(t);
+
+	return (
+		'<time datetime="'
+	+		(HIS ? YMD+'T'+HIS : YMD)
+	+		tz
+	+	'" title="'
+	+		getDayOfWeek(d)+', '
+	+		YMD+(HIS ? ' '+HIS : '')+', '
+	+		tz
+	+	'" data-t="'
+	+		Math.floor(d / 1000)
+	+	'">'
+	+		YMD
+	+		(HIS ? ' <small>'+HIS+'</small>' : '')
+	+	'</time>'
+	);
+}
+
 function toggleClass(e,c,keep) {
 var	k = 'className'
 ,	old = e[k]
@@ -34,35 +123,6 @@ var	k = 'className'
 	}
 	if (a.length) e[k] = a.join(' ');
 	else if (old) e[k] = '', e.removeAttribute(k);
-}
-
-function getFormattedTimezoneOffset(t) {
-	return (
-		(t = (t && t.getTimezoneOffset ? t : new Date()).getTimezoneOffset())
-		? (t < 0?(t = -t, '+'):'-')+leftPad(Math.floor(t/splitSec))+':'+leftPad(t%splitSec)
-		: 'Z'
-	);
-}
-
-function getFormattedTime(t, plain, only_ymd) {
-	if (TOS.indexOf(typeof t) > -1) t = orz(t)*1000;
-var	d = (t ? new Date(t+(t > 0 ? 0 : new Date())) : new Date());
-	t = ('FullYear,Month,Date'+(only_ymd?'':',Hours,Minutes,Seconds')).split(',').map(function(v,i) {
-		v = d['get'+v]();
-		if (i == 1) ++v;
-		return leftPad(v);
-	});
-var	YMD = t.slice(0,3).join('-')
-,	HIS = t.slice(3).join(':')
-	;
-	return (
-		plain
-		? YMD+' '+HIS
-		: '<time datetime="'+YMD+'T'+HIS
-		+	getFormattedTimezoneOffset(t)
-		+	'" data-t="'+Math.floor(d/1000)
-		+	'">'+YMD+' <small>'+HIS+'</small></time>'
-	);
 }
 
 //* Specific functions *-------------------------------------------------------
