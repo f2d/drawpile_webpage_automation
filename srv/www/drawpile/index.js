@@ -31,24 +31,31 @@ function leftPad(n, len, pad) {
 }
 
 //* Accepts a Date object or date string that is recognized by the Date.parse() method
-function getDayOfWeek(date) {
+function getWeekDayName(date) {
 
 //* https://stackoverflow.com/a/27347503
 
 	if (date.toLocaleString) {
-		return date.toLocaleString(window.navigator.language, { weekday : 'long' });
+		var weekDayName = date.toLocaleString(window.navigator.language, { weekday : 'long' });
+
+		if (
+			weekDayName.indexOf(' ') < 0
+		&&	weekDayName.indexOf(':') < 0
+		) {
+			return weekDayName;
+		}
 	}
 
 //* https://stackoverflow.com/a/17964373
 
-	var dayOfWeek = new Date(date).getDay();
+	var weekDayIndex = new Date(date).getDay();
 
 	return (
-		isNaN(dayOfWeek)
+		isNaN(weekDayIndex)
 		? null :
 		// ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
 		['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
-		[dayOfWeek]
+		[weekDayIndex]
 	);
 }
 
@@ -98,7 +105,7 @@ function getFormattedTime(t, plain, only_ymd, for_filename) {
 	+		(HIS ? YMD+'T'+HIS : YMD)
 	+		tz
 	+	'" title="'
-	+		getDayOfWeek(d)+', '
+	+		getWeekDayName(d)+', '
 	+		YMD+(HIS ? ' '+HIS : '')+', '
 	+		tz
 	+	'" data-t="'
