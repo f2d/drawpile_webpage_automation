@@ -93,13 +93,14 @@
 ,	regSplitTime = /[^\d-]+/g
 ,	regSplitName = /\s+-\s+/g
 
-,	splitSec = 60
 ,	maxThumbWidth = 200
 ,	maxThumbHeight = 200
 
 ,	dprecMetaByID = {}
 
 ,	TOS = ['object', 'string']
+,	TYMD = ['FullYear', 'Month', 'Date']
+,	TYMDHMS = ['FullYear', 'Month', 'Date', 'Hours', 'Minutes', 'Seconds']
 
 ,	la, lang = document.documentElement.lang || 'en'
 	;
@@ -331,7 +332,7 @@ function getWeekDayName(date) {
 //* https://stackoverflow.com/a/27347503
 
 	if (date.toLocaleString) {
-		var weekDayName = date.toLocaleString(window.navigator.language, { weekday : 'long' });
+	var	weekDayName = date.toLocaleString(window.navigator.language, { weekday : 'long' });
 
 		if (
 			weekDayName.indexOf(' ') < 0
@@ -343,7 +344,7 @@ function getWeekDayName(date) {
 
 //* https://stackoverflow.com/a/17964373
 
-	var weekDayIndex = new Date(date).getDay();
+var	weekDayIndex = new Date(date).getDay();
 
 	return (
 		isNaN(weekDayIndex)
@@ -363,37 +364,41 @@ function getFormattedTimezoneOffset(t) {
 }
 
 function getFormattedTime(t, plain, only_ymd, for_filename) {
-	if (TOS.indexOf(typeof t) > -1) {
-		t = orz(t) * 1000;
+
+	function getFormattedTimePart(v,i) {
+		v = d['get'+v]();
+		if (i == 1) ++v;
+
+		return leftPad(v);
 	}
 
-	var d = (
+	if (TOS.indexOf(typeof t) > -1) {
+	var	text = String(t);
+
+		if (isString(t) && Date.parse) {
+			t = Date.parse(t.replace(/(T\d+)-(\d+)-(\d+\D*)/, '$1:$2:$3'));
+		} else {
+			t = orz(t) * 1000;
+		}
+
+		if (!t && text) return text;
+	}
+
+var	d = (
 		t
 		? new Date(t > 0 ? t : t + new Date)
 		: new Date
 	);
 
-	var t = (
-		('FullYear,Month,Date'+(only_ymd ? '' : ',Hours,Minutes,Seconds'))
-		.split(',')
-		.map(
-			function(v,i) {
-				v = d['get'+v]();
-				if (i == 1) ++v;
-
-				return leftPad(v);
-			}
-		)
-	);
-
-	var YMD = t.slice(0,3).join('-');
-	var HIS = (only_ymd ? '' : t.slice(3).join(for_filename ? '-' : ':'));
+var	t = (only_ymd ? TYMD : TYMDHMS).map(getFormattedTimePart);
+var	YMD = t.slice(0,3).join('-');
+var	HIS = (only_ymd ? '' : t.slice(3).join(for_filename ? '-' : ':'));
 
 	if (plain) {
 		return (HIS ? YMD+(for_filename ? '_' : ' ')+HIS : YMD);
 	}
 
-	var tz = getFormattedTimezoneOffset(t);
+var	tz = getFormattedTimezoneOffset(t);
 
 	return (
 		'<time datetime="'
