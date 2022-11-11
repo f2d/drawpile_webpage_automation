@@ -11,6 +11,20 @@ from dateutil.parser import parse as datetime_text_to_object
 from dateutil.tz import tzlocal, tzutc
 from PIL import Image, ImageChops
 
+# DeprecationWarning:
+# Image.ANTIALIAS is deprecated and will be removed in Pillow 10 (2023-07-01).
+# Use Resampling.LANCZOS instead.
+try:
+	from PIL import Resampling
+
+	image_resampling_method = Resampling.LANCZOS
+
+except:
+	try:
+		image_resampling_method = Image.ANTIALIAS	# <- best for downscaling
+	except:
+		image_resampling_method = None
+
 # Use colored text if available:
 try:
 	from termcolor import colored, cprint
@@ -2140,7 +2154,7 @@ def get_recording_screenshots_with_thumbs(img_paths):
 				try: img.close()
 				except: pass
 
-			thumb.thumbnail(thumb_size, Image.ANTIALIAS) # <- best for downscaling
+			thumb.thumbnail(thumb_size, image_resampling_method)
 			img_size_text = 'x'.join(map(str, thumb.size))
 
 			print_with_time_stamp('Thumb size: %s' % img_size_text)
