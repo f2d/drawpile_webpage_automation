@@ -258,6 +258,8 @@ def print_help():
 
 # - Do not change: ------------------------------------------------------------
 
+done_records_count = 0
+
 print_enc = path_enc = file_enc = log_enc = web_enc = default_enc
 
 cfg_var_name_by_exts = ['lock', 'log', 'htm', 'html', 'txt']
@@ -2638,6 +2640,7 @@ def process_archived_session(session_ID, src_files):
 	# - END process_archived_session
 
 def do_task_records():
+	global done_records_count
 
 	# - Check if all dirs exist or can be created first:
 
@@ -2685,6 +2688,8 @@ def do_task_records():
 
 		except Exception as exception:
 			print_whats_wrong(exception)
+
+	done_records_count += 1
 
 	# - END do_task_records
 
@@ -3019,8 +3024,8 @@ if task == 'pipe':
 
 	pat_ID_part = r'\{?' + pat_session_ID_part + '\}?:.+?'
 	pat_tasks = {
-		'records': re.compile(pat_ID_part + r'(Closing.+?session|Last.+?user.+?left)', re.I | re.DOTALL)
-	,	'stats'  : re.compile(pat_ID_part + r'(Changed|Made|Tagged|preserve|(Left|Joined).+?session)', re.I | re.DOTALL)
+		'records': re.compile(pat_ID_part + r'(Closing.+?session|Last.+?user.+?left|Idle.+?session.+?expired)', re.I | re.DOTALL)
+	,	'stats'  : re.compile(pat_ID_part + r'(Changed|Made|Tagged|preserve|(Left|Joined).+?session)|Starting.+?microhttpd.+?on.+?port', re.I | re.DOTALL)
 	}
 
 	lock_off()
@@ -3055,6 +3060,12 @@ else:
 	time.sleep(cfg['wait'])
 
 	do_task(task)
+
+if done_records_count > 0:
+
+	lock_on()
+
+	do_task_stats()
 
 # - End: ----------------------------------------------------------------------
 
