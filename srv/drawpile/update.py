@@ -57,6 +57,7 @@ read_encodings = 'utf_8|utf_16_le|utf_16_be|cp1251'.split('|')
 cmd_optimize_prefix = 'cmd_optimize_'
 
 # Order of preference: cmd arg > ini? > default:
+
 cfg_default = {
 	'root': u'./'
 ,	'rec_src': 'sessions/'	# <- source, scanned not recursively
@@ -505,7 +506,7 @@ def print_action_paths(prefix, from_path, to_path):
 # https://stackoverflow.com/a/919684
 def print_with_time_stamp(*list_args, **keyword_args):
 	lines = []
-	count_args = count_keyword_args = 0
+	args_count = keyword_args_count = 0
 	before_task = tell_if_readonly = False
 
 	def try_append(arg):
@@ -523,7 +524,7 @@ def print_with_time_stamp(*list_args, **keyword_args):
 	if list_args:
 		for arg in list_args:
 			try_append(arg)
-			count_args += 1
+			args_count += 1
 
 	if keyword_args:
 		for keyword, arg in keyword_args.items():
@@ -533,9 +534,9 @@ def print_with_time_stamp(*list_args, **keyword_args):
 				tell_if_readonly = arg
 			else:
 				try_append(arg)
-				count_keyword_args += 1
+				keyword_args_count += 1
 
-	if not (count_args or count_keyword_args):
+	if not (args_count or keyword_args_count):
 		return
 
 	time_stamp = get_time_now_text(before_task=before_task)
@@ -568,7 +569,7 @@ def print_with_time_stamp(*list_args, **keyword_args):
 					traceback.print_exc()
 
 	else:
-		print('%s Warning: nothing to print with %d args and %d keyword args.' % (time_stamp, count_args, count_keyword_args))
+		print('%s Warning: nothing to print with %d args and %d keyword args.' % (time_stamp, args_count, keyword_args_count))
 
 # https://stackoverflow.com/a/3314411
 def get_obj_pretty_print(obj):
@@ -790,7 +791,7 @@ def replace_by_arr(text, replacements):
 	and	replacement_count <= 2
 	and	replacement_count == len(list(filter(is_type_str, replacements)))
 	):
-		replacement_index = 1 if (re.match(pat_true, text) == None) else 0
+		replacement_index = 1 if (re.match(pat_true, text) is None) else 0
 
 		text = (
 			replacements[replacement_index]
@@ -895,7 +896,7 @@ def expand_task(task):
 
 def get_cfg_default(var_name):
 	if var_name in cfg_default:
-		result = cfg_default[var_name]
+		result = cfg_default.get(var_name, '')
 
 		if is_type_dic(result):
 			result = int(result.get('default', 0))
@@ -918,13 +919,13 @@ def get_cfg_path_with_root(var_name, ext=None):
 	result = cfg.get(var_name, '')
 
 	if not result:
-		if result == None:
+		if result is None:
 			return result
 
-		result = cfg.cfg_default(var_name, '')
+		result = cfg_default.get(var_name, '')
 
 		if not result:
-			if result == None:
+			if result is None:
 				return result
 
 			result = (
@@ -1058,7 +1059,7 @@ web_enc   = cfg.get('web_enc',   '') or default_enc
 
 thumb_size = cfg['thumb_w'], cfg['thumb_h']
 
-rec_versions = sorted(set(
+cmd_rec_versions = sorted(set(
 	x.strip()
 	for x in
 	cfg.get('cmd_rec_versions', '').split('/')
@@ -1792,43 +1793,54 @@ def get_cmd_with_path(cmd_line, subject='', exe_suffix=''):
 	return list(map(fix_slashes, arr))
 
 def get_print_and_check_cmd_result(
-	cmd_line
+	cmd_lines_to_try
 ,	filename=''
 ,	title=''
 ,	callback_for_each_line=None
 ,	callback_for_final_check=None
-,	retry_exe_suffixes=None
+,	exe_suffixes_to_try=None
 ,	print_cmd_output=True
 ,	return_cmd_output=True
 ):
-	if not retry_exe_suffixes:
-		retry_exe_suffixes = []
+	if not is_type_arr(cmd_lines_to_try):
+		cmd_lines_to_try = [cmd_lines_to_try]
 
-	retry_exe_suffixes.append('')
-	retry_exe_suffixes = sorted(set(map(str, retry_exe_suffixes)))
+	if not exe_suffixes_to_try:
+		exe_suffixes_to_try = []
+
+	exe_suffixes_to_try.append('')
+	exe_suffixes_to_try = sorted(set(map(str, exe_suffixes_to_try)))
 
 	if TEST:
 		print('Exe suffixes to try:')
-		print('\n'.join(retry_exe_suffixes))
+		print('\n'.join(exe_suffixes_to_try))
 
-	for exe_suffix in retry_exe_suffixes:
+	for cmd_line in cmd_lines_to_try:
+
+		if not cmd_line:
+			continue
 
 		if TEST:
-			print('Trying exe suffix: ' + (exe_suffix or 'none'))
+			print('Trying command line: ' + cmd_line)
 
-		cmd_result = get_and_print_cmd_result(
-			get_cmd_with_path(cmd_line, filename, exe_suffix)
-		,	title=title
-		,	callback_for_each_line=callback_for_each_line
-		,	print_cmd_output=print_cmd_output
-		,	return_cmd_output=return_cmd_output
-		)
+		for exe_suffix in exe_suffixes_to_try:
 
-		if callback_for_final_check:
-			if callback_for_final_check():
+			if TEST:
+				print('Trying exe suffix: ' + (exe_suffix or 'none'))
+
+			cmd_result = get_and_print_cmd_result(
+				get_cmd_with_path(cmd_line, filename, exe_suffix)
+			,	title=title
+			,	callback_for_each_line=callback_for_each_line
+			,	print_cmd_output=print_cmd_output
+			,	return_cmd_output=return_cmd_output
+			)
+
+			if callback_for_final_check:
+				if callback_for_final_check():
+					break
+			elif cmd_result:
 				break
-		elif cmd_result:
-			break
 
 	return cmd_result
 
@@ -2019,7 +2031,7 @@ def get_recording_stats_for_each_user(
 	,	title='get recording stats'
 	,	callback_for_each_line=callback_for_each_line
 	,	callback_for_final_check=callback_for_final_check
-	,	retry_exe_suffixes=rec_versions
+	,	exe_suffixes_to_try=cmd_rec_versions
 	,	print_cmd_output=False	# <- to keep output/logs cleaner
 	,	return_cmd_output=False	# <- to use less memory uselessly
 	)
@@ -2116,7 +2128,7 @@ def get_recording_screenshots_saved(source_rec_file_path):
 	,	title='save screenshots + thumbs'
 	,	callback_for_each_line=callback_for_each_line
 	,	callback_for_final_check=callback_for_final_check
-	,	retry_exe_suffixes=rec_versions
+	,	exe_suffixes_to_try=cmd_rec_versions
 	,	return_cmd_output=False
 	)
 
@@ -2234,7 +2246,7 @@ def process_archived_session(session_ID, src_files):
 	# - Remove leftovers of previous runs:
 
 	if temp_filenames_to_remove:
-		done_files = 0
+		done_files_count = 0
 
 		print_with_time_stamp(
 			'Old temp files to remove:' if READ_ONLY else
@@ -2243,13 +2255,13 @@ def process_archived_session(session_ID, src_files):
 
 		for filename in temp_filenames_to_remove:
 			file_path = fix_slashes(dir_active + '/' + filename)
-			done_files += check_and_remove(file_path, 'old temp', skip_done_message=True)
+			done_files_count += check_and_remove(file_path, 'old temp', skip_done_message=True)
 
-		if done_files:
-			print_with_time_stamp('Removed %d files.' % done_files)
+		if done_files_count:
+			print_with_time_stamp('Removed %d files.' % done_files_count)
 
 	if old_public_file_paths_to_remove:
-		done_files = 0
+		done_files_count = 0
 
 		print_with_time_stamp(
 			'Old public files to remove:' if READ_ONLY else
@@ -2257,10 +2269,10 @@ def process_archived_session(session_ID, src_files):
 		)
 
 		for file_path in old_public_file_paths_to_remove:
-			done_files += check_and_remove(file_path, 'old public', skip_done_message=True)
+			done_files_count += check_and_remove(file_path, 'old public', skip_done_message=True)
 
-		if done_files:
-			print_with_time_stamp('Removed %d files.' % done_files)
+		if done_files_count:
+			print_with_time_stamp('Removed %d files.' % done_files_count)
 
 	# - Find best session recording parts to copy:
 
@@ -2602,7 +2614,7 @@ def process_archived_session(session_ID, src_files):
 		file_path = fix_slashes(dir_active + '/' + filename)
 		target_path = fix_slashes(dir_target + '/' + filename)
 
-		if dir_target == None:
+		if dir_target is None:
 			check_and_remove(file_path, 'small session')
 		else:
 			check_and_move(file_path, target_path)
@@ -3010,9 +3022,11 @@ if task == 'pipe':
 		'records': re.compile(pat_ID_part + r'(Closing.+?session|Last.+?user.+?left)', re.I | re.DOTALL)
 	,	'stats'  : re.compile(pat_ID_part + r'(Changed|Made|Tagged|preserve|(Left|Joined).+?session)', re.I | re.DOTALL)
 	}
+
 	lock_off()
 
 	for line in sys.stdin:
+
 		lock_on()
 
 		try:
