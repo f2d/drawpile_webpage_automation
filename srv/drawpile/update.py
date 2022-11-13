@@ -33,7 +33,7 @@ try:
 
 except ImportError:
 	def colored(*list_args, **keyword_args): return list_args[0]
-	def cprint(*list_args, **keyword_args): print(list_args[0])
+	def cprint (*list_args, **keyword_args): print (list_args[0])
 
 # https://stackoverflow.com/a/17510727
 try:
@@ -97,6 +97,7 @@ cfg_default = {
 }
 
 def print_help():
+
 	self_name = os.path.basename(__file__)
 
 	line_sep = '''
@@ -108,12 +109,12 @@ def print_help():
 	prefix_len = len(cmd_optimize_prefix)
 	pad_to_len = prefix_len + len('<ext>')
 
-	for arg in cfg_default:
-		if arg[:prefix_len] == cmd_optimize_prefix:
-			pad_width = pad_to_len - len(arg)
+	for each_arg in cfg_default:
+		if each_arg[ : prefix_len] == cmd_optimize_prefix:
+			pad_width = pad_to_len - len(each_arg)
 			pad_text = (' ' * pad_width) if pad_width > 0 else ''
 
-			cmd_optimize_lines.append(arg + pad_text + ' = <command line>. ' + get_cfg_for_help(arg))
+			cmd_optimize_lines.append(each_arg + pad_text + ' = <command line>. ' + get_cfg_for_help(each_arg))
 
 	default_enc_text = '<encoding name>. ' + colored('Default: ', 'yellow') + default_enc
 
@@ -312,6 +313,7 @@ pat_session_ID = re.compile(r'''^
 $''', re.I | re.X | re.DOTALL)
 
 # Log[sample]: 2018-04-17T12:13:19Z Info/Join 2;::ffff:1.2.3.4;?????@{8315280b-6293-4d6f-83dd-00a484ee59c5}: Joined session
+
 pat_time_from_log = re.compile(r'''^
 	(?P<Before>[^\]]*\]:\s*)?
 	(?P<DateTime>\d{4}(?:\D\d\d){5}\S*)
@@ -372,8 +374,8 @@ pat_time_to_html = (
 )
 # pat_time_to_html = r'\g<Date> <small>\g<Time></small>'
 
-pat_false = re.compile('^.*false.*$', re.I)
-pat_true  = re.compile('^.*true.*$', re.I)
+pat_false = re.compile(r'\bFalse\b', re.I)
+pat_true  = re.compile(r'\bTrue\b', re.I)
 
 pat_non_digit        = re.compile(r'\D+')
 pat_conseq_slashes   = re.compile(r'[\\/]+')
@@ -426,24 +428,27 @@ def is_type_date(v): return isinstance(v, date_type)
 def is_type_str(v): return isinstance(v, str_type) or isinstance(v, uni_type)
 
 def is_any_char_of_a_in_b(chars, text):
-	for char in chars:
-		if text.find(char) >= 0:
+
+	for each_char in chars:
+		if text.find(each_char) >= 0:
 			return True
 
 	return False
 
 def is_quoted(text):
+
 	if len(text) > 1:
-		for char in '\'"':
+		for each_char in '\'"':
 			if (
-				char == text[0]
-			and	char == text[-1 : ][0]
+				each_char == text[0]
+			and	each_char == text[-1 : ][0]
 			):
 				return True
 
 	return False
 
 def quoted_if_must(text):
+
 	text = '%s' % text
 
 	return (
@@ -453,12 +458,15 @@ def quoted_if_must(text):
 	)
 
 def quoted_list(args):
+
 	return list(map(quoted_if_must, args))
 
 def cmd_args_to_text(args):
+
 	return ' '.join(quoted_list(args))
 
 def cmd_args_to_text_with_pipe(args):
+
 	return ' '.join([
 		(
 			arg
@@ -472,20 +480,22 @@ def cmd_args_to_text_with_pipe(args):
 	])
 
 def dump(obj, check_list=[]):
+
 	result_text = ''
 
-	for attr_name in (check_list or dir(obj)):
-		found = hasattr(obj, attr_name) if check_list else True
+	for each_attr_name in (check_list or dir(obj)):
+		found = hasattr(obj, each_attr_name) if check_list else True
 
 		if found:
-			attr_value = getattr(obj, attr_name)
+			attr_value = getattr(obj, each_attr_name)
 
 			if attr_value and (check_list or not callable(attr_value)):
-				result_text += 'obj.%s = %s\n' % (attr_name, attr_value)
+				result_text += 'obj.%s = %s\n' % (each_attr_name, attr_value)
 
 	return result_text
 
 def print_whats_wrong(exception, title='Error:'):
+
 	print_with_time_stamp(colored(title or 'Error:', 'red'))
 	traceback.print_exc()
 
@@ -498,14 +508,17 @@ def print_whats_wrong(exception, title='Error:'):
 	print('')
 
 def print_action_path(prefix, path):
+
 	print_with_time_stamp('%s: "%s"' % (prefix, path), tell_if_readonly=True)
 
 def print_action_paths(prefix, from_path, to_path):
+
 	print_with_time_stamp('%s from: "%s"' % (prefix, from_path), tell_if_readonly=True)
 	print_with_time_stamp('%s to:   "%s"' % (prefix, to_path), tell_if_readonly=True)
 
 # https://stackoverflow.com/a/919684
 def print_with_time_stamp(*list_args, **keyword_args):
+
 	lines = []
 	args_count = keyword_args_count = 0
 	before_task = tell_if_readonly = False
@@ -523,18 +536,20 @@ def print_with_time_stamp(*list_args, **keyword_args):
 					lines.append(arg)
 
 	if list_args:
-		for arg in list_args:
-			try_append(arg)
+		for each_arg in list_args:
+			try_append(each_arg)
 			args_count += 1
 
 	if keyword_args:
-		for keyword, arg in keyword_args.items():
-			if keyword == 'before_task':
-				before_task = arg
-			elif keyword == 'tell_if_readonly':
-				tell_if_readonly = arg
+		for each_keyword, each_arg in keyword_args.items():
+
+			if each_keyword == 'before_task':
+				before_task = each_arg
+
+			elif each_keyword == 'tell_if_readonly':
+				tell_if_readonly = each_arg
 			else:
-				try_append(arg)
+				try_append(each_arg)
 				keyword_args_count += 1
 
 	if not (args_count or keyword_args_count):
@@ -552,9 +567,9 @@ def print_with_time_stamp(*list_args, **keyword_args):
 			text = '\n'.join(lines)
 		except:
 			try:
-				text = '\n'.join(line.encode(print_enc) for line in lines)
+				text = '\n'.join(each_line.encode(print_enc) for each_line in lines)
 			except:
-				text = '\n'.join(line.decode(print_enc) for line in lines)
+				text = '\n'.join(each_line.decode(print_enc) for each_line in lines)
 
 		try:
 			print('%s %s' % (time_stamp, text))
@@ -574,6 +589,7 @@ def print_with_time_stamp(*list_args, **keyword_args):
 
 # https://stackoverflow.com/a/3314411
 def get_obj_pretty_print(obj):
+
 	try:
 		dict = obj.__dict__ if '__dict__' in obj else obj
 
@@ -593,12 +609,15 @@ def get_obj_pretty_print(obj):
 
 # https://stackoverflow.com/a/18126680
 def epoch_to_datetime(time_arg):
+
 	return datetime.fromtimestamp(time_arg, tzutc())
 
 def get_file_mod_time(file_path):
+
 	return epoch_to_datetime(os.path.getmtime(file_path))
 
 def get_time_now_text(format=time_format_print_log, before_task=False):
+
 	global time_before_task
 
 	time_obj = datetime.now().replace(tzinfo=tzlocal())
@@ -609,7 +628,9 @@ def get_time_now_text(format=time_format_print_log, before_task=False):
 	return time_obj.strftime(format)
 
 def get_time_now_html(format=time_format_print, content_type='html', lang='en'):
+
 	if content_type == 'html':
+
 		time_html = fix_html_time_stamp(get_time_now_text(format))
 		reason = cfg.get('reason')
 
@@ -619,35 +640,39 @@ def get_time_now_html(format=time_format_print, content_type='html', lang='en'):
 			if index >= 0:
 				reason = reason[index + 1 : ].strip() or reason
 
-			for reason_group in output_update_reasons:
+			for each_reason_group in output_update_reasons:
 
-				possible_reasons = reason_group.get('reasons')
-				outputs_by_lang  = reason_group.get('output')
+				possible_reasons = each_reason_group.get('reasons')
+				outputs_by_lang  = each_reason_group.get('output')
 
 				if possible_reasons and outputs_by_lang:
 					reason_text = outputs_by_lang.get(lang)
 
 					if reason_text:
-						for possible_part in possible_reasons:
+						for each_possible_part in possible_reasons:
 
-							if possible_part in reason:
+							if each_possible_part in reason:
 								return u'%s<br>(%s)' % (time_html, reason_text)
 
 		return time_html
 
 	if content_type == 'txt':
+
 		return get_time_now_text(format)
 
 def datetime_to_utc_epoch(time_arg):
+
 	return (time_arg - time_epoch_start).total_seconds()
 
 def datetime_text_to_utc_epoch(time_arg):
+
 	time_obj = datetime_text_to_object(time_arg)
 	time_int = datetime_to_utc_epoch(time_obj)
 
 	return time_int
 
 def fix_html_time_stamp(time_arg):
+
 	if time_arg and is_type_str(time_arg):
 		time_text = '%s %s' % (time_arg, datetime_text_to_utc_epoch(time_arg))
 	else:
@@ -656,6 +681,7 @@ def fix_html_time_stamp(time_arg):
 	return re.sub(pat_time_from_text, pat_time_to_html, time_text)
 
 def get_rec_time_text(time_arg):
+
 	if time_arg:
 		if is_type_str(time_arg):
 			time_arg = datetime_text_to_object(time_arg)
@@ -674,6 +700,7 @@ def get_rec_time_text(time_arg):
 	return time_text
 
 def bytes_to_text(content, encoding=file_enc, trim=False):
+
 	try:	content = content.decode(encoding or default_enc)
 	except:	pass
 
@@ -687,9 +714,11 @@ def bytes_to_text(content, encoding=file_enc, trim=False):
 	return content
 
 def fix_slashes(path):
+
 	return re.sub(pat_conseq_slashes, '/', unicode(path))
 
 def prepend_root_if_none(path):
+
 	path = fix_slashes(path)
 
 	if (
@@ -702,6 +731,7 @@ def prepend_root_if_none(path):
 	return fix_slashes(path)
 
 def get_file_name(path):
+
 	path = fix_slashes(path)
 	index = path.rfind('/')
 
@@ -711,6 +741,7 @@ def get_file_name(path):
 	return path
 
 def get_file_ext(path, include_dot=False):
+
 	path = get_file_name(path)
 	index = path.rfind('.')
 
@@ -720,12 +751,16 @@ def get_file_ext(path, include_dot=False):
 	return path.lower()
 
 def get_lang(name):
+
 	index = name.find('.')
-	if index >= 0: name = name[ : index]
+
+	if index >= 0:
+		name = name[ : index]
 
 	return name.lower()
 
 def get_text_as_is_or_by_lang(lang, text):
+
 	return '%s' % (
 		text.get(lang, '')
 		if is_type_dic(text)
@@ -760,18 +795,18 @@ def get_trimmed_image(image, border=None):
 		]
 
 		corner_bounding_boxes = filter(None, [
-			get_trimmed_image_bounding_box(image.getpixel(pixel_coordinates))
-			for pixel_coordinates in corner_pixels
+			get_trimmed_image_bounding_box(image.getpixel(each_pixel))
+			for each_pixel in corner_pixels
 		])
 
-		for corner_bounding_box in corner_bounding_boxes:
+		for each_corner_box in corner_bounding_boxes:
 			if bounding_box:
-				if bounding_box[0] < corner_bounding_box[0]: bounding_box[0] = corner_bounding_box[0]
-				if bounding_box[1] < corner_bounding_box[1]: bounding_box[1] = corner_bounding_box[1]
-				if bounding_box[2] > corner_bounding_box[2]: bounding_box[2] = corner_bounding_box[2]
-				if bounding_box[3] > corner_bounding_box[3]: bounding_box[3] = corner_bounding_box[3]
+				if bounding_box[0] < each_corner_box[0]: bounding_box[0] = each_corner_box[0]
+				if bounding_box[1] < each_corner_box[1]: bounding_box[1] = each_corner_box[1]
+				if bounding_box[2] > each_corner_box[2]: bounding_box[2] = each_corner_box[2]
+				if bounding_box[3] > each_corner_box[3]: bounding_box[3] = each_corner_box[3]
 			else:
-				bounding_box = list(corner_bounding_box)
+				bounding_box = list(each_corner_box)
 
 	if bounding_box:
 		return image.crop(bounding_box)
@@ -803,20 +838,23 @@ def replace_by_arr(text, replacements):
 # batch of replacements:
 
 	else:
-		for replacement in replacements:
-			if   is_type_fun(replacement): text = replacement(text)
-			elif is_type_arr(replacement): text = re.sub(replacement[0], replacement[1], text)
-			elif is_type_str(replacement): text = re.sub(replacement, '', text)
+		for each_replace in replacements:
+			if   is_type_fun(each_replace): text = each_replace(text)
+			elif is_type_arr(each_replace): text = re.sub(each_replace[0], each_replace[1], text)
+			elif is_type_str(each_replace): text = re.sub(each_replace, '', text)
 
 	return text
 
 # https://gist.github.com/carlsmith/b2e6ba538ca6f58689b4c18f46fef11c
 def replace_key_to_value(text, substitutions):
+
 	substrings = sorted(substitutions, key=len, reverse=True)
 	regex = re.compile('|'.join(map(re.escape, substrings)))
+
 	return regex.sub(lambda match: substitutions[match.group(0)], text)
 
 def sanitize_filename(input_text, safe_only=False):
+
 	result_text = ''
 
 	for index in range(len(input_text)):
@@ -824,35 +862,23 @@ def sanitize_filename(input_text, safe_only=False):
 
 		try:
 			input_char_code = ord(input_char)
+			safe = False if safe_only else True
 
-			if safe_only:
-				safe = False
+			for each_char_code in (
+				safe_chars_as_ord if safe_only else
+				unsafe_chars_as_ord
+			):
+				if (
+					(
+						input_char_code >= each_char_code[0]
+					and	input_char_code <= each_char_code[1]
+					)
+					if is_type_arr(each_char_code) else
+					input_char_code == each_char_code
+				):
+					safe = True if safe_only else False
 
-				for safe_char_code in safe_chars_as_ord:
-					if (
-						(
-							input_char_code >= safe_char_code[0]
-						and	input_char_code <= safe_char_code[1]
-						)
-						if is_type_arr(safe_char_code) else
-						input_char_code == safe_char_code
-					):
-						safe = True
-						break
-			else:
-				safe = True
-
-				for unsafe_char_code in unsafe_chars_as_ord:
-					if (
-						(
-							input_char_code >= unsafe_char_code[0]
-						and	input_char_code <= unsafe_char_code[1]
-						)
-						if is_type_arr(unsafe_char_code) else
-						input_char_code == unsafe_char_code
-					):
-						safe = False
-						break
+					break
 		except:
 			pass # - 2018-04-30 10:42 - I just want to sleep already.
 
@@ -861,6 +887,7 @@ def sanitize_filename(input_text, safe_only=False):
 	return result_text
 
 def get_filename_from_array(input_array):
+
 	parts = list(filter(None, input_array))
 
 	if len(parts) > 0:
@@ -872,6 +899,7 @@ def get_filename_from_array(input_array):
 	return ''
 
 def get_sanitized_filename_from_text(text):
+
 	if len(text) > 0:
 		try:
 			return sanitize_filename(text)
@@ -881,6 +909,7 @@ def get_sanitized_filename_from_text(text):
 	return ''
 
 def expand_task(task):
+
 	if task in tasks_as_function_name:
 		return task
 
@@ -896,6 +925,7 @@ def expand_task(task):
 	return ''
 
 def get_cfg_default(var_name):
+
 	if var_name in cfg_default:
 		result = cfg_default.get(var_name, '')
 
@@ -907,6 +937,7 @@ def get_cfg_default(var_name):
 	return result
 
 def get_cfg_for_help(var_name):
+
 	result = get_cfg_default(var_name)
 
 	return '%s %s' % (
@@ -917,6 +948,7 @@ def get_cfg_for_help(var_name):
 	)
 
 def get_cfg_path_with_root(var_name, ext=None):
+
 	result = cfg.get(var_name, '')
 
 	if not result:
@@ -942,11 +974,13 @@ def get_cfg_path_with_root(var_name, ext=None):
 	return prepend_root_if_none(result or '.')
 
 def save_current_sessions(sessions_on_server=None):
+
 	global current_sessions
 
 	current_sessions = sessions_on_server
 
 def is_user_included_in_txt(user_session_id=None):
+
 	if (
 		not current_sessions
 	or	not user_session_id
@@ -955,8 +989,9 @@ def is_user_included_in_txt(user_session_id=None):
 
 	marks = cfg.get('add_pwd_session_users') or []
 
-	for session in current_sessions:
-		session_id = session.get('id')
+	for each_session in current_sessions:
+
+		session_id = each_session.get('id')
 
 		if (
 			not session_id
@@ -964,7 +999,7 @@ def is_user_included_in_txt(user_session_id=None):
 		):
 			continue
 
-		passworded = session.get('hasPassword')
+		passworded = each_session.get('hasPassword')
 
 		if (
 			passworded.lower() == 'false'
@@ -973,16 +1008,17 @@ def is_user_included_in_txt(user_session_id=None):
 		):
 			return True
 
-		title = session.get('title', '').lower()
+		title = each_session.get('title', '').lower()
 
 		if marks and title:
-			for mark in marks:
-				if mark in title:
+			for each_mark in marks:
+				if each_mark in title:
 					return True
 
 	return False
 
 def is_any_option_set(*list_args):
+
 	return bool(set(list_args).intersection(options))
 
 # - Check arguments: ----------------------------------------------------------
@@ -1000,18 +1036,18 @@ TEST = is_any_option_set('TEST', 'T' )
 
 cfg = {}
 
-for var_name in cfg_default:
-	cfg[var_name] = get_cfg_default(var_name)
+for each_var_name in cfg_default:
+	cfg[each_var_name] = get_cfg_default(each_var_name)
 
-for arg in options:
+for each_arg in options:
 	var_name = ''
 	var_value = ''
 
-	if arg.find('=') > 0:
+	if each_arg.find('=') > 0:
 		var_name, var_value = [
-			x.strip()
-			for x in
-			arg.split('=', 1)
+			each_part.strip()
+			for each_part in
+			each_arg.split('=', 1)
 		]
 		var_name = var_name.strip('-')
 
@@ -1031,8 +1067,8 @@ for arg in options:
 
 		elif var_name == 'add_pwd_session_users':
 			var_value = sorted(set(
-				x.strip(' \t\r\n\'",.').lower()
-				for x in
+				each_part.strip(' \t\r\n\'",.').lower()
+				for each_part in
 				var_value.split(',')
 			))
 
@@ -1040,7 +1076,7 @@ for arg in options:
 			var_value = fix_slashes(var_value)
 
 	elif not var_name:
-		var_value = fix_slashes(arg)
+		var_value = fix_slashes(each_arg)
 		ext = get_file_ext(var_value)
 
 		if ext and ext in cfg_var_name_by_exts:
@@ -1107,9 +1143,9 @@ if task == 'records' or task == 'pipe':
 	,	'make': ['rec_end', 'rec_pub', 'rec_del']	# <- need later to move results
 	}
 
-	for condition, dir_paths in dirs_required.items():
-		for var_name in dir_paths:
-			cfg[var_name] = get_cfg_path_with_root(var_name)
+	for each_condition, each_path_group in dirs_required.items():
+		for each_var_name in each_path_group:
+			cfg[each_var_name] = get_cfg_path_with_root(each_var_name)
 
 	dir_active = cfg['rec_src']
 	dir_closed = cfg['rec_end']
@@ -1145,8 +1181,8 @@ if task:
 	stats_output = ['txt', 'html']
 	stats_output_path = {}
 
-	for var_name in stats_output:
-		stats_output_path[var_name] = get_cfg_path_with_root(var_name, ext=True)
+	for each_var_name in stats_output:
+		stats_output_path[each_var_name] = get_cfg_path_with_root(each_var_name, ext=True)
 
 	data_sources = ['users', 'sessions']
 	html_langs = ['en', 'ru']
@@ -1175,7 +1211,11 @@ if task:
 
 	output_formats = [
 		{
-			'input': [
+			'output_title': {
+				'en': u'Active sessions'
+			,	'ru': u'Активные сессии'
+			}
+		,	'input': [
 				{
 					'api_endpoint': 'sessions'
 				,	'run_with_data': save_current_sessions
@@ -1194,15 +1234,16 @@ if task:
 						,	'put_by_id': 'nsfm'
 						,	'replace': ['18+', '0+']
 						}
-					,	'protocol', 'title', 'founder', 'userCount', 'maxUserCount'
+					,	'protocol'
+					,	'title'
+					,	'founder'
+					,	'userCount'
+					,	'maxUserCount'
 					]
 				}
 			]
 		,	'output': ['html']
-		,	'output_title': {
-				'en': u'Active sessions'
-			,	'ru': u'Активные сессии'
-			}
+		,	'output_entry_separator': indent_newline
 		,	'output_entry_format': {
 				'en': indent_param.join([
 					indent_inline.join([
@@ -1231,9 +1272,12 @@ if task:
 				,	u'<span title="время начала">$startTime</span>'
 				])
 			}
-		,	'output_entry_separator': indent_newline
 		},{
-			'input': [
+			'output_title': {
+				'en': u'Users'
+			,	'ru': u'Участники'
+			}
+		,	'input': [
 				{
 					'api_endpoint': 'users'
 				,	'skip_if_empty': ['session']
@@ -1247,10 +1291,6 @@ if task:
 				}
 			]
 		,	'output': ['html']
-		,	'output_title': {
-				'en': u'Users'
-			,	'ru': u'Участники'
-			}
 		,	'output_entry_separator': ', '
 		},{
 			'input': [
@@ -1274,12 +1314,12 @@ if task:
 		,	'output': ['txt']
 		,	'output_entry_separator': '\n'
 		},{
-			'input': get_time_now_html
-		,	'output': ['html']
-		,	'output_title': {
+			'output_title': {
 				'en': u'Last updated'
 			,	'ru': u'Обновлено'
 			}
+		,	'input': get_time_now_html
+		,	'output': ['html']
 		}
 	]
 
@@ -1327,6 +1367,7 @@ if task:
 
 # - Lock file to prevent concurrent task run and log writes:
 def lock_on():
+
 	global lock_file
 
 	lock_path = cfg['lock']
@@ -1362,37 +1403,40 @@ def lock_on():
 		sys.exit(4)
 
 def lock_off():
+
 	global lock_file
 
 	if lock_file:
 		lock_file.close()
 
 def get_dict_from_matches(key_to_name, *list_args):
+
 	key_to_value = {}
 
-	for target_key, arg_key in key_to_name.items():
+	for each_target_key, each_arg_key in key_to_name.items():
 		match = None
 
-		for arg in list_args:
-			if is_type_reg_match(arg):
+		for each_arg in list_args:
+			if is_type_reg_match(each_arg):
 				try:
-					match = arg.group(arg_key)
+					match = each_arg.group(each_arg_key)
 				except IndexError:
 					pass
 
-			elif is_type_dic(arg):
-				if arg_key in arg:
-					match = arg[arg_key]
+			elif is_type_dic(each_arg):
+				if each_arg_key in each_arg:
+					match = each_arg[each_arg_key]
 
 			if match:
 				break
 
 		if match:
-			key_to_value[target_key] = match
+			key_to_value[each_target_key] = match
 
 	return key_to_value
 
 def get_subdir_from_matches(cfg_key, key_to_value):
+
 	path = cfg.get(cfg_key, '')
 
 	if path:
@@ -1401,15 +1445,18 @@ def get_subdir_from_matches(cfg_key, key_to_value):
 	return fix_slashes(path)
 
 def get_normalized_dir_path(path):
+
 	return fix_slashes(os.path.abspath(path)).rstrip('/') + '/'
 
 def is_parent_path(parent_path, child_path):
+
 	parent_path = get_normalized_dir_path(parent_path)
 	child_path  = get_normalized_dir_path(child_path)
 
 	return child_path.find(parent_path) == 0
 
 def get_rec_file_sort_value(filename):
+
 	path = fix_slashes(dir_active + '/' + filename)
 	match = re.search(pat_session_ID, filename)
 	index = 0
@@ -1440,6 +1487,7 @@ def get_rec_file_sort_value(filename):
 	# 2020-02-12 02.56.27 session 01e0vaxg66g7xpj77v5ptmcn7f (2).dprec	 4 511 906 bytes, modtime = 2020-02-12 14:36
 
 def get_rec_files_in_session_sequence_order(filenames):
+
 	files = map(get_rec_file_sort_value, filenames)
 	sorted_files = sorted(files)
 	sorted_files_as_dicts = [
@@ -1456,22 +1504,23 @@ def get_rec_files_in_session_sequence_order(filenames):
 	return sorted_files_as_dicts
 
 def get_file_paths_in_tree_by_session_id(session_ID, path, skip_paths=None, nested_call=False):
+
 	if skip_paths:
 		if not nested_call:
 			skip_paths = filter(
-				lambda skip_path: not is_parent_path(skip_path, path)
+				lambda each_skip_path: not is_parent_path(each_skip_path, path)
 			,	skip_paths
 			)
 
-		for skip_path in skip_paths:
-			if is_parent_path(skip_path, path):
+		for each_skip_path in skip_paths:
+			if is_parent_path(each_skip_path, path):
 				return []
 
 	result_paths = []
 
 	if os.path.isdir(path):
-		for name in os.listdir(path):
-			path_name = fix_slashes(path + '/' + name)
+		for each_name in os.listdir(path):
+			path_name = fix_slashes(path + '/' + each_name)
 
 			if os.path.isdir(path_name):
 				result_paths += get_file_paths_in_tree_by_session_id(
@@ -1481,7 +1530,7 @@ def get_file_paths_in_tree_by_session_id(session_ID, path, skip_paths=None, nest
 				,	nested_call=True
 				)
 
-			elif name.find(session_ID) >= 0:
+			elif each_name.find(session_ID) >= 0:
 				result_paths.append(path_name)
 
 	return result_paths
@@ -1494,9 +1543,9 @@ def get_open_file(path, mode='rU'):
 	if 'b' in mode:
 		return open(path, mode)
 
-	for read_enc in read_encodings:
+	for each_encoding in read_encodings:
 		try:
-			return io.open(path, mode, encoding=read_enc)
+			return io.open(path, mode, encoding=each_encoding)
 
 		except UnicodeDecodeError:
 			continue
@@ -1504,6 +1553,7 @@ def get_open_file(path, mode='rU'):
 	return None
 
 def read_file(path, mode='rb'):
+
 	if not os.path.isfile(path):
 		return ''
 
@@ -1515,12 +1565,12 @@ def read_file(path, mode='rb'):
 			file = None
 			file_content = ''
 
-			for read_enc in read_encodings:
+			for each_encoding in read_encodings:
 				if file:
 					file.close()
 
 				try:
-					file = io.open(path, mode, encoding=read_enc)
+					file = io.open(path, mode, encoding=each_encoding)
 					file_content = file.read()
 
 					break
@@ -1540,13 +1590,15 @@ def read_file(path, mode='rb'):
 
 	return file_content
 
-def write_file(path, conts, mode='a+b'):
+def write_file(path, contents, mode='a+b'):
+
 	if READ_ONLY:
 		return READ_ONLY
 
-	for attr in ['lower', 'real']:
-		if hasattr(conts, attr):
-			conts = [conts]
+	for each_key in ['lower', 'real']:
+		if hasattr(contents, each_key):
+			contents = [contents]
+
 			break
 
 	path = fix_slashes(path)
@@ -1576,14 +1628,14 @@ def write_file(path, conts, mode='a+b'):
 
 				retry = False
 	if file:
-		for content in conts:
+		for each_content in contents:
 			try:
-				written = file.write(content if binary else unicode(content))
+				written = file.write(each_content if binary else unicode(each_content))
 			except:
 				try:
 					written = file.write(
-						dump(content, ['__class__', '__doc__', 'args', 'message'])
-					or	dump(content)
+						dump(each_content, ['__class__', '__doc__', 'args', 'message'])
+					or	dump(each_content)
 					)
 				except:
 					print_whats_wrong(exception, 'Error: cannot write content to file: "%s"' % path.encode(print_enc))
@@ -1591,10 +1643,12 @@ def write_file(path, conts, mode='a+b'):
 
 	return written
 
-def rewrite_file(path, conts, mode='w+b'):
-	return write_file(path, conts, mode)
+def rewrite_file(path, contents, mode='w+b'):
+
+	return write_file(path, contents, mode)
 
 def save_files(path, content, suffix_before_ext=True):
+
 	if is_type_arr(content) or is_type_dic(content):
 		if suffix_before_ext:
 			ext = get_file_ext(path, include_dot=True)
@@ -1603,11 +1657,11 @@ def save_files(path, content, suffix_before_ext=True):
 			ext = ''
 			path = path + '.'
 
-		for file_name, file_content in (
+		for each_filename, each_content in (
 			enumerate(content) if is_type_arr(content) else
 			content.items()
 		):
-			save_files(path + file_name + ext, file_content)
+			save_files(path + each_filename + ext, each_content)
 
 	else:
 		if READ_ONLY:
@@ -1620,6 +1674,7 @@ def save_files(path, content, suffix_before_ext=True):
 			rewrite_file(path, content, 'w')
 
 def fetch_url(url):
+
 	print_with_time_stamp('Request URL: %s' % url)
 
 	if url.find('https://') == 0:
@@ -1652,6 +1707,7 @@ def fetch_url(url):
 	}
 
 def get_path_type(path):
+
 	text_parts = []
 
 	if os.path.isdir(path):  text_parts.append('folder')
@@ -1661,6 +1717,7 @@ def get_path_type(path):
 	return ' '.join(text_parts)
 
 def check_and_remove(path, title=None, skip_done_message=False):
+
 	title = ' '.join(filter(None, [
 		'Remove'
 	,	title
@@ -1680,6 +1737,7 @@ def check_and_remove(path, title=None, skip_done_message=False):
 	return 0
 
 def check_and_move(src_path, dest_path, make_symlink=False):
+
 	src_path = fix_slashes(src_path)
 	dest_path = fix_slashes(dest_path)
 
@@ -1733,6 +1791,7 @@ def check_and_move(src_path, dest_path, make_symlink=False):
 def get_cmd_with_path(cmd_line, subject='', exe_suffix=''):
 
 	def get_path_variants_with_suffix(path, suffix):
+
 		path = fix_slashes(path)
 		filename = get_file_name(path)
 		file_ext = get_file_ext(path, include_dot=True)
@@ -1749,8 +1808,8 @@ def get_cmd_with_path(cmd_line, subject='', exe_suffix=''):
 	placeholder = '%s'
 	found_subject = False
 
-	for match in re.finditer(pat_cmd_line_arg, cmd_line):
-		arg = match.group('Arg')
+	for each_match in re.finditer(pat_cmd_line_arg, cmd_line):
+		arg = each_match.group('Arg')
 
 		if is_quoted(arg):
 			arg = arg[1 : -1]
@@ -1785,9 +1844,10 @@ def get_cmd_with_path(cmd_line, subject='', exe_suffix=''):
 		print('Exe paths to check:')
 		print('\n'.join(exe_path_variants))
 
-	for exe_path in exe_path_variants:
-		if exe_path and os.path.isfile(exe_path):
-			arr[0] = exe_path
+	for each_exe_path in exe_path_variants:
+		if each_exe_path and os.path.isfile(each_exe_path):
+			arr[0] = each_exe_path
+
 			break
 
 	return list(map(fix_slashes, arr))
@@ -1815,21 +1875,21 @@ def get_print_and_check_cmd_result(
 		print('Exe suffixes to try:')
 		print('\n'.join(exe_suffixes_to_try))
 
-	for cmd_line in cmd_lines_to_try:
+	for each_cmd_line in cmd_lines_to_try:
 
-		if not cmd_line:
+		if not each_cmd_line:
 			continue
 
 		if TEST:
-			print('Trying command line: ' + cmd_line)
+			print('Trying command line: ' + each_cmd_line)
 
-		for exe_suffix in exe_suffixes_to_try:
+		for each_exe_suffix in exe_suffixes_to_try:
 
 			if TEST:
-				print('Trying exe suffix: ' + (exe_suffix or 'none'))
+				print('Trying exe suffix: ' + (each_exe_suffix or 'none'))
 
 			cmd_result = get_and_print_cmd_result(
-				get_cmd_with_path(cmd_line, filename, exe_suffix)
+				get_cmd_with_path(each_cmd_line, filename, each_exe_suffix)
 			,	title=title
 			,	callback_for_each_line=callback_for_each_line
 			,	print_cmd_output=print_cmd_output
@@ -1975,15 +2035,17 @@ def get_recording_stats_for_each_user(
 	pat_stroke = re.compile(r'^(?P<ID>\d+)\s+penup', re.I | re.U | re.DOTALL)
 
 	if users_by_ID:
-		for user_ID, user in users_by_ID.items():
-			rec_stats_users_by_ID[user_ID] = {
-				'name': user.get('name', '#' + user_ID)
-			,	'strokes': user.get('strokes', 0)
+		for each_user_ID, each_user_dict in users_by_ID.items():
+
+			rec_stats_users_by_ID[each_user_ID] = {
+				'name': each_user_dict.get('name', '#' + each_user_ID)
+			,	'strokes': each_user_dict.get('strokes', 0)
 			}
 
 	# - Find usernames by ID and their stroke counts:
 
 	def callback_for_each_line(line):
+
 		global rec_stats_multiline, rec_stats_users_by_ID, rec_stats_total_strokes
 
 		if rec_stats_multiline or line[-1 : ] == '{':
@@ -2020,6 +2082,7 @@ def get_recording_stats_for_each_user(
 				rec_stats_total_strokes += 1
 
 	def callback_for_final_check():
+
 		if rec_stats_multiline:
 			callback_for_each_line('}')
 
@@ -2039,14 +2102,15 @@ def get_recording_stats_for_each_user(
 	return rec_stats_users_by_ID
 
 def get_recording_stats_for_each_username(users_by_ID):
+
 	users_by_name = {}
 
-	for user_ID, user in users_by_ID.items():
+	for each_user_ID, each_user_dict in users_by_ID.items():
 		try:
-			strokes_count = user.get('strokes', 0)
+			strokes_count = each_user_dict.get('strokes', 0)
 
 			if strokes_count > 0:
-				user_name = user.get('name', '#' + user_ID)
+				user_name = each_user_dict.get('name', '#' + each_user_ID)
 				user_name = re.sub(pat_conseq_spaces_un, '_', user_name.strip())
 
 				if user_name in users_by_name:
@@ -2062,14 +2126,16 @@ def get_recording_stats_for_each_username(users_by_ID):
 	return users_by_name
 
 def get_recording_usernames_with_stats(users_by_name):
+
 	users_by_name_with_stats = {}
 
-	for user_name, strokes_count in users_by_name.items():
-		users_by_name_with_stats['%s %d' % (user_name, strokes_count)] = strokes_count
+	for each_user_name, each_user_strokes_count in users_by_name.items():
+		users_by_name_with_stats['%s %d' % (each_user_name, each_user_strokes_count)] = each_user_strokes_count
 
 	return users_by_name_with_stats
 
 def get_recording_screenshots_saved(source_rec_file_path):
+
 	global rec_img_paths
 
 	rec_img_paths = []
@@ -2107,10 +2173,11 @@ def get_recording_screenshots_saved(source_rec_file_path):
 	# - Save image files and grab their paths:
 
 	def callback_for_each_line(line):
+
 		global rec_img_paths
 
-		for marker in markers:
-			prefix, offset = marker
+		for each_marker in markers:
+			prefix, offset = each_marker
 
 			pos = line.find(prefix)
 			if pos >= 0:
@@ -2120,6 +2187,7 @@ def get_recording_screenshots_saved(source_rec_file_path):
 				return
 
 	def callback_for_final_check():
+
 		return bool(rec_img_paths)
 
 	get_print_and_check_cmd_result(
@@ -2135,22 +2203,23 @@ def get_recording_screenshots_saved(source_rec_file_path):
 	return get_recording_screenshots_with_thumbs(rec_img_paths)
 
 def get_recording_screenshots_with_thumbs(img_paths):
+
 	to_move = []
 
 	if not is_type_arr(img_paths):
 		img_paths = [img_paths]
 
-	for img_path in img_paths:
-		print_with_time_stamp('Resizing image: "%s"' % img_path)
+	for each_img_path in img_paths:
+		print_with_time_stamp('Resizing image: "%s"' % each_img_path)
 
 		try:
-			img_filename = get_file_name(img_path)
-			img_dir = img_path[ : -len(img_filename)]
+			img_filename = get_file_name(each_img_path)
+			img_dir = each_img_path[ : -len(img_filename)]
 			img_ext = get_file_ext(img_filename, include_dot=True)
 			img_basename = img_filename[ : -len(img_ext)]
 			res_filename = img_basename + '_resized' + img_ext
 
-			img = Image.open(img_path)
+			img = Image.open(each_img_path)
 			img_size_text = 'x'.join(map(str, img.size))
 
 			print_with_time_stamp('Full size: %s' % img_size_text)
@@ -2186,10 +2255,10 @@ def get_recording_screenshots_with_thumbs(img_paths):
 			cmd_line = cfg.get(cmd_optimize_prefix + ext, '')
 
 			if cmd_line:
-				for filename in [img_filename, res_filename]:
+				for each_filename in [img_filename, res_filename]:
 					get_and_print_cmd_result(
 						cmd_line
-					,	img_dir + filename
+					,	img_dir + each_filename
 					,	'optimize image'
 					)
 
@@ -2199,6 +2268,7 @@ def get_recording_screenshots_with_thumbs(img_paths):
 	return to_move
 
 def process_archived_session(session_ID, src_files):
+
 	all_filenames_to_move = []
 	cfg_filenames_to_read = []
 	log_filenames_to_read = []
@@ -2211,26 +2281,26 @@ def process_archived_session(session_ID, src_files):
 
 	# - Find files to move away:
 
-	for filename in src_files:
-		if filename.find(session_ID) >= 0:
+	for each_filename in src_files:
+		if each_filename.find(session_ID) >= 0:
 			if not date_match:
-				date_match = re.search(pat_get_date, filename)
+				date_match = re.search(pat_get_date, each_filename)
 
-			ext = get_file_ext(filename, include_dot=True)
+			ext = get_file_ext(each_filename, include_dot=True)
 
 			if ext in removable_temp_file_exts:
-				temp_filenames_to_remove.append(filename)
+				temp_filenames_to_remove.append(each_filename)
 			else:
-				if filename.find(session_rec_ext) > 0:
+				if each_filename.find(session_rec_ext) > 0:
 					if ext == session_closed_ext:
-						rec_filenames_to_publish.append(filename)
+						rec_filenames_to_publish.append(each_filename)
 					else:
-						bak_filenames_to_publish.append(filename)
+						bak_filenames_to_publish.append(each_filename)
 
-				elif filename.find(session_cfg_ext) > 0: cfg_filenames_to_read.append(filename)
-				elif filename.find(session_log_ext) > 0: log_filenames_to_read.append(filename)
+				elif each_filename.find(session_cfg_ext) > 0: cfg_filenames_to_read.append(each_filename)
+				elif each_filename.find(session_log_ext) > 0: log_filenames_to_read.append(each_filename)
 
-				all_filenames_to_move.append(filename)
+				all_filenames_to_move.append(each_filename)
 
 	old_public_file_paths_to_remove = get_file_paths_in_tree_by_session_id(
 		session_ID
@@ -2253,8 +2323,8 @@ def process_archived_session(session_ID, src_files):
 			'Old temp files, removing:'
 		)
 
-		for filename in temp_filenames_to_remove:
-			file_path = fix_slashes(dir_active + '/' + filename)
+		for each_filename in temp_filenames_to_remove:
+			file_path = fix_slashes(dir_active + '/' + each_filename)
 			done_files_count += check_and_remove(file_path, 'old temp', skip_done_message=True)
 
 		if done_files_count:
@@ -2268,8 +2338,8 @@ def process_archived_session(session_ID, src_files):
 			'Old public files, removing:'
 		)
 
-		for file_path in old_public_file_paths_to_remove:
-			done_files_count += check_and_remove(file_path, 'old public', skip_done_message=True)
+		for each_file_path in old_public_file_paths_to_remove:
+			done_files_count += check_and_remove(each_file_path, 'old public', skip_done_message=True)
 
 		if done_files_count:
 			print_with_time_stamp('Removed %d files.' % done_files_count)
@@ -2320,8 +2390,8 @@ def process_archived_session(session_ID, src_files):
 
 	session_flags = []
 
-	for filename in cfg_filenames_to_read:
-		file_path = fix_slashes(dir_active + '/' + filename)
+	for each_filename in cfg_filenames_to_read:
+		file_path = fix_slashes(dir_active + '/' + each_filename)
 
 		if os.path.isfile(file_path):
 			file_size = os.path.getsize(file_path)
@@ -2329,8 +2399,8 @@ def process_archived_session(session_ID, src_files):
 			print_with_time_stamp('Reading config file, %d bytes: "%s"' % (file_size, file_path))
 
 			with get_open_file(file_path) as lines:
-				for line in lines:
-					words = line.strip().split(' ')
+				for each_line in lines:
+					words = each_line.strip().split(' ')
 
 					if words[0] == 'FLAGS':
 						session_flags = words[1 : ]	# <- overwrite previously found set
@@ -2342,8 +2412,8 @@ def process_archived_session(session_ID, src_files):
 
 	users_by_ID_from_log = {}
 
-	for filename in log_filenames_to_read:
-		file_path = fix_slashes(dir_active + '/' + filename)
+	for each_filename in log_filenames_to_read:
+		file_path = fix_slashes(dir_active + '/' + each_filename)
 
 		if os.path.isfile(file_path):
 			file_size = os.path.getsize(file_path)
@@ -2351,11 +2421,12 @@ def process_archived_session(session_ID, src_files):
 			print_with_time_stamp('Reading log file, %d bytes: "%s"' % (file_size, file_path))
 
 			with get_open_file(file_path) as lines:
-				for line in lines:
+				for each_line in lines:
 					if TEST and READ_ONLY:
-						print_with_time_stamp(line.rstrip())
+						print_with_time_stamp(each_line.rstrip())
 
-					match = re.search(pat_time_from_log, line)
+					match = re.search(pat_time_from_log, each_line)
+
 					if match:
 						time_text = get_rec_time_text(match.group('DateTime'))
 
@@ -2410,11 +2481,11 @@ def process_archived_session(session_ID, src_files):
 		public_meta_content_parts = []
 		public_filenames_to_move = []
 
-		for file in rec_files_to_publish:
+		for each_file in rec_files_to_publish:
 
 	# - Prepare session recording copy for public archive:
 
-			selected_rec_file_path = file['path']
+			selected_rec_file_path = each_file['path']
 
 			if rec_parts_count > 1:
 				session_part_index += 1
@@ -2468,8 +2539,8 @@ def process_archived_session(session_ID, src_files):
 				shortened = False
 
 				public_rec_filename = ''
-				public_rec_ctime = get_rec_time_text(file['ctime'])
-				public_rec_mtime = get_rec_time_text(file['mtime'])
+				public_rec_ctime = get_rec_time_text(each_file['ctime'])
+				public_rec_mtime = get_rec_time_text(each_file['mtime'])
 				public_rec_ext = session_ID + session_part_label + session_rec_ext
 
 				rec_stats_parts = filter(None, [
@@ -2589,12 +2660,12 @@ def process_archived_session(session_ID, src_files):
 
 	# - Move saved files to public folder:
 
-		for from_to_filenames in public_filenames_to_move:
+		for each_rename in public_filenames_to_move:
 
-			if is_type_arr(from_to_filenames):
-				from_filename, to_filename = from_to_filenames
+			if is_type_arr(each_rename):
+				from_filename, to_filename = each_rename
 			else:
-				from_filename = to_filename = from_to_filenames
+				from_filename = to_filename = each_rename
 
 			check_and_move(
 				dir_active + '/' + from_filename
@@ -2610,9 +2681,10 @@ def process_archived_session(session_ID, src_files):
 	elif dir_removed:
 		dir_target = dir_removed + '/' + subdir_del
 
-	for filename in all_filenames_to_move:
-		file_path = fix_slashes(dir_active + '/' + filename)
-		target_path = fix_slashes(dir_target + '/' + filename)
+	for each_filename in all_filenames_to_move:
+
+		file_path = fix_slashes(dir_active + '/' + each_filename)
+		target_path = fix_slashes(dir_target + '/' + each_filename)
 
 		if dir_target is None:
 			check_and_remove(file_path, 'small session')
@@ -2638,27 +2710,28 @@ def process_archived_session(session_ID, src_files):
 	# - END process_archived_session
 
 def do_task_records():
+
 	global done_records_count
 
 	# - Check if all dirs exist or can be created first:
 
-	for condition, dir_paths in dirs_required.items():
-		for dir_path in dir_paths:
-			dir_path = get_cfg_path_with_root(dir_path)
+	for each_condition, each_path_group in dirs_required.items():
+		for each_dir_path in each_path_group:
+			each_dir_path = get_cfg_path_with_root(each_dir_path)
 
-			if not os.path.isdir(dir_path):
-				if condition == 'make':
+			if not os.path.isdir(each_dir_path):
+				if each_condition == 'make':
 					if not READ_ONLY:
-						os.makedirs(dir_path, new_dir_rights)
+						os.makedirs(each_dir_path, new_dir_rights)
 
-						if not os.path.isdir(dir_path):
-							print_with_time_stamp('Error: cannot create folder: "%s"' % dir_path)
+						if not os.path.isdir(each_dir_path):
+							print_with_time_stamp('Error: cannot create folder: "%s"' % each_dir_path)
 
 							return 3
 					else:
-						print_with_time_stamp('Warning: folder does not exist: "%s"' % dir_path)
+						print_with_time_stamp('Warning: folder does not exist: "%s"' % each_dir_path)
 				else:
-					print_with_time_stamp('Error: required folder does not exist: "%s"' % dir_path)
+					print_with_time_stamp('Error: required folder does not exist: "%s"' % each_dir_path)
 
 					return 2
 
@@ -2670,11 +2743,11 @@ def do_task_records():
 	session_closed_suffix = session_cfg_ext + session_closed_ext
 	session_closed_suffix_len = len(session_closed_suffix)
 
-	for filename in src_files:
+	for each_filename in src_files:
 		try:
-			if filename[-session_closed_suffix_len : ] == session_closed_suffix:
+			if each_filename[-session_closed_suffix_len : ] == session_closed_suffix:
 
-				match = re.search(pat_session_ID, filename)
+				match = re.search(pat_session_ID, each_filename)
 				if match:
 					session_ID = match.group('SessionID')
 					if session_ID in IDs_done:
@@ -2697,9 +2770,9 @@ def do_task_stats():
 
 	data = {}
 
-	for api_endpoint in data_sources:
+	for each_api_endpoint in data_sources:
 		try:
-			url = cfg['api_url_prefix'] + api_endpoint
+			url = cfg['api_url_prefix'] + each_api_endpoint
 
 			response = fetch_url(url)
 			content = response['content']
@@ -2715,7 +2788,7 @@ def do_task_stats():
 
 			print_with_time_stamp('Data object:\n%s' % get_obj_pretty_print(obj))
 
-			data[api_endpoint] = obj
+			data[each_api_endpoint] = obj
 
 		except Exception as exception:
 			print_whats_wrong(exception)
@@ -2726,28 +2799,28 @@ def do_task_stats():
 
 	output_files = {}
 
-	for output_format in output_formats:
-		format = output_format.get('output_entry_format')
+	for each_output_format in output_formats:
 
-		input_sources = output_format.get('input', [])
-		output_target_rules = output_format.get('output', [])
+		input_sources       = each_output_format.get('input', [])
+		output_target_rules = each_output_format.get('output', [])
+		format              = each_output_format.get('output_entry_format')
 
 		output_parts = {}
 
 		if is_type_fun(input_sources):
-			for lang in html_langs:
-				for ext in output_target_rules:
-					output_file_suffix = (lang + '.' + ext) if ext == 'html' else ext
-					output_parts[output_file_suffix] = input_sources(content_type=ext, lang=lang)
+			for each_lang in html_langs:
+				for each_ext in output_target_rules:
+					output_file_suffix = (each_lang + '.' + each_ext) if each_ext == 'html' else each_ext
+					output_parts[output_file_suffix] = input_sources(content_type=each_ext, lang=each_lang)
 
 		elif is_type_arr(input_sources):
-			for lang in html_langs:
-				for ext in output_target_rules:
-					output_file_suffix = (lang + '.' + ext) if ext == 'html' else ext
+			for each_lang in html_langs:
+				for each_ext in output_target_rules:
+					output_file_suffix = (each_lang + '.' + each_ext) if each_ext == 'html' else each_ext
 					output_parts[output_file_suffix] = []
 
-			for input_source in input_sources:
-				api_endpoint = input_source.get('api_endpoint')
+			for each_input_source in input_sources:
+				api_endpoint = each_input_source.get('api_endpoint')
 
 				if not api_endpoint:
 					continue
@@ -2757,29 +2830,29 @@ def do_task_stats():
 				if not data_from_api:
 					continue
 
-				data_function = input_source.get('run_with_data')
+				data_function = each_input_source.get('run_with_data')
 
 				if data_function:
 					data_function(data_from_api)
 
-				data_vars_to_get = input_source.get('get_vars')
+				data_vars_to_get = each_input_source.get('get_vars')
 
 				if not data_vars_to_get:
 					continue
 
-				skip_rules = input_source.get('skip_if_empty', [])
+				skip_rules = each_input_source.get('skip_if_empty', [])
 
-				for data_entry in data_from_api:
+				for each_data_entry in data_from_api:
 					skip = False
 
-					for skip_rule in skip_rules:
-						if is_type_dic(skip_rule):
-							skip_rule_function = skip_rule.get('function')
-							skip_rule_key = skip_rule.get('data_id')
+					for each_skip_rule in skip_rules:
+						if is_type_dic(each_skip_rule):
+							skip_rule_function = each_skip_rule.get('function')
+							skip_rule_key = each_skip_rule.get('data_id')
 							skip_rule_value = None
 
 							if skip_rule_key:
-								skip_rule_value = data_entry.get(skip_rule_key)
+								skip_rule_value = each_data_entry.get(skip_rule_key)
 
 							if skip_rule_function:
 								if not skip_rule_function(skip_rule_value):
@@ -2788,7 +2861,7 @@ def do_task_stats():
 							elif not skip_rule_value:
 								skip = True
 
-						elif not data_entry.get(skip_rule):
+						elif not each_data_entry.get(each_skip_rule):
 							skip = True
 
 						if skip:
@@ -2799,31 +2872,31 @@ def do_task_stats():
 
 					output_vars = {}
 
-					for data_var in data_vars_to_get:
+					for each_data_var in data_vars_to_get:
 						replacements = {}
 
 						data_var_name = output_var_name = None
 
-						if is_type_str(data_var):
-							data_var_name = output_var_name = data_var
+						if is_type_str(each_data_var):
+							data_var_name = output_var_name = each_data_var
 
-						elif is_type_dic(data_var):
+						elif is_type_dic(each_data_var):
 							data_var_name = (
-								data_var.get('get_by_id')
-							or	data_var.get('id')
-							or	data_var.get('put_by_id')
+								each_data_var.get('get_by_id')
+							or	each_data_var.get('id')
+							or	each_data_var.get('put_by_id')
 							)
 
 							output_var_name = (
-								data_var.get('put_by_id')
-							or	data_var.get('id')
-							or	data_var.get('get_by_id')
+								each_data_var.get('put_by_id')
+							or	each_data_var.get('id')
+							or	each_data_var.get('get_by_id')
 							)
 
-							for output_file_type in output_target_rules:
-								replacements[output_file_type] = (
-									data_var.get('replace_before_' + output_file_type, [])
-								+	data_var.get('replace', [])
+							for each_output_file_type in output_target_rules:
+								replacements[each_output_file_type] = (
+									each_data_var.get('replace_before_' + each_output_file_type, [])
+								+	each_data_var.get('replace', [])
 								)
 
 						if (
@@ -2833,57 +2906,58 @@ def do_task_stats():
 						):
 							var_value = unicode(data_entry[data_var_name])
 
-							for output_file_type in output_target_rules:
-								if output_file_type in replacements:
-									var_value = replace_by_arr(var_value, replacements[output_file_type])
+							for each_output_file_type in output_target_rules:
+								if each_output_file_type in replacements:
+									var_value = replace_by_arr(var_value, replacements[each_output_file_type])
 
-								if not output_file_type in output_vars:
-									output_vars[output_file_type] = {}
+								if not each_output_file_type in output_vars:
+									output_vars[each_output_file_type] = {}
 
-								output_vars[output_file_type][output_var_name] = var_value or '?'
+								output_vars[each_output_file_type][output_var_name] = var_value or '?'
 
-					for lang in html_langs:
-						for ext, vars in output_vars.items():
+					for each_lang in html_langs:
+						for each_ext, each_ext_vars in output_vars.items():
 							text = format or ''
 
 							if text:
 								if is_type_dic(text):
-									text = text.get(lang, '')
+									text = text.get(each_lang, '')
 
-								for output_var_name, var_value in vars.items():
-									text = text.replace('$' + output_var_name, var_value)
+								for each_var_name, each_var_value in each_ext_vars.items():
+									text = text.replace('$' + each_var_name, each_var_value)
 							else:
-								for output_var_name, var_value in vars.items():
+								for each_var_name, each_var_value in each_ext_vars.items():
 									if text:
 										text += unformatted_var_separator
-									text += var_value
+									text += each_var_value
 
-							output_file_suffix = (lang + '.' + ext) if ext == 'html' else ext
+							output_file_suffix = (each_lang + '.' + each_ext) if each_ext == 'html' else each_ext
 
 							if not output_file_suffix in output_parts:
 								output_parts[output_file_suffix] = []
 
 							output_parts[output_file_suffix].append(text)
 
-		output_title = output_format.get('output_title', 'unknown')
-		output_separator = output_format.get('output_entry_separator', ', ')
+		output_title     = each_output_format.get('output_title', 'unknown')
+		output_separator = each_output_format.get('output_entry_separator', ', ')
 
-		for output_file_suffix, content in output_parts.items():
+		for output_file_suffix, each_content in output_parts.items():
+
 			ext = get_file_ext(output_file_suffix)
 			lang = html_langs[0] if ext == output_file_suffix else get_lang(output_file_suffix)
 
 			title     = get_text_as_is_or_by_lang(lang, output_title)
 			separator = get_text_as_is_or_by_lang(lang, output_separator)
 
-			if is_type_arr(content):
-				count = len(content)
-				text = separator.join(sorted(set(content)))	# <- uniq, sort, join: https://stackoverflow.com/a/2931683
+			if is_type_arr(each_content):
+				count = len(each_content)
+				text = separator.join(sorted(set(each_content)))	# <- uniq, sort, join: https://stackoverflow.com/a/2931683
 			else:
 				count = None
-				text = '%s' % content
+				text = '%s' % each_content
 
 			if ext == 'html':
-				if is_type_arr(content):
+				if is_type_arr(each_content):
 					if text:
 						text = (
 							indent_newline
@@ -2907,7 +2981,8 @@ def do_task_stats():
 
 			output_files[output_file_suffix] += text
 
-	for output_file_suffix, content in output_files.items():
+	for output_file_suffix, each_content in output_files.items():
+
 		ext = get_file_ext(output_file_suffix)
 
 		if ext in stats_output_path:
@@ -2918,7 +2993,7 @@ def do_task_stats():
 				ext = get_file_ext(path, include_dot=True)
 				path = path[ : -len(ext)] + '.' + lang + ext
 
-			save_files(path, content)
+			save_files(path, each_content)
 
 	# - END do_task_stats
 
@@ -2936,8 +3011,8 @@ def do_task(task):
 
 			return 1
 
-		for arg in options:
-			file_path = prepend_root_if_none(arg)
+		for each_arg in options:
+			file_path = prepend_root_if_none(each_arg)
 
 			if os.path.isfile(file_path):
 				try:
@@ -2962,19 +3037,21 @@ def do_task(task):
 		try_files = []
 
 		if time_before_task:
-			for k, file_path in stats_output_path.items():
-				try_files.append(file_path)
+			for each_ext, each_file_path in stats_output_path.items():
 
-				for lang in html_langs:
-					ext = get_file_ext(file_path, include_dot=True)
-					try_files.append(file_path[ : -len(ext)] + '.' + lang + ext)
+				try_files.append(each_file_path)
+
+				for each_lang in html_langs:
+					ext = get_file_ext(each_file_path, include_dot=True)
+
+					try_files.append(each_file_path[ : -len(ext)] + '.' + each_lang + ext)
 
 		latest_time = None
 
-		for file_path in try_files:
+		for each_file_path in try_files:
 			try:
-				if os.path.isfile(file_path):
-					file_mod_time = get_file_mod_time(file_path)
+				if os.path.isfile(each_file_path):
+					file_mod_time = get_file_mod_time(each_file_path)
 
 					if not latest_time or latest_time > file_mod_time:
 						latest_time = file_mod_time
@@ -3022,24 +3099,33 @@ if task == 'pipe':
 
 	pat_ID_part = r'\{?' + pat_session_ID_part + '\}?:.+?'
 	pat_tasks = {
-		'records': re.compile(pat_ID_part + r'(Closing.+?session|Last.+?user.+?left|Idle.+?session.+?expired)', re.I | re.DOTALL)
-	,	'stats'  : re.compile(pat_ID_part + r'(Changed|Made|Tagged|preserve|(Left|Joined).+?session)|Starting.+?microhttpd.+?on.+?port', re.I | re.DOTALL)
+		'records': re.compile(pat_ID_part
+		+	r'(Closing.+?session|Last.+?user.+?left|Idle.+?session.+?expired)'
+		,	re.I | re.DOTALL
+		)
+	,	'stats'  : re.compile(pat_ID_part
+		+	r'(Changed|Made|Tagged|preserve|(Left|Joined).+?session)'
+		+	r'|Starting.+?microhttpd.+?on.+?port'
+		,	re.I | re.DOTALL
+		)
 	}
 
 	lock_off()
 
-	for line in sys.stdin:
+	for each_line in sys.stdin:
 
 		lock_on()
 
 		try:
-			for task, pat in pat_tasks.items():
-				match = re.search(pat, line)
-				if match:
-					print_with_time_stamp(line)
-					print_with_time_stamp('Next task: %s' % task, before_task=True)
+			for each_task, each_pattern in pat_tasks.items():
 
-					do_task(task)
+				match = re.search(each_pattern, each_line)
+
+				if match:
+					print_with_time_stamp(each_line)
+					print_with_time_stamp('Next task: %s' % each_task, before_task=True)
+
+					do_task(each_task)
 
 					time.sleep(cfg['sleep'])
 
