@@ -12,17 +12,16 @@ from dateutil.tz import tzlocal, tzutc
 from PIL import Image, ImageChops
 
 # DeprecationWarning:
-# Image.ANTIALIAS is deprecated and will be removed in Pillow 10 (2023-07-01).
+# ANTIALIAS is deprecated and will be removed in Pillow 10 (2023-07-01).
 # Use Resampling.LANCZOS instead.
 try:
-	from PIL import Resampling
+	image_resampling_method = Image.Resampling.LANCZOS
 
-	image_resampling_method = Resampling.LANCZOS
-
-except:
+except AttributeError:
 	try:
 		image_resampling_method = Image.ANTIALIAS	# <- best for downscaling
-	except:
+
+	except AttributeError:
 		image_resampling_method = None
 
 # Use colored text if available:
