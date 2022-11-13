@@ -1141,8 +1141,7 @@ if task == 'records' or task == 'pipe':
 
 # - Config for stats: ---------------------------------------------------------
 
-if task == 'stats' or task == 'pipe':
-
+if task:
 	stats_output = ['txt', 'html']
 	stats_output_path = {}
 
