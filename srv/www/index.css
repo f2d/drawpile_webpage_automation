@@ -144,6 +144,7 @@ table {
 .media-row-value-inside {
 	float: right;
 }
+.id-filter .media-row:not(:target),
 .inside.media-rows-separated .simple-row,
 .inside:not(.media-rows-separated) .media-rows-table,
 .inside:not(.media-row-img-newlines) .media-row-images br,

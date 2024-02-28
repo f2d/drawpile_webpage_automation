@@ -96,6 +96,7 @@
 ,	maxThumbWidth = 200
 ,	maxThumbHeight = 200
 
+,	dprecIDinURL = (location.hash || '').replace(/#/g, '')
 ,	dprecMetaByID = {}
 
 ,	TOS = ['object', 'string']
@@ -469,6 +470,10 @@ function toggleImageNewlines(e) {
 	toggleClass(getParentBeforeClass(e.target || e, 'inside').parentNode, classMediaRowImageBreaks);
 }
 
+function toggleIDFilter(keep) {
+	toggleClass(document.body, 'id-filter', keep);
+}
+
 function getSortFromURL(url) {
 var	a = url.split(/"/g)
 ,	i = a.length
@@ -630,6 +635,7 @@ var	js = (evt && evt.target ? evt.target : evt)
 //* Runtime *------------------------------------------------------------------
 
 function init() {
+	
 	gt('time').map(function(timeElement) {
 	var	timeStamp = timeElement.getAttribute('data-t');
 		if (timeStamp && orz(timeStamp) > 0) {
@@ -880,6 +886,7 @@ function init() {
 			&&	fileRecIDs.indexOf(recID) < 0
 			) {
 				fileRecIDs.push(recID);
+				if (recID === dprecIDinURL) toggleIDFilter(1);
 				if (!simpleFileTable) simpleFileTable = getParentByTagName(e, 'table');
 			}
 		});
@@ -1254,7 +1261,7 @@ function init() {
 				,	'tabs': [
 						'<a href="#'
 					+		recID
-					+	'" class="anchor">'
+					+	'" class="anchor" onclick="toggleIDFilter()">'
 					+		recID
 					+	'</a>'
 					]
