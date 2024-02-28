@@ -84,7 +84,7 @@ cfg_default = {
 ,	'sleep':          {'min': 0, 'default': 1}			# <- seconds, wait_after_pipe_task
 ,	'wait':           {'min': 0, 'default': 0}			# <- seconds, wait_before_single_task
 
-,	'cmd_rec_versions': '-2.0/-2.1'
+,	'cmd_rec_versions': '-2.2/-2.1/-2.0'
 ,	'cmd_rec_stats':    'dprectool --acl --format text'		# not needed: -o /dev/stdout, -o CON, etc.
 ,	'cmd_rec_render':   'drawpile-cmd --acl --verbose --every-seq 1000 -platform offscreen'
 ,	cmd_optimize_prefix + 'jpg': 'jpegoptim --all-progressive'	# 'jpegtran -progressive -optimize -outfile %s.out %s'
@@ -2902,9 +2902,9 @@ def do_task_stats():
 						if (
 							output_var_name
 						and	data_var_name
-						and	data_var_name in data_entry
+						and	data_var_name in each_data_entry
 						):
-							var_value = unicode(data_entry[data_var_name])
+							var_value = unicode(each_data_entry[data_var_name])
 
 							for each_output_file_type in output_target_rules:
 								if each_output_file_type in replacements:
