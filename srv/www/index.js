@@ -117,6 +117,7 @@ if (lang == 'ru') {
 	,	'toggle': {
 			'media_rows': 'Переключить вид медиафайлов'
 		,	'img_newlines': 'Переключить ряды картинок одной высоты'
+		,	'id_filter': 'Переключить вид'
 		}
 	,	'drawpile': {
 			'start': 'Начало'
@@ -142,6 +143,7 @@ if (lang == 'ru') {
 	,	'toggle': {
 			'media_rows': 'Toggle media file view'
 		,	'img_newlines': 'Toggle image rows of same height'
+		,	'id_filter': 'Toggle view'
 		}
 	,	'drawpile': {
 			'start': 'Start'
@@ -635,7 +637,9 @@ var	js = (evt && evt.target ? evt.target : evt)
 //* Runtime *------------------------------------------------------------------
 
 function init() {
-	
+
+	cre('style', document.head).textContent = '.inside .anchor::after { content: "(' + la.toggle.id_filter + ')"; }';
+
 	gt('time').map(function(timeElement) {
 	var	timeStamp = timeElement.getAttribute('data-t');
 		if (timeStamp && orz(timeStamp) > 0) {

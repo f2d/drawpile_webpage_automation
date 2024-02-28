@@ -18,6 +18,11 @@ table {
 	margin-right: 0.5em;
 	display: inline-block;
 }
+.anchor::after {
+	content: "<?>";
+	margin-left: 0.5em;
+	display: inline-block;
+}
 .download a {
 	font-weight: bold;
 }
