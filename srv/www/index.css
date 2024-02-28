@@ -116,6 +116,17 @@ table {
 .media-row:target th a:not(:hover) {
 	background-color: #ace;
 }
+.media-row-img-skip {
+	display: inline-block;
+	vertical-align: top;
+	padding: 0.25em;
+}
+.media-row-img-skip::before {
+	content: "(";
+}
+.media-row-img-skip::after {
+	content: ")";
+}
 .media-rows-table {
 	border-spacing: 1em;
 	margin: -1em;
@@ -150,9 +161,11 @@ table {
 	float: right;
 }
 .id-filter .media-row:not(:target),
+.id-filter .media-row-img-skip,
+.outside:not(.id-filter) .media-row-img:not(:first-child):not(:last-child),
 .inside.media-rows-separated .simple-row,
 .inside:not(.media-rows-separated) .media-rows-table,
-.inside:not(.media-row-img-newlines) .media-row-images br,
+.inside:not(.media-row-img-newlines) .media-row-images > br,
 .loading body > * {
 	display: none;
 }

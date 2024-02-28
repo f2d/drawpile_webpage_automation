@@ -131,6 +131,7 @@ if (lang == 'ru') {
 		,	'strokes': 'Черт'
 		,	'session_part': 'запись сессии'
 		,	'screenshot': 'снимок'
+		,	'screenshots_skipped': 'снимков пропущено'
 		,	'index_of_total': ' из '
 		,	'users': 'Участников'
 		,	'users_omitted': '(ещё $1)'
@@ -157,6 +158,7 @@ if (lang == 'ru') {
 		,	'strokes': 'Strokes'
 		,	'session_part': 'session part'
 		,	'screenshot': 'screenshot'
+		,	'screenshots_skipped': 'screenshots skipped'
 		,	'index_of_total': ' of '
 		,	'users': 'Users'
 		,	'users_omitted': '($1 more)'
@@ -1204,7 +1206,7 @@ function init() {
 				)
 			,	imageCount = imageFiles.length
 			,	imagesHTMLParts = imageFiles.map(
-					function(file) {
+					function(file, imageIndex) {
 					var	full = file.full || file.thumb
 					,	thumb = file.thumb || file.full
 					,	meta = (
@@ -1220,6 +1222,21 @@ function init() {
 						+	full.width + 'x'
 						+	full.height + ', '
 						+	getFileSizeText(full.size)
+						)
+					,	skipPlaceHolder = (
+							imageCount <= 2
+						||	imageIndex > 0
+							? '' : (
+								'<a href="#'
+							+		recID
+							+	'" class="media-row-img-skip" onclick="toggleIDFilter()">'
+							+		(imageCount - 2)
+							+		la.drawpile.index_of_total
+							+		imageCount
+							+		'<br>'
+							+		la.drawpile.screenshots_skipped.replace(/\s+/g, '<br>')
+							+	'</a>'
+							)
 						)
 					,	width = thumb.width
 					,	height = thumb.height
@@ -1252,6 +1269,7 @@ function init() {
 						+		'" alt="' + meta
 						+		'">'
 						+	'</a>'
+						+	skipPlaceHolder
 						);
 					}
 				)
