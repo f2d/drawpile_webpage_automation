@@ -63,6 +63,7 @@ cfg_default = {
 ,	'rec_del': 'sessions/removed/'
 ,	'rec_end': 'sessions/closed/'
 ,	'rec_pub': 'sessions/public_archive/'
+,	'web_pub': 'record/'
 
 ,	'sub_del': ''
 ,	'sub_end': 'Y-M/Y-M-D_H-N-S_I'
@@ -71,6 +72,7 @@ cfg_default = {
 # ,	'ini': 'updater.ini'
 ,	'txt':  'users.txt'
 ,	'html': 'stats.htm'
+,	'rec_newest': 'newest_record.htm'
 ,	'lock': None
 ,	'log':  None
 
@@ -174,6 +176,7 @@ def print_help():
 		+	colored(' in any order, optional:', 'yellow')
 	,	''
 	,	', '.join(cfg_var_name_by_exts) + ' = </path/to/file>: Same as above options.'
+	,	'rec_newest = </path/to/file>: Save newest record info for SSI. ' + get_cfg_for_help('rec_newest')
 	,	''
 	,	'task = <task>: Override first task argument.'
 	,	'reason = <text>: The drawpile-srv log line that caused this script to run.'
@@ -219,6 +222,7 @@ def print_help():
 	,	''
 	,	'rec_end = </path/to/closed/sessions/>.    ' + get_cfg_for_help('rec_end')
 	,	'rec_pub = </path/to/public/web/archive/>. ' + get_cfg_for_help('rec_pub')
+	,	'web_pub = </URL/path/to/public/web/archive/>. ' + get_cfg_for_help('web_pub')
 	,	''
 	,	colored(' * Destination to remove (no path = delete at once):', 'yellow')
 	,	''
@@ -946,6 +950,18 @@ def get_cfg_for_help(var_name):
 		('%d' % result) if is_type_int(result) else
 		('%r' % result)
 	)
+
+def get_cfg_path_or_default(var_name):
+
+	result = cfg.get(var_name, '')
+
+	if not result:
+		if result is None:
+			return result
+
+		result = cfg_default.get(var_name, '')
+
+	return fix_slashes(result or '.')
 
 def get_cfg_path_with_root(var_name, ext=None):
 
@@ -2671,6 +2687,23 @@ def process_archived_session(session_ID, src_files):
 				dir_active + '/' + from_filename
 			,	dir_public + '/' + subdir_pub + '/' + to_filename.replace('.jpeg', '.jpg')
 			)
+
+	# - Update link to newest public record:
+
+		newest_rec_info_file_path = get_cfg_path_with_root('rec_newest')
+
+		if newest_rec_info_file_path:
+			content = '\n\t\t\t<a href="{path}/#{hash}">{time}</a>'.format(
+				hash=session_ID
+			,	path=fix_slashes(get_cfg_path_or_default('web_pub') + '/' + subdir_pub)
+			,	time=fix_html_time_stamp(time_closed)
+			)
+
+			if READ_ONLY:
+				print_with_time_stamp('Newest record info file path: "%s"' % newest_rec_info_file_path)
+				print_with_time_stamp('Newest record info file content = %d bytes:\n%s' % (len(content), content))
+			else:
+				save_files(newest_rec_info_file_path, content)
 
 	# - Move away all private source files:
 

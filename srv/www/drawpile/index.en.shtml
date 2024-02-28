@@ -25,6 +25,10 @@
 			<label>	Replays:		</label>
 			<a href="/drawpile/record/?sort_by=name&sort_order=descending"><!--#include file="hostname.txt" stub="hostname"--><!--# block name="records"-->/drawpile/record/<!--# endblock --><!--#include file="records.txt" stub="records"--></a>
 		</p>
+		<p>
+			<label>	Newest replay:	</label>
+			<!--# block name="no_link"--><b class="gray">none</b><!--# endblock --><!--#include file="newest_record.htm" stub="no_link"-->
+		</p>
 	</t>
 	<t><b class="gray">	At this moment:		</b></t>
 	<t>
