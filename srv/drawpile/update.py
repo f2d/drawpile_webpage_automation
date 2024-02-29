@@ -1209,7 +1209,7 @@ if task:
 
 	block_start = '<p><b class="blue">'
 	block_end = '</b></p>'
-	indent_block = '\n\t\t\t'
+	indent_block = '\n\t\t'
 	indent_inline = indent_block + '\t'
 	indent_newline = indent_inline + '<br><br>'
 	indent_param = indent_inline + '- '
@@ -2693,7 +2693,7 @@ def process_archived_session(session_ID, src_files):
 		newest_rec_info_file_path = get_cfg_path_with_root('rec_newest')
 
 		if newest_rec_info_file_path:
-			content = '\n\t\t\t<a href="{path}/#{hash}">{time}</a>'.format(
+			content = '<a href="{path}/#{hash}">{time}</a>'.format(
 				hash=session_ID
 			,	path=fix_slashes(get_cfg_path_or_default('web_pub') + '/' + subdir_pub)
 			,	time=fix_html_time_stamp(time_closed)
