@@ -1536,8 +1536,8 @@ function init() {
 						tr.setAttribute(attrSort + key, fileSortableValues[key]);
 					}
 
-					td.id = row.id;
-					td.className = classMediaRow;
+					tr.id = row.id;
+					tr.className = classMediaRow;
 					td.innerHTML = row.html;
 				}
 			);

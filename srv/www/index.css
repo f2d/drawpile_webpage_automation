@@ -147,6 +147,9 @@ table {
 .media-row-info tr.sub-list-row > td:not(:first-child) {
 	text-align: right;
 }
+.media-row-info {
+	margin: 0.125em;
+}
 .simple-rows-table th,
 .simple-rows-table td:not(:first-child),
 .media-row-info tr > *,
