@@ -2,6 +2,172 @@
 # -*- coding: UTF-8 -*-
 # Python 2 or 3 should work.
 
+# - Help screen shown on demand or without arguments --------------------------
+
+def print_help():
+
+	def get_cmd_list_by_prefix_for_help(prefix):
+
+		def get_cmd_line_for_help(arg):
+			pad_width = pad_to_len - len(arg)
+			pad_text = (' ' * pad_width) if pad_width > 0 else ''
+
+			return arg + pad_text + ' = <command line>. ' + get_cfg_for_help(arg)
+
+		prefix_len = len(prefix)
+		pad_to_len = prefix_len + len('<ext>')
+
+		return [
+			get_cmd_line_for_help(each_arg)
+			for each_arg in cfg_default
+			if each_arg[ : prefix_len] == prefix
+		]
+
+	self_name = os.path.basename(__file__)
+	default_enc_text = '<encoding name>. ' + colored('Default: ', 'yellow') + default_enc
+	line_sep = '''
+-------------------------------------------------------------------------------
+'''
+	help_text_lines = [
+		line_sep
+
+	,	colored(' * Usage:', 'yellow')
+	,	''
+	,	'"%s"' % self_name
+		+	colored(' [<task>]', 'cyan')
+		+	colored(' [<option>] ["<option = value>"] [<option>] [...]', 'magenta')
+
+	,	line_sep
+
+	,	colored(' * ', 'yellow')
+		+	colored('<Task>', 'cyan')
+		+	colored(' is always the first and required argument. May be any of:', 'yellow')
+	,	''
+	,	'h, help: Show this text.'
+	,	'r, records: Once, process and move all files of closed/archived sessions.'
+	,	's, stats: Once, rewrite stats in file(s), using actual data from server API.'
+# TODO:	,	'c, cycle: Repeatedly check server API, run update on changes.'
+	,	'p, pipe: Continuosly wait for input, line by line, looking for:'
+	,	'	Joined / Left session / Changed [session settings] => update stats'
+	,	'	Closing (...) session / Last user left             => update records'
+	,	''
+	,	'Notes:'
+	,	'	Pipe mode does not require interlayer (e.g. awk),'
+	,	'	but will require restarting the whole setup,'
+	,	'	including drawpile-srv itself, to apply changes to updater script.'
+	,	'	Also it is likely less robust to errors and exceptions.'
+	,	''
+	,	colored(' * ', 'yellow')
+		+	colored('<Function name as task>', 'cyan')
+		+	colored(', call for each optional file path argument:', 'yellow')
+	,	''
+	,	'\n'.join(tasks_as_function_name)
+
+	,	line_sep
+
+	,	colored(' * ', 'yellow')
+		+	colored('<Option>', 'magenta')
+		+	colored(' in any order, optional:', 'yellow')
+	,	''
+	,	'ro, readonly: Don\'t save or change anything, only show output, for testing.'
+	,	'copyrec: Copy session recording files to public archive instead of symlink.'
+	,	''
+	,	'</path/to/file>.log:  Log file to print messages.      ' + get_cfg_for_help('log')
+	,	'</path/to/file>.lock: Lock file to queue self runs.    ' + get_cfg_for_help('lock')
+	,	'</path/to/file>.txt:  Save usernames, one per line.    ' + get_cfg_for_help('txt')
+	,	'</path/to/file>.html: Save partial HTML files for SSI. ' + get_cfg_for_help('html')
+
+	,	line_sep
+
+	,	colored(' * ', 'yellow')
+		+	colored('<Option = value>', 'magenta')
+		+	colored(' in any order, optional:', 'yellow')
+	,	''
+	,	', '.join(cfg_var_name_by_exts) + ' = </path/to/file>: Same as above options.'
+	,	'rec_newest = </path/to/file>: Save newest record info for SSI. ' + get_cfg_for_help('rec_newest')
+	,	''
+	,	'task = <task>: Override first task argument.'
+	,	'reason = <text>: The drawpile-srv log line that caused this script to run.'
+	,	'run_after_<task> = <URL or command line>: Call after specified task finishes.'
+	,	''
+	,	'wait  = <number of seconds>: Pause before task in single mode. ' + get_cfg_for_help('wait')
+	,	'sleep = <number of seconds>: Pause after task in pipe mode.    ' + get_cfg_for_help('sleep')
+	,	''
+	,	'thumb_w = <number of pixels>: Thumbnail maximum width.         ' + get_cfg_for_help('thumb_w')
+	,	'thumb_h = <number of pixels>: Thumbnail maximum height.        ' + get_cfg_for_help('thumb_h')
+	,	''
+	,	'path_len_max = <number of symbols>: Maximum dest. path length. ' + get_cfg_for_help('path_len_max')
+	,	''
+	,	'api_url_prefix = <http://server:port/path/>. ' + get_cfg_for_help('api_url_prefix')
+	,	''
+	,	'add_pwd_session_users = <comma-separated substrings>, used in session titles:'
+	,	'	Txt file is intended to be used by a chat bot to announce new users.'
+	,	'	It will skip usernames from passworded sessions,'
+	,	'	unless session title contains one of these substrings.'
+	,	'		' + get_cfg_for_help('add_pwd_session_users')
+	,	''
+	,	'cmd_rec_versions = <version.number.1/v.2/v.3>:'
+	,	'	Try to append each part as literal suffix'
+	,	'	to filename or last folder of external record processing tool,'
+	,	'	starting with configured path as is without any suffix.'
+	,	'	Stop on the first variant that returns viable result.'
+	,	'		' + get_cfg_for_help('cmd_rec_versions')
+	,	''
+	,	colored(' * Commands for processing (%s for subject filename, or it will be appended):', 'yellow')
+	,	''
+	,	'cmd_rec_stats      = <command line>. ' + get_cfg_for_help('cmd_rec_stats')
+	,	'cmd_rec_render     = <command line>. ' + get_cfg_for_help('cmd_rec_render')
+	,	''
+	,	cmd_optimize_prefix + '<ext> = <command line>. Custom formats may be added here.'
+	,	'\n'.join(get_cmd_list_by_prefix_for_help(cmd_optimize_prefix))
+	,	''
+	,	colored(' * Source to process:', 'yellow')
+	,	''
+	,	'root    = </path/to/root/folder/>.        ' + get_cfg_for_help('root')
+	,	'rec_src = </path/to/active/sessions/>.    ' + get_cfg_for_help('rec_src')
+	,	''
+	,	colored(' * Destination to keep:', 'yellow')
+	,	''
+	,	'rec_end = </path/to/closed/sessions/>.    ' + get_cfg_for_help('rec_end')
+	,	'rec_pub = </path/to/public/web/archive/>. ' + get_cfg_for_help('rec_pub')
+	,	'web_pub = </URL/path/to/public/web/archive/>. ' + get_cfg_for_help('web_pub')
+	,	''
+	,	colored(' * Destination to remove (no path = delete at once):', 'yellow')
+	,	''
+	,	'rec_del = </path/to/removed/sessions/>.   ' + get_cfg_for_help('rec_del')
+	,	'rec_del_max = <number of bytes>: Remove if file size sum fits. ' + get_cfg_for_help('rec_del_max')
+	,	'rec_del_max_users    = <number>: Remove if user count sum fits. ' + get_cfg_for_help('rec_del_max_users')
+	,	'rec_del_max_strokes  = <number>: Remove if stroke count sum fits. ' + get_cfg_for_help('rec_del_max_strokes')
+	,	''
+	,	colored(' * Destination subfolders (YMD/HNS/I = date/ID from filenames):', 'yellow')
+	,	''
+	,	'sub_del = <Y-M-D/HNS_I>. ' + get_cfg_for_help('sub_del')
+	,	'sub_end = <Y-M-D/HNS_I>. ' + get_cfg_for_help('sub_end')
+	,	'sub_pub = <Y/Y-M/Y-M-D>. ' + get_cfg_for_help('sub_pub')
+	,	''
+	,	colored(' * Text encoding:', 'yellow')
+	,	''
+	,	'print_enc = ' + default_enc_text
+	,	'path_enc  = ' + default_enc_text
+	,	'file_enc  = ' + default_enc_text
+	,	'log_enc   = ' + default_enc_text
+	,	'web_enc   = ' + default_enc_text
+
+	,	line_sep
+
+	,	colored(' * Result status codes:', 'yellow')
+	,	''
+	,	'0: All done, or cycle was interrupted by user.'
+	,	'1: Nothing done, help shown.'
+	,	'2: Error: wrong arguments.'
+	,	'3: Error: cannot log.'
+	,	'4: Error: cannot lock.'
+
+	,	line_sep
+	]
+
+	print('\n'.join(help_text_lines))
+
 # - Dependencies: -------------------------------------------------------------
 
 import errno, io, json, os, re, shutil, ssl, string, subprocess, sys, time, traceback
@@ -97,168 +263,6 @@ cfg_default = {
 ,	'add_pwd_session_users': ''					# '[a], [anyway]'
 ,	'reason': ''
 }
-
-def print_help():
-
-	self_name = os.path.basename(__file__)
-
-	line_sep = '''
--------------------------------------------------------------------------------
-'''
-
-	cmd_optimize_lines = []
-
-	prefix_len = len(cmd_optimize_prefix)
-	pad_to_len = prefix_len + len('<ext>')
-
-	for each_arg in cfg_default:
-		if each_arg[ : prefix_len] == cmd_optimize_prefix:
-			pad_width = pad_to_len - len(each_arg)
-			pad_text = (' ' * pad_width) if pad_width > 0 else ''
-
-			cmd_optimize_lines.append(each_arg + pad_text + ' = <command line>. ' + get_cfg_for_help(each_arg))
-
-	default_enc_text = '<encoding name>. ' + colored('Default: ', 'yellow') + default_enc
-
-	help_text_lines = [
-		line_sep
-
-	,	colored(' * Usage:', 'yellow')
-	,	''
-	,	'"%s"' % self_name
-		+	colored(' [<task>]', 'cyan')
-		+	colored(' [<option>] ["<option = value>"] [<option>] [...]', 'magenta')
-
-	,	line_sep
-
-	,	colored(' * ', 'yellow')
-		+	colored('<Task>', 'cyan')
-		+	colored(' is always the first and required argument. May be any of:', 'yellow')
-	,	''
-	,	'h, help: Show this text.'
-	,	'r, records: Once, process and move all files of closed/archived sessions.'
-	,	's, stats: Once, rewrite stats in file(s), using actual data from server API.'
-# TODO:	,	'c, cycle: Repeatedly check server API, run update on changes.'
-	,	'p, pipe: Continuosly wait for input, line by line, looking for:'
-	,	'	Joined / Left session / Changed [session settings] => update stats'
-	,	'	Closing (...) session / Last user left             => update records'
-	,	''
-	,	'Notes:'
-	,	'	Pipe mode does not require interlayer (e.g. awk),'
-	,	'	but will require restarting the whole setup,'
-	,	'	including drawpile-srv itself, to apply changes to updater script.'
-	,	'	Also it is likely less robust to errors and exceptions.'
-	,	''
-	,	colored(' * ', 'yellow')
-		+	colored('<Function name as task>', 'cyan')
-		+	colored(', call for each optional file path argument:', 'yellow')
-	,	''
-	,	'\n'.join(tasks_as_function_name)
-
-	,	line_sep
-
-	,	colored(' * ', 'yellow')
-		+	colored('<Option>', 'magenta')
-		+	colored(' in any order, optional:', 'yellow')
-	,	''
-	,	'ro, readonly: Don\'t save or change anything, only show output, for testing.'
-	,	'copyrec: Copy session recording files to public archive instead of symlink.'
-	,	''
-	,	'</path/to/file>.log:  Log file to print messages.      ' + get_cfg_for_help('log')
-	,	'</path/to/file>.lock: Lock file to queue self runs.    ' + get_cfg_for_help('lock')
-	,	'</path/to/file>.txt:  Save usernames, one per line.    ' + get_cfg_for_help('txt')
-	,	'</path/to/file>.html: Save partial HTML files for SSI. ' + get_cfg_for_help('html')
-
-	,	line_sep
-
-	,	colored(' * ', 'yellow')
-		+	colored('<Option = value>', 'magenta')
-		+	colored(' in any order, optional:', 'yellow')
-	,	''
-	,	', '.join(cfg_var_name_by_exts) + ' = </path/to/file>: Same as above options.'
-	,	'rec_newest = </path/to/file>: Save newest record info for SSI. ' + get_cfg_for_help('rec_newest')
-	,	''
-	,	'task = <task>: Override first task argument.'
-	,	'reason = <text>: The drawpile-srv log line that caused this script to run.'
-	,	'run_after_<task> = <URL or command line>: Call after specified task finishes.'
-	,	''
-	,	'wait  = <number of seconds>: Pause before task in single mode. ' + get_cfg_for_help('wait')
-	,	'sleep = <number of seconds>: Pause after task in pipe mode.    ' + get_cfg_for_help('sleep')
-	,	''
-	,	'thumb_w = <number of pixels>: Thumbnail maximum width.         ' + get_cfg_for_help('thumb_w')
-	,	'thumb_h = <number of pixels>: Thumbnail maximum height.        ' + get_cfg_for_help('thumb_h')
-	,	''
-	,	'path_len_max = <number of symbols>: Maximum dest. path length. ' + get_cfg_for_help('path_len_max')
-	,	''
-	,	'api_url_prefix = <http://server:port/path/>. ' + get_cfg_for_help('api_url_prefix')
-	,	''
-	,	'add_pwd_session_users = <comma-separated substrings>, used in session titles:'
-	,	'	Txt file is intended to be used by a chat bot to announce new users.'
-	,	'	It will skip usernames from passworded sessions,'
-	,	'	unless session title contains one of these substrings.'
-	,	'		' + get_cfg_for_help('add_pwd_session_users')
-	,	''
-	,	'cmd_rec_versions = <version.number.1/v.2/v.3>:'
-	,	'	Try to append each part as literal suffix'
-	,	'	to filename or last folder of external record processing tool,'
-	,	'	starting with configured path as is without any suffix.'
-	,	'	Stop on the first variant that returns viable result.'
-	,	'		' + get_cfg_for_help('cmd_rec_versions')
-	,	''
-	,	colored(' * Commands for processing (%s for subject filename, or it will be appended):', 'yellow')
-	,	''
-	,	'cmd_rec_stats      = <command line>. ' + get_cfg_for_help('cmd_rec_stats')
-	,	'cmd_rec_render     = <command line>. ' + get_cfg_for_help('cmd_rec_render')
-	,	''
-	,	cmd_optimize_prefix + '<ext> = <command line>. Custom formats may be added here.'
-	,	'\n'.join(cmd_optimize_lines)
-	,	''
-	,	colored(' * Source to process:', 'yellow')
-	,	''
-	,	'root    = </path/to/root/folder/>.        ' + get_cfg_for_help('root')
-	,	'rec_src = </path/to/active/sessions/>.    ' + get_cfg_for_help('rec_src')
-	,	''
-	,	colored(' * Destination to keep:', 'yellow')
-	,	''
-	,	'rec_end = </path/to/closed/sessions/>.    ' + get_cfg_for_help('rec_end')
-	,	'rec_pub = </path/to/public/web/archive/>. ' + get_cfg_for_help('rec_pub')
-	,	'web_pub = </URL/path/to/public/web/archive/>. ' + get_cfg_for_help('web_pub')
-	,	''
-	,	colored(' * Destination to remove (no path = delete at once):', 'yellow')
-	,	''
-	,	'rec_del = </path/to/removed/sessions/>.   ' + get_cfg_for_help('rec_del')
-	,	'rec_del_max = <number of bytes>: Remove if file size sum fits. ' + get_cfg_for_help('rec_del_max')
-	,	'rec_del_max_users    = <number>: Remove if user count sum fits. ' + get_cfg_for_help('rec_del_max_users')
-	,	'rec_del_max_strokes  = <number>: Remove if stroke count sum fits. ' + get_cfg_for_help('rec_del_max_strokes')
-	,	''
-	,	colored(' * Destination subfolders (YMD/HNS/I = date/ID from filenames):', 'yellow')
-	,	''
-	,	'sub_del = <Y-M-D/HNS_I>. ' + get_cfg_for_help('sub_del')
-	,	'sub_end = <Y-M-D/HNS_I>. ' + get_cfg_for_help('sub_end')
-	,	'sub_pub = <Y/Y-M/Y-M-D>. ' + get_cfg_for_help('sub_pub')
-	,	''
-	,	colored(' * Text encoding:', 'yellow')
-	,	''
-	,	'print_enc = ' + default_enc_text
-	,	'path_enc  = ' + default_enc_text
-	,	'file_enc  = ' + default_enc_text
-	,	'log_enc   = ' + default_enc_text
-	,	'web_enc   = ' + default_enc_text
-
-	,	line_sep
-
-	,	colored(' * Result status codes:', 'yellow')
-	,	''
-	,	'0: All done, or cycle was interrupted by user.'
-	,	'1: Nothing done, help shown.'
-	,	'2: Error: wrong arguments.'
-	,	'3: Error: cannot log.'
-	,	'4: Error: cannot lock.'
-
-	,	line_sep
-	]
-
-	print('\n'.join(help_text_lines))
 
 # - Do not change: ------------------------------------------------------------
 
