@@ -316,7 +316,7 @@ pat_session_ID_part = (
 
 pat_session_ID = re.compile(r'''^
 	(?P<Before>.*?[^0-9a-z-])?
-	''' + pat_session_ID_part + '''
+	''' + pat_session_ID_part + r'''
 	(?P<After>[^0-9a-z-].*)?
 $''', re.I | re.X | re.DOTALL)
 
@@ -341,7 +341,7 @@ pat_time_from_log = re.compile(r'''^
 		)?
 
 		\{?
-			''' + pat_session_ID_part + '''
+			''' + pat_session_ID_part + r'''
 		\}?:\s+
 	)?
 	(?P<After>.*?)
@@ -3134,7 +3134,7 @@ print_with_time_stamp('Command line: %s' % cmd_args_to_text(sys.argv))
 
 if task == 'pipe':
 
-	pat_ID_part = r'\{?' + pat_session_ID_part + '\}?:.+?'
+	pat_ID_part = r'\{?' + pat_session_ID_part + r'\}?:.+?'
 	pat_tasks = {
 		'records': re.compile(pat_ID_part
 		+	r'(Closing.+?session|Last.+?user.+?left|Idle.+?session.+?expired)'
