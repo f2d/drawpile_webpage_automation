@@ -1226,6 +1226,10 @@ if task:
 	indent_inline = indent_block + '\t'
 	indent_newline = indent_inline + '<br><br>'
 	indent_param = indent_inline + '- '
+	table_start = '<b class="blue">'
+	table_start_entries = indent_block + '</b><table class="blue"><tr>'
+	table_end = '</tr></table>'
+	table_newline = indent_inline + '</tr><tr>'
 
 	unformatted_var_separator = ' - '
 
@@ -1275,33 +1279,32 @@ if task:
 				}
 			]
 		,	'output': ['html']
-		,	'output_entry_separator': indent_newline
+		,	'output_start': table_start
+		,	'output_start_entries': table_start_entries
+		,	'output_end': table_end
+		,	'output_entry_separator': table_newline
 		,	'output_entry_format': {
-				'en': indent_param.join([
-					indent_inline.join([
-						''
-					,	u'<span title="title">"$title"</span>'
-					,	u'<span title="minimal user age requirement">($nsfm</span>'
-					,	u'<span title="persistent session, will not end without users remaining">$persistent</span>'
-					,	u'<span title="need password to join">$hasPassword</span>'
-					,	u'<span title="protocol version">$protocol)</span>'
-					])
-				,	u'<span title="started by">$founder</span>'
-				,	u'<span title="users">$userCount/$maxUserCount</span>'
-				,	u'<span title="start time">$startTime</span>'
+				'en': indent_inline.join([
+					''
+				,	u'<td title="title">"$title"</td>'
+				,	u'<td title="minimal user age requirement">$nsfm</td>'
+				,	u'<td title="persistent session, will not end until 10 days without users remaining">$persistent</td>'
+				,	u'<td title="need password to join">$hasPassword</td>'
+				,	u'<td title="protocol version">$protocol</td>'
+				,	u'<td title="started by">$founder</td>'
+				,	u'<td title="users">$userCount/$maxUserCount</td>'
+				,	u'<td title="start time">$startTime</td>'
 				])
-			,	'ru': indent_param.join([
-					indent_inline.join([
-						''
-					,	u'<span title="название">"$title"</span>'
-					,	u'<span title="минимальный возраст для участия">($nsfm</span>'
-					,	u'<span title="постоянная сессия, не закроется без оставшихся пользователей">$persistent</span>'
-					,	u'<span title="нужен пароль, чтобы зайти">$hasPassword</span>'
-					,	u'<span title="версия протокола">$protocol)</span>'
-					])
-				,	u'<span title="кто начал">$founder</span>'
-				,	u'<span title="участники">$userCount/$maxUserCount</span>'
-				,	u'<span title="время начала">$startTime</span>'
+			,	'ru': indent_inline.join([
+					''
+				,	u'<td title="название">"$title"</td>'
+				,	u'<td title="минимальный возраст для участия">$nsfm</td>'
+				,	u'<td title="постоянная сессия, не закроется до 10 дней без оставшихся пользователей">$persistent</td>'
+				,	u'<td title="нужен пароль, чтобы зайти">$hasPassword</td>'
+				,	u'<td title="версия протокола">$protocol</td>'
+				,	u'<td title="кто начал">$founder</td>'
+				,	u'<td title="участники">$userCount/$maxUserCount</td>'
+				,	u'<td title="время начала">$startTime</td>'
 				])
 			}
 		},{
@@ -3009,7 +3012,7 @@ def do_task_stats():
 				if is_type_arr(each_content):
 					if text:
 						text = (
-							indent_newline
+							each_output_format.get('output_start_entries', indent_newline)
 						+	text
 						+	indent_block
 						)
@@ -3018,9 +3021,9 @@ def do_task_stats():
 
 				text = (
 					indent_block
-				+	block_start
+				+	each_output_format.get('output_start', block_start)
 				+		title + ': ' + text
-				+	block_end
+				+	each_output_format.get('output_end', block_end)
 				)
 			else:
 				text = ('\n' if output_file_suffix in output_files else '') + text
