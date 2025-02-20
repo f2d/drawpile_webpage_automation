@@ -106,6 +106,8 @@ def print_help():
 	,	'	unless session title contains one of these substrings.'
 	,	'		' + get_cfg_for_help('add_pwd_session_users')
 	,	''
+	,	'versions_help_url = <URL/to/public/website>: protocol versions compatibility table. ' + get_cfg_for_help('versions_help_url')
+	,	''
 	,	'cmd_rec_versions = <version.number.1/v.2/v.3>:'
 	,	'	Try to append each part as literal suffix'
 	,	'	to filename or last folder of external record processing tool,'
@@ -258,6 +260,7 @@ cfg_default = {
 ,	cmd_optimize_prefix + 'jpg': 'jpegoptim --all-progressive'	# 'jpegtran -progressive -optimize -outfile %s.out %s'
 ,	cmd_optimize_prefix + 'png': 'optipng -i 0 -fix' 		# 'oxipng -i 0 --fix -t 1 %s'
 
+,	'versions_help_url': 'https://docs.drawpile.net/help/development/versioncompatibility'
 ,	'api_url_prefix': 'http://127.0.0.1:80/'
 
 ,	'add_pwd_session_users': ''					# '[a], [anyway]'
@@ -993,6 +996,12 @@ def get_cfg_path_with_root(var_name, ext=None):
 
 	return prepend_root_if_none(result or '.')
 
+def get_versions_help_link_html(text):
+
+	url = cfg.get('versions_help_url')
+
+	return '<a href="{}">{}</a>'.format(url, text) if url else text
+
 def save_current_sessions(sessions_on_server=None):
 
 	global current_sessions
@@ -1253,8 +1262,11 @@ if task:
 							'get_by_id': 'nsfm'
 						,	'put_by_id': 'nsfm'
 						,	'replace': ['18+', '0+']
+						},{
+							'id': 'protocol'
+						,	'replace_before_html': [get_versions_help_link_html]
 						}
-					,	'protocol'
+					# ,	'protocol'
 					,	'title'
 					,	'founder'
 					,	'userCount'

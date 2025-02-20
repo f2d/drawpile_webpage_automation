@@ -32,10 +32,10 @@
 	</t>
 	<t><b class="gray">	At this moment:		</b></t>
 	<t>
-		<p><b class="blue">	Server version: <!--# block name="not_found"-->not found<!--# endblock --><!--#include file="version.txt" stub="not_found"--></b></p><!--# block name="none"-->
+		<p><b class="blue">	Server version:		<a href="https://docs.drawpile.net/help/development/versioncompatibility"><!--# block name="not_found"-->not found<!--# endblock --><!--#include file="version.txt" stub="not_found"--></b></a></p><!--# block name="none"-->
 		<p><b class="blue">	Active sessions:	0</b></p>
 		<p><b class="blue">	Users:			0</b></p>
-		<p><b class="blue">	Last updated:	0000-00-00 <small>00:00:00</small></b></p><!--# endblock --><!--#include file="stats.en.htm" stub="none"-->
+		<p><b class="blue">	Last updated:		0000-00-00 <small>00:00:00</small></b></p><!--# endblock --><!--#include file="stats.en.htm" stub="none"-->
 	</t>
 	<t><b class="gray">	Help:			</b></t>
 	<details class="aqua">

@@ -32,10 +32,10 @@
 	</t>
 	<t><b class="gray">	На данный момент:	</b></t>
 	<t>
-		<p><b class="blue">	Версия сервера: <!--# block name="not_found"-->не найдено<!--# endblock --><!--#include file="version.txt" stub="not_found"--></b></p><!--# block name="none"-->
+		<p><b class="blue">	Версия сервера:		<a href="https://docs.drawpile.net/help/development/versioncompatibility"><!--# block name="not_found"-->не найдено<!--# endblock --><!--#include file="version.txt" stub="not_found"--></a></b></p><!--# block name="none"-->
 		<p><b class="blue">	Активные сессии:	0</b></p>
 		<p><b class="blue">	Участники:		0</b></p>
-		<p><b class="blue">	Обновлено:	0000-00-00 <small>00:00:00</small></b></p><!--# endblock --><!--#include file="stats.ru.htm" stub="none"-->
+		<p><b class="blue">	Обновлено:		0000-00-00 <small>00:00:00</small></b></p><!--# endblock --><!--#include file="stats.ru.htm" stub="none"-->
 	</t>
 	<t><b class="gray">	Справка:		</b></t>
 	<details class="aqua">
