@@ -1131,6 +1131,53 @@ cmd_rec_versions = sorted(set(
 	cfg.get('cmd_rec_versions', '').split('/')
 ))
 
+# - Lock file to prevent concurrent task run and log writes: ------------------
+
+def lock_on():
+
+	global lock_file
+
+	lock_path = cfg['lock']
+
+	if not lock_path:
+		return
+
+	lock_path = prepend_root_if_none(lock_path)
+	lock_file = open(lock_path, 'a')
+
+	if lock_file:
+		sleep_time = 0
+
+		# http://tilde.town/~cristo/file-locking-in-python.html
+		import fcntl
+
+		while True:
+			try:
+				fcntl.flock(lock_file, fcntl.LOCK_EX | fcntl.LOCK_NB)
+				break
+
+			except IOError as exception:
+				# - raise on unrelated IOErrors:
+				if exception.errno != errno.EAGAIN:
+					raise
+				else:
+					if   sleep_time <  1: sleep_time += 0.1
+					elif sleep_time < 10: sleep_time += 1
+					time.sleep(sleep_time)
+	else:
+		print_with_time_stamp('Error: cannot open lock file: "%s"' % lock_path)
+
+		sys.exit(4)
+
+def lock_off():
+
+	global lock_file
+
+	if lock_file:
+		lock_file.close()
+
+lock_on()
+
 # - Open log: -----------------------------------------------------------------
 
 log_path = cfg['log']
@@ -1399,50 +1446,6 @@ if task:
 	]
 
 # - Common functions: ---------------------------------------------------------
-
-# - Lock file to prevent concurrent task run and log writes:
-def lock_on():
-
-	global lock_file
-
-	lock_path = cfg['lock']
-
-	if not lock_path:
-		return
-
-	lock_path = prepend_root_if_none(lock_path)
-	lock_file = open(lock_path, 'a')
-
-	if lock_file:
-		sleep_time = 0
-
-		# http://tilde.town/~cristo/file-locking-in-python.html
-		import fcntl
-
-		while True:
-			try:
-				fcntl.flock(lock_file, fcntl.LOCK_EX | fcntl.LOCK_NB)
-				break
-
-			except IOError as exception:
-				# - raise on unrelated IOErrors:
-				if exception.errno != errno.EAGAIN:
-					raise
-				else:
-					if   sleep_time <  1: sleep_time += 0.1
-					elif sleep_time < 10: sleep_time += 1
-					time.sleep(sleep_time)
-	else:
-		print_with_time_stamp('Error: cannot open lock file: "%s"' % lock_path)
-
-		sys.exit(4)
-
-def lock_off():
-
-	global lock_file
-
-	if lock_file:
-		lock_file.close()
 
 def get_dict_from_matches(key_to_name, *list_args):
 
@@ -3141,8 +3144,6 @@ def do_task(task):
 
 if READ_ONLY:	print_with_time_stamp('READ ONLY mode ON')
 if TEST:	print_with_time_stamp('TEST mode ON')
-
-lock_on()
 
 print_with_time_stamp('Start task: %s' % (task or 'none'), before_task=True)
 print_with_time_stamp('Command line: %s' % cmd_args_to_text(sys.argv))
