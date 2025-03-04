@@ -92,6 +92,7 @@
 ,	regTimeBreak = /^\d+(<|>|,|$)/
 ,	regSplitTime = /[^\d-]+/g
 ,	regSplitName = /\s+-\s+/g
+,	regLastZeroes = /0+$/g
 
 ,	maxThumbWidth = 200
 ,	maxThumbHeight = 200
@@ -129,10 +130,11 @@ if (lang == 'ru') {
 		,	'dl_total_size': 'Общий вес'
 		,	'size': 'Вес'
 		,	'strokes': 'Черт'
-		,	'session_part': 'запись сессии'
+		,	'session_part': 'части сессии'
 		,	'screenshot': 'снимок'
 		,	'screenshots_skipped': 'снимков пропущено'
 		,	'index_of_total': ' из '
+		,	'total': 'всего'
 		,	'users': 'Участников'
 		,	'users_omitted': '(ещё $1)'
 		}
@@ -160,6 +162,7 @@ if (lang == 'ru') {
 		,	'screenshot': 'screenshot'
 		,	'screenshots_skipped': 'screenshots skipped'
 		,	'index_of_total': ' of '
+		,	'total': 'total'
 		,	'users': 'Users'
 		,	'users_omitted': '($1 more)'
 		}
@@ -1209,23 +1212,44 @@ function init() {
 					function(file, imageIndex) {
 					var	full = file.full || file.thumb
 					,	thumb = file.thumb || file.full
-					,	meta = (
+					,	imageTotalIndex = imageIndex + 1
+						;
+
+						if (
+							imageTotalIndex > 5
+						&&	imageTotalIndex < imageCount
+						&&	(
+								imageTotalIndex < 10
+							||	String(imageTotalIndex).replace(regLastZeroes, '').length > 1
+							)
+						) {
+							return;
+						}
+
+					var	meta = (
+							la.drawpile.screenshot + ' '
+						+	full.index
+						) + (
 							!full.partIndex
 							? '' :
-							la.drawpile.session_part + ' '
-						+	full.partIndex + la.drawpile.index_of_total
+							la.drawpile.index_of_total
+						+	la.drawpile.session_part + ' '
+						+	la.drawpile.dl_num_prefix
+						+	full.partIndex
+						+	la.drawpile.index_of_total
 						+	downloads.length + ', '
+						+	la.drawpile.total + ' '
+						+	imageTotalIndex
 						) + (
-							la.drawpile.screenshot + ' '
-						+	full.index + la.drawpile.index_of_total
+							la.drawpile.index_of_total
 						+	imageCount + ' - '
 						+	full.width + 'x'
 						+	full.height + ', '
 						+	getFileSizeText(full.size)
 						)
 					,	skipPlaceHolder = (
-							imageCount <= 2
-						||	imageIndex > 0
+							imageIndex > 0
+						||	imageCount <= 2
 							? '' : (
 								'<a href="#'
 							+		recID
@@ -1272,7 +1296,7 @@ function init() {
 						+	skipPlaceHolder
 						);
 					}
-				)
+				).filter(hasValue)
 
 //* 3.2. Get row metadata fields:
 
