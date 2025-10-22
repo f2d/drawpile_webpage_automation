@@ -1274,8 +1274,9 @@ if task:
 	indent_newline = indent_inline + '<br><br>'
 	indent_param = indent_inline + '- '
 	table_start = '<b class="blue">'
-	table_start_entries = indent_block + '</b><table class="blue"><tr>'
-	table_end = '</tr></table>'
+	table_end = '</b>'
+	table_entries_start = '<table class="blue"><tr>'
+	table_entries_end = '</tr></table>'
 	table_newline = indent_inline + '</tr><tr>'
 
 	unformatted_var_separator = ' - '
@@ -1326,9 +1327,10 @@ if task:
 				}
 			]
 		,	'output': ['html']
-		,	'output_start': table_start
-		,	'output_start_entries': table_start_entries
-		,	'output_end': table_end
+		,	'output_block_start': table_start
+		,	'output_block_end'  : table_end
+		,	'output_entries_start': table_entries_start
+		,	'output_entries_end'  : table_entries_end
 		,	'output_entry_separator': table_newline
 		,	'output_entry_format': {
 				'en': indent_inline.join([
@@ -3015,18 +3017,17 @@ def do_task_stats():
 				if is_type_arr(each_content):
 					if text:
 						text = (
-							each_output_format.get('output_start_entries', indent_newline)
+							indent_block + each_output_format.get('output_entries_start', indent_newline)
 						+	text
-						+	indent_block
+						+	indent_block + each_output_format.get('output_entries_end', indent_newline)
 						)
 
 					text = '%d%s' % (count, text)
 
 				text = (
-					indent_block
-				+	each_output_format.get('output_start', block_start)
-				+		title + ': ' + text
-				+	each_output_format.get('output_end', block_end)
+					indent_block + each_output_format.get('output_block_start', block_start)
+				+	title + ': ' + text
+				+	indent_block + each_output_format.get('output_block_end', block_end)
 				)
 			else:
 				text = ('\n' if output_file_suffix in output_files else '') + text
